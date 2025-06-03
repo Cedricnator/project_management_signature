@@ -1,46 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-
-const users: User[] = [
-  {
-    userId: 1,
-    userName: 'admin',
-    password: 'admin',
-    role: 'admin',
-  },
-  {
-    userId: 2,
-    userName: 'user',
-    password: 'user',
-    role: 'user',
-  },
-];
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as by from 'bcryptjs';
+import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
+
+  async create(createUserDto: CreateUserDto) {
+    const exists = await this.usersRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (exists) {
+      throw new ConflictException('Email already in use');
+    }
+
+    // Ensure that the password is hashed before saving
+    const user: User = this.usersRepository.create({
+      firstName: createUserDto.firstName,
+      lastName: createUserDto.lastName,
+      email: createUserDto.email,
+      password: by.hashSync(createUserDto.password, 10), // Hash the password
+    });
+    return this.usersRepository.save(user);
   }
 
-  findAll() {
-    return users;
+  findOne(id: string) {
+    return this.usersRepository.findOneBy({ id });
   }
 
-  findOne(id: number) {
-    return users.find((user) => user.userId === id);
-  }
-
-  async findByName(userName: string) {
-    return users.find((user) => user.userName === userName);
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  findOneByEmail(email: string) {
+    return this.usersRepository.findOneBy({ email });
   }
 }

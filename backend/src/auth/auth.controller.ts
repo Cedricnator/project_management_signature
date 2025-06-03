@@ -6,22 +6,29 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Patch,
   Post,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { AuthentificationInput } from './dto/authInput-auth.dto';
+import { AuthentificationInput } from './dto/auth-input-auth.dto';
+import { UsersService } from '../users/users.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private userService: UsersService,
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
   create(@Body() input: AuthentificationInput) {
-    console.log(input);
     return this.authService.autenticate(input);
+  }
+
+  @Post('register')
+  register(@Body() dto: CreateUserDto) {
+    return this.userService.create(dto);
   }
 
   @Get()
@@ -32,11 +39,6 @@ export class AuthController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
   }
 
   @Delete(':id')
