@@ -1,6 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+
+const users: User[] = [
+  {
+    userId: 1,
+    userName: 'admin',
+    password: 'admin',
+    role: 'admin',
+  },
+  {
+    userId: 2,
+    userName: 'user',
+    password: 'user',
+    role: 'user',
+  },
+];
 
 @Injectable()
 export class UsersService {
@@ -9,11 +25,15 @@ export class UsersService {
   }
 
   findAll() {
-    return `This action returns all users`;
+    return users;
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return users.find((user) => user.userId === id);
+  }
+
+  async findByName(userName: string) {
+    return users.find((user) => user.userName === userName);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
