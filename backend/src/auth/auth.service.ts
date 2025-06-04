@@ -5,12 +5,16 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { AuthResult } from './dto/auth-result-auth.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async autenticate(
@@ -55,15 +59,15 @@ export class AuthService {
     };
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  verifyToken(token: string): JwtPayload {
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) throw new UnauthorizedException('JWT_SECRET not configured');
+    try {
+      const payload = jwt.verify(token, secret) as unknown as JwtPayload;
+      return payload;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      throw new UnauthorizedException('Token inválido o expirado');
+    }
   }
 }
