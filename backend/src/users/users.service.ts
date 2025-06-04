@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as by from 'bcryptjs';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
+import { SignInAuthDto } from '../auth/dto/sign-in-auth.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,7 +14,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<SignInAuthDto> {
     const exists = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
     });
@@ -28,7 +29,15 @@ export class UsersService {
       email: createUserDto.email,
       password: by.hashSync(createUserDto.password, 10), // Hash the password
     });
-    return this.usersRepository.save(user);
+    const userCreated = await this.usersRepository.save(user);
+    if (!userCreated) {
+      throw new ConflictException('User creation failed');
+    }
+    return {
+      id: userCreated.id,
+      email: userCreated.email,
+      role: userCreated.role,
+    };
   }
 
   findOne(id: string) {
