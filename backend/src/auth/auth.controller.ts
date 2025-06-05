@@ -14,7 +14,6 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtPayload } from 'jsonwebtoken';
-import { SignInAuthDto } from './dto/sign-in-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -30,7 +29,7 @@ export class AuthController {
   }
 
   @Post('register')
-  register(@Body() dto: CreateUserDto): Promise<SignInAuthDto> {
+  register(@Body() dto: CreateUserDto) {
     return this.userService.create(dto);
   }
 
