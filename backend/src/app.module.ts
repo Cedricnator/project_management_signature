@@ -8,6 +8,7 @@ import { SignatureModule } from './signature/signature.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { User } from './users/entities/user.entity';
     SignatureModule,
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

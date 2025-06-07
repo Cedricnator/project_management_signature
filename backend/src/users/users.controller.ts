@@ -4,8 +4,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserRole } from '../common/enum/user-role.enum';
-import { Role } from '../auth/decorators/role.decorator';
-import { RolesGuard } from '../common/guard/role.guard';
+import { Role } from '../common/decorators/role.decorator';
+import { RoleGuard } from '../common/guard/role.guard';
 
 @Controller('users')
 export class UsersController {
@@ -18,7 +18,7 @@ export class UsersController {
 
   @Get()
   @Role(UserRole.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   findAll(): Promise<UserResponseDto[]> {
     return this.usersService.findAll();
   }
