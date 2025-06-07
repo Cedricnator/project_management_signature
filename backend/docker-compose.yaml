@@ -29,7 +29,7 @@ services:
       context: .
       dockerfile: build/Dockerfile
     depends_on:
-      db.cac.administrative.aguas.local:
+      db.signature.project_management.local:
         condition: service_healthy
     environment:
       DB_HOST : db.signature.project_management.local
