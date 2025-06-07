@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import Breadcrumbs from '@/components/Breadcrumb.vue'
+
+
+
 </script>
 
 <template>
-    <Breadcrumbs />
+
+    <div class="flex h-full w-full">testo</div>
 </template>
