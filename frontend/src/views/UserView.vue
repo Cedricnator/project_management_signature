@@ -28,7 +28,7 @@ onMounted(() => {
                 </div>
                 
             </div>
-            <div class="p-4 mt-4 bg-amber-600"><RouterView /></div>
+            <div class="mt-4 h-full bg-amber-600 overflow-auto"><RouterView /></div>
             
         </div>
     </main>

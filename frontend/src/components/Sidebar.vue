@@ -1,11 +1,19 @@
 <script setup lang="ts">
 
 import SidebarButton from '@/components/SidebarButton.vue'
+import { ref } from 'vue';
+const isSidebarOpen = ref(false)
+
+function toggleSidebar() {
+    isSidebarOpen.value = !isSidebarOpen.value
+}
 
 </script>
 
 <template>
+    
     <button
+        @click="toggleSidebar"
         data-drawer-target="logo-sidebar"
         data-drawer-toggle="logo-sidebar"
         aria-controls="logo-sidebar"
@@ -27,14 +35,22 @@ import SidebarButton from '@/components/SidebarButton.vue'
             ></path>
         </svg>
     </button>
-
+    <div
+        v-if="isSidebarOpen"
+        class="fixed inset-0 z-30 bg-black opacity-40 sm:hidden"
+        @click="toggleSidebar"
+    ></div>
     <aside
         id="logo-sidebar"
         class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
         aria-label="Sidebar"
+        :class="[
+        isSidebarOpen ? 'translate-x-0 max-w-55' : '-translate-x-full',
+                    'sm:translate-x-0']"
     >
-        <div class="h-full px-3 py-4 overflow-y-auto bg-white">
-            <div class="flex flex-2 min-h-40">
+    
+        <div class="flex flex-col h-full px-3 py-4 overflow-y-auto bg-white">
+            <div class="flex flex-2 min-h-40 justify-between">
                 <RouterLink class="flex items-center ps-2.5 mb-5" :to="{ name: 'user-dashboard' }">
                     <img
                         src="https://flowbite.com/docs/images/logo.svg"
@@ -45,8 +61,13 @@ import SidebarButton from '@/components/SidebarButton.vue'
                         >FirmaTic</span
                     >
                 </RouterLink>
+                <div>
+                    <button @click="toggleSidebar">
+                        <font-awesome-icon icon="fa-solid fa-xmark" size="lg" />
+                    </button>
+                </div>
             </div>
-            <div class="flex flex-1 flex-col">
+            <div class="flex h-full grow flex-col">
                 <ul class=" space-y-2 font-medium">
                     <li>
                         <SidebarButton label="Dashboard" iconName="fa-solid fa-house" />
@@ -55,11 +76,16 @@ import SidebarButton from '@/components/SidebarButton.vue'
                         <SidebarButton label="Documentos" iconName="fa-solid fa-file-invoice" />
                     </li>
                     <li>
-                        <SidebarButton label="Cerrar sesion" iconName="fa-solid fa-arrow-right-from-bracket" :rotation=180 />
+                        
                     </li>
                 </ul>
+            </div>
+            <div class="w-full mb-5">
+                <SidebarButton label="Cerrar sesión" iconName="fa-solid fa-arrow-right-from-bracket" :rotation="180" :danger="true"  />
             </div>
             
         </div>
     </aside>
+
+
 </template>

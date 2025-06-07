@@ -10,6 +10,15 @@ export interface Account {
     email: string
 }
 
+export enum DocumentStatus {
+    valid = 'Validado',
+    invalid = 'Por validar',
+}
+
 export interface Document {
     documentId: number
+    documentName: string
+    state: DocumentStatus
+    createdBy: number
+    validatedBy?: number | null
 }
