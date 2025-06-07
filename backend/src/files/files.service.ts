@@ -118,12 +118,8 @@ export class FilesService {
   }
 
   remove(id: string) {
-    const fileIndex = this.files.findIndex((f) => f.id === id);
-    if (fileIndex === -1) {
-      throw new NotFoundException(`File with id ${id} not found`);
-    }
-
-    const file = this.files[fileIndex];
+    const file = this.findOne(id);
+    const existingFileIndex = this.files.findIndex((f) => f.id === id);
 
     // Eliminar archivo físico
     const filePath = join(process.cwd(), file.path);
@@ -136,10 +132,9 @@ export class FilesService {
     }
 
     // Eliminar del array
-    this.files.splice(fileIndex, 1);
+    this.files.splice(existingFileIndex, 1);
 
     return {
-      message: 'File deleted successfully',
       deletedFile: {
         id: file.id,
         originalName: file.originalName,
