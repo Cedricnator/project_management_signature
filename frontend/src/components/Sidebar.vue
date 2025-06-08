@@ -61,7 +61,7 @@ function toggleSidebar() {
                         >FirmaTic</span
                     >
                 </RouterLink>
-                <div>
+                <div class="md:hidden">
                     <button @click="toggleSidebar">
                         <font-awesome-icon icon="fa-solid fa-xmark" size="lg" />
                     </button>

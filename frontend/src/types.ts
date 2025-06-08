@@ -4,7 +4,7 @@ export enum AccountRole {
 }
 
 export interface Account {
-    accountId: number
+    accountId: string
     role: AccountRole
     username: string
     email: string
@@ -13,12 +13,21 @@ export interface Account {
 export enum DocumentStatus {
     valid = 'Validado',
     invalid = 'Por validar',
+    approved = 'Aprobado',
+    rejected = 'Rechazado',
+    signed = 'Firmado',
+    deleted = 'Eliminado',
 }
 
 export interface Document {
-    documentId: number
+    documentId: string
     documentName: string
     state: DocumentStatus
-    createdBy: number
-    validatedBy?: number | null
+    createdBy: string
+    validatedBy?: string | null
+}
+
+export enum ButtonType {
+    filled = 'filled',
+    outlined = 'outlined',
 }

@@ -19,6 +19,8 @@ import {
     faHouse,
     faArrowRightFromBracket,
     faXmark,
+    faUser,
+    faMagnifyingGlass,
 } from '@fortawesome/free-solid-svg-icons'
 /* adds icons */
 library.add(faStar)
@@ -29,6 +31,8 @@ library.add(faHouse)
 library.add(faFileInvoice)
 library.add(faArrowRightFromBracket)
 library.add(faXmark)
+library.add(faUser)
+library.add(faMagnifyingGlass)
 
 /* pinia */
 const pinia = createPinia()

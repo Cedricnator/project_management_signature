@@ -10,7 +10,7 @@ export const useSessionStore = defineStore('session', {
         async login() {
             try {
                 const currentAccount: Account = {
-                    accountId: 1000,
+                    accountId: '1000',
                     role: AccountRole.user,
                     username: 'Cucharoth',
                     email: 'cucha@roth.rs',

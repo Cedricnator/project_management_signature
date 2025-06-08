@@ -39,8 +39,9 @@ body,
 }
 
 @theme {
-    --color-background: #0C21C1;
+    --color-user-background: #e0efff;
     --color-primary: #0C21C1;
+    --color-primary-200: #b6d5ff;
     --primary-darker: #302c3c;
     --color-secondary: #e4effa;
     --color-text-white: #eff1f6;

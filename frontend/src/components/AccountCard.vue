@@ -7,14 +7,14 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="flex grow items-center border">
+    <div class="flex grow items-center">
         <div class="flex w-full items-center">
             <div
-                class="flex grow min-w-14 min-h-14 max-w-18 max-h-18 md:min-h-18 md:min-w-18 border rounded-full justify-center items-center"
+                class="flex grow min-w-14 min-h-14 max-w-18 max-h-18 md:min-h-18 md:min-w-18 border rounded-full justify-center items-center bg-primary-200"
             >
-                <img src="" alt="#" />
+                <font-awesome-icon icon="fa-solid fa-user" size="2xl" />
             </div>
-            <div class="flex w-full flex-col p-2 justify-start border">
+            <div class="flex w-full flex-col p-2 justify-start">
                 <div class="flex grow truncate">
                     <p class="text-primary">{{ account.role }}</p>
                 </div>

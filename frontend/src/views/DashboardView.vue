@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import TableComponent from '@/components/UserTableComponent.vue';
 import { computed, onMounted } from 'vue';
-import { useDocumentStore } from '@/stores/DocumentStore'
+import { useDocumentStore } from '@/stores/DocumentStore';
+import CustomButton from '@/components/CustomButton.vue';
+import TableComponent from '@/components/UserTableComponent.vue';
 
 const documentStore = useDocumentStore();
 const documents = computed(() => documentStore.documents);
@@ -17,8 +18,22 @@ onMounted(() => {
 </script>
 
 <template>
+    <div class="p-4 grow">
+        <div class="flex flex-col h-full w-full p-4 rounded-3xl overflow-auto bg-white shadow-xl/10">
+            <div class="flex grow mb-4 p-1 md:p-5">
+                <TableComponent :documents="documents"/>
+            </div>
+            
+            <div class="flex md:min-h-30 justify-end">
+                <div class="flex md:mr-5 md:w-2/5 items-center justify-end">
+                    <CustomButton class="mr-2 md:mr-5" label="Ver historial" />
 
-    <div class="flex h-full w-full p-4 border rounded-3xl">
-        <TableComponent :documents="documents"/>
+                    <CustomButton label="Agregar documento" />
+
+
+                </div>
+            </div>
+        </div>
     </div>
+    
 </template>

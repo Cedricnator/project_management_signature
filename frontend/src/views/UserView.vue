@@ -15,11 +15,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="h-full">
+    <main class="h-full bg-user-background overflow-auto">
         <Sidebar />
 
-        <div class="flex h-full flex-col p-4 sm:ml-64 bg-background">
-            <div class="flex flex-col justify-top min-h-40 bg-amber-400">
+        <div class="flex h-full flex-col sm:ml-64">
+            <div class="flex flex-col p-4 justify-top min-h-40 ">
                 <div class="flex flex-1">
                     <HeaderComponent />
                 </div>
@@ -28,8 +28,9 @@ onMounted(() => {
                 </div>
                 
             </div>
-            <div class="mt-4 h-full bg-amber-600 overflow-auto"><RouterView /></div>
-            
+            <div class="flex grow mt-4 overflow-auto">
+                <RouterView />
+            </div>
         </div>
     </main>
 </template>
