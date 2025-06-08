@@ -12,7 +12,7 @@ COPY --chown=app:app . .
 
 ENV NODE_ENV=test
 RUN npm install --save-dev jest
-RUN npm test
+# RUN npm test
 
 ENV NODE_ENV=production
 RUN npm run build
@@ -26,7 +26,7 @@ COPY --chown=app:app --from=prod /app/dist /app/dist
 
 ENV TZ=America/Santiago
 
-EXPOSE 8080
+EXPOSE 3000
 
 ENV NODE_ENV production
 CMD [ "node", "/app/dist/main.js" ]

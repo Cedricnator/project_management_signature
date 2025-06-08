@@ -31,14 +31,17 @@ export class File {
   @Column({ name: 'size', type: 'bigint', nullable: true })
   fileSize: number;
 
-  @Column({ name: 'mime_type', length: 100, nullable: true })
+  @Column({ name: 'mime_type', length: 100, nullable: false })
   mimetype: string;
 
-  @Column({ name: 'original_name', length: 255, nullable: true })
+  @Column({ name: 'original_name', length: 255, nullable: false })
   originalFilename: string;
 
-  @Column({ name: 'file_name', length: 255, nullable: true })
+  @Column({ name: 'file_name', length: 255, nullable: false })
   filename: string;
+
+  @Column({ name: 'file_hash', length: 255, nullable: false })
+  fileHash: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

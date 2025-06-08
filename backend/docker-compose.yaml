@@ -1,5 +1,5 @@
 services:
-  db.signature.project_management.local:
+  db-signature-project-management:
     hostname: db.signature.project_management.local
     container_name: db.signature.project_management.local
     build:
@@ -17,34 +17,34 @@ services:
     ports:
       - '31000:5432'
     volumes: 
-      - db.signature.project_management.local:/var/lib/postgresql/data
+      - db-signature-project-management:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - project_management_network
+      - project-management-network
 
-  backend.signature.project_management.local:
+  backend-signature-project-management:
     hostname: backend.signature.project_management.local
     container_name: backend.signature.project_management.local
     build:
       context: .
       dockerfile: build/Dockerfile
     depends_on:
-      db.signature.project_management.local:
+      db-signature-project-management:  
         condition: service_healthy
     environment:
-      DB_HOST : db.signature.project_management.local
-      DB_PORT : 5432
-      DB_NAME : signature_project
-      APP_ENV : staging
+      DB_HOST: db.signature.project_management.local  
+      DB_PORT: 5432
+      DB_NAME: signature_project
+      APP_ENV: staging
     ports:
-      - "32000:8080"
+      - "32000:3000"
     networks:
-      - project_management_network
+      - project-management-network
 
 volumes:
-  db.signature.project_management.local:
+  db-signature-project-management:  
     driver: local
 
 networks:
-  project_management_network:
-    external: true
+  project-management-network:
+    driver: bridge

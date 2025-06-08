@@ -14,6 +14,7 @@ import { File } from './entities/file.entity';
 import { Repository } from 'typeorm';
 import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class FilesService {
@@ -46,6 +47,10 @@ export class FilesService {
       throw new BadRequestException('No file provided!');
     }
 
+    if (!file.buffer && !file.path) {
+      throw new BadRequestException('File data is missing');
+    }
+
     const draftStatus = await this.findDocumentStatus(
       '01974b23-bc2f-7e5f-a9d0-73a5774d2778',
     );
@@ -53,6 +58,10 @@ export class FilesService {
     if (!draftStatus) {
       throw new NotFoundException('pending_review status not found');
     }
+
+    const documentHash = createHash('sha256')
+      .update(file.buffer || file.path)
+      .digest('hex');
 
     const document = this.documentRepository.create({
       name: file.originalname,
@@ -63,6 +72,7 @@ export class FilesService {
       mimetype: file.mimetype,
       originalFilename: file.originalname,
       filename: file.filename,
+      fileHash: documentHash,
     });
 
     const savedDocument = await this.documentRepository.save(document);
@@ -205,6 +215,21 @@ export class FilesService {
         documentName: document.name,
       },
     };
+  }
+
+  verifyFileIntegrity(document: File): boolean {
+    try {
+      if (document.fileHash) {
+        const currentHash = createHash('sha256')
+          .update(document.filePath)
+          .digest('hex');
+        return currentHash === document.fileHash;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error verifying file integrity:', error);
+      throw new InternalServerErrorException('Could not verify file integrity');
+    }
   }
 
   async changeFileStatus(
