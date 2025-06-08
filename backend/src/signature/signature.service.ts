@@ -13,6 +13,8 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { createHash } from 'crypto';
 import { UserRole } from 'src/users/entities/user-role.enum';
+import { File } from 'src/files/entities/file.entity';
+import * as fs from 'fs';
 
 @Injectable()
 export class SignatureService {
@@ -115,6 +117,31 @@ export class SignatureService {
 
   async findAll() {
     return await this.accountDocumentRepository.find();
+  }
+
+  verifyFileIntegrity(document: File) {
+    try {
+      if (!fs.existsSync(document.filePath)) {
+        return false;
+      }
+
+      // Verificar tamaño del archivo
+      const stats = fs.statSync(document.filePath);
+      if (stats.size !== document.fileSize) {
+        return false;
+      }
+
+      // Opcional: Verificar hash del archivo si lo tienes almacenado
+      // if (document.fileHash) {
+      //   const currentHash = await this.calculateFileHash(document.path);
+      //   return currentHash === document.fileHash;
+      // }
+
+      return true;
+    } catch (error) {
+      console.error('Error verifying file integrity:', error);
+      return false;
+    }
   }
 
   async findOne(id: string) {
