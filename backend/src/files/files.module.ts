@@ -4,9 +4,14 @@ import { FilesController } from './files.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { File } from './entities/file.entity';
+import { DocumentStatusType } from './entities/document_status_type.entity';
+import { DocumentHistory } from './entities/document_history.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([File, DocumentStatusType, DocumentHistory]),
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads',
@@ -19,7 +24,11 @@ import { extname } from 'path';
         },
       }),
       fileFilter: (req, file, callback) => {
-        const allowedTypes = ['application/pdf'];
+        const allowedTypes = [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
         if (allowedTypes.includes(file.mimetype)) {
           callback(null, true);
         } else {

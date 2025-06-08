@@ -4,10 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { DocumentStatusType } from './document_status_type.entity';
+import { DocumentHistory } from './document_history.entity';
 
 @Entity('document')
 export class File {
@@ -47,4 +49,7 @@ export class File {
   @ManyToOne(() => DocumentStatusType)
   @JoinColumn({ name: 'current_status_id' })
   currentStatus: DocumentStatusType;
+
+  @OneToMany(() => DocumentHistory, (history) => history.documentId)
+  history: DocumentHistory[];
 }

@@ -10,6 +10,7 @@ import {
   UploadedFile,
   ParseUUIDPipe,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -23,6 +24,9 @@ export class FilesController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
     return this.filesService.uploadFile(file);
   }
 
@@ -62,5 +66,10 @@ export class FilesController {
   @Delete(':id')
   remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.filesService.remove(id);
+  }
+
+  @Get(':id/history')
+  getFileHistory(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.filesService.getFileHistory(id);
   }
 }

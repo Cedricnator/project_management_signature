@@ -2,9 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { File } from './file.entity';
+import { DocumentStatusType } from './document_status_type.entity';
 
 @Entity('document_history')
 export class DocumentHistory {
@@ -28,4 +32,12 @@ export class DocumentHistory {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToOne(() => File, (document) => document.history)
+  @JoinColumn({ name: 'document_id' })
+  document: File;
+
+  @ManyToOne(() => DocumentStatusType)
+  @JoinColumn({ name: 'status_id' })
+  status: DocumentStatusType;
 }
