@@ -1,34 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  Req,
+} from '@nestjs/common';
 import { SignatureService } from './signature.service';
-import { CreateSignatureDto } from './dto/create-signature.dto';
-import { UpdateSignatureDto } from './dto/update-signature.dto';
+import { SignDocumentDto } from './dto/sign-document.dto';
+import { Request } from 'express';
 
 @Controller('signature')
 export class SignatureController {
   constructor(private readonly signatureService: SignatureService) {}
 
   @Post()
-  create(@Body() createSignatureDto: CreateSignatureDto) {
-    return this.signatureService.create(createSignatureDto);
+  async signDocument(
+    @Body() createSignatureDto: SignDocumentDto,
+    @Req() req: Request,
+  ) {
+    return this.signatureService.signDocument(createSignatureDto, req);
   }
 
   @Get()
-  findAll() {
-    return this.signatureService.findAll();
+  async findAll() {
+    return await this.signatureService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.signatureService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSignatureDto: UpdateSignatureDto) {
-    return this.signatureService.update(+id, updateSignatureDto);
+  async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.signatureService.findOne(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.signatureService.remove(+id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.signatureService.remove(id);
   }
 }

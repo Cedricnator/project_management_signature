@@ -55,7 +55,7 @@ export class FilesService {
     }
 
     const document = this.documentRepository.create({
-      documentName: file.originalname,
+      name: file.originalname,
       description: '',
       currentStatusId: draftStatus.id,
       filePath: file.path,
@@ -155,7 +155,7 @@ export class FilesService {
     }
 
     // Update document properties
-    document.documentName = newFile.originalname;
+    document.name = newFile.originalname;
     document.filePath = newFile.path;
     document.fileSize = newFile.size;
     document.mimetype = newFile.mimetype;
@@ -202,7 +202,7 @@ export class FilesService {
       message: 'File deleted successfully',
       deletedDocument: {
         id: document.id,
-        documentName: document.documentName,
+        documentName: document.name,
       },
     };
   }
@@ -255,7 +255,7 @@ export class FilesService {
     return {
       document: {
         id: document.id,
-        documentName: document.documentName,
+        documentName: document.name,
         currentStatus: document.currentStatus?.status,
       },
       history: history.map((h) => ({

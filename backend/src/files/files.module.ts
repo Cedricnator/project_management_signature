@@ -42,5 +42,6 @@ import { DocumentHistory } from './entities/document_history.entity';
   ],
   controllers: [FilesController],
   providers: [FilesService],
+  exports: [FilesService],
 })
 export class FilesModule {}

@@ -16,28 +16,28 @@ export class File {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'document_name', length: 255 })
-  documentName: string;
+  @Column({ name: 'document_name', length: 255, nullable: false })
+  name: string;
 
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ name: 'current_status_id' })
+  @Column({ name: 'current_status_id', type: 'uuid', nullable: false })
   currentStatusId: string;
 
-  @Column({ name: 'file_path', length: 500, nullable: true })
+  @Column({ name: 'path', length: 500, nullable: true })
   filePath: string;
 
-  @Column({ name: 'file_size', type: 'bigint', nullable: true })
+  @Column({ name: 'size', type: 'bigint', nullable: true })
   fileSize: number;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ name: 'mime_type', length: 100, nullable: true })
   mimetype: string;
 
-  @Column({ name: 'original_filename', length: 255, nullable: true })
+  @Column({ name: 'original_name', length: 255, nullable: true })
   originalFilename: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'file_name', length: 255, nullable: true })
   filename: string;
 
   @CreateDateColumn({ name: 'created_at' })
