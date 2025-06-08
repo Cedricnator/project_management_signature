@@ -94,7 +94,7 @@ export class SignatureService {
 
     await this.filesService.changeFileStatus(
       documentId,
-      'signed',
+      '01974b23-fecc-7863-b7ac-b64554d34cde',
       `Document signed by supervisor: ${user.email}`,
       userId,
     );

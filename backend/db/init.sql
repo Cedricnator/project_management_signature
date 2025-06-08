@@ -67,6 +67,9 @@ CREATE TABLE account_document (
   account_id UUID NOT NULL, 
   document_id UUID NOT NULL, 
   validated BOOLEAN DEFAULT FALSE,
+  signature_hash VARCHAR(255),
+  ip_address VARCHAR(45),
+  user_agent TEXT,
   validated_at TIMESTAMP,
   FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
   FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE
