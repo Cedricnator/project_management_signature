@@ -70,18 +70,18 @@ function toggleSidebar() {
             <div class="flex h-full grow flex-col">
                 <ul class=" space-y-2 font-medium">
                     <li>
-                        <SidebarButton label="Dashboard" iconName="fa-solid fa-house" />
+                        <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="user-dashboard" />
                     </li>
                     <li>
-                        <SidebarButton label="Documentos" iconName="fa-solid fa-file-invoice" />
+                        <SidebarButton label="Documentos" iconName="fa-solid fa-file-invoice" to="documents" />
                     </li>
                     <li>
-                        
+                        <SidebarButton label="Historial" iconName="fa-solid fa-list-ul" to="user-history"/>
                     </li>
                 </ul>
             </div>
             <div class="w-full mb-5">
-                <SidebarButton label="Cerrar sesión" iconName="fa-solid fa-arrow-right-from-bracket" :rotation="180" :danger="true"  />
+                <SidebarButton label="Cerrar sesión" iconName="fa-solid fa-arrow-right-from-bracket" :rotation="180" :danger="true" to="login" />
             </div>
             
         </div>

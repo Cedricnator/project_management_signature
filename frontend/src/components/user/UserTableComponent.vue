@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import type { Document } from '@/types'
-import { ButtonType } from '@/types';
+import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
-import CustomButton from './CustomButton.vue';
+import CustomButton from '../CustomButton.vue'
+import UserDocumentHistoryModal from '@/components/user/UserDocumentHistoryModal.vue'
 
 const props = defineProps<{
     documents: Document[]
 }>()
 
+const isShowModal = ref(false)
 const searchQuery = ref('')
 const allDocuments = computed(() => props.documents)
+const currentDocument = ref()
 
 const currentPage = ref(1)
 const itemsPerPage = 6
@@ -54,6 +57,17 @@ function sortBy(key: 'documentName' | 'state') {
     }
 }
 
+function handleDocumentHistoryModal(document: Document) {
+    currentDocument.value = document
+    isShowModal.value = true
+}
+
+function handleCloseModal() {
+    isShowModal.value = false
+}
+
+const showModal = computed(() => isShowModal.value)
+
 /**
  * moves to first page when searching, so it doesn't show empty pages.
  */
@@ -63,6 +77,12 @@ watch(searchQuery, () => {
 </script>
 
 <template>
+    <UserDocumentHistoryModal
+        v-if="currentDocument != null"
+        :isShowModal="showModal.valueOf()"
+        @close="handleCloseModal"
+        :document="currentDocument"
+    />
     <div class="flex flex-col h-full w-full overflow-x-auto sm:rounded-lg">
         <div class="grid grid-cols-1 md:grid-cols-2 pb-4 bg-white">
             <p class="font-semibold text-2xl">Documentos</p>
@@ -105,13 +125,17 @@ watch(searchQuery, () => {
                         scope="col"
                         class="px-6 py-3 cursor-pointer md:min-w-10 md:max-w-10"
                     >
-                        Nombre 
+                        Nombre
                         <span v-if="sortKey === 'documentName'">
                             {{ sortAsc ? '▲' : '▼' }}
                         </span>
                     </th>
-                    <th @click="sortBy('state')" scope="col" class="px-6 py-3 cursor-pointer md:min-w-10 md:max-w-10">
-                        Estado 
+                    <th
+                        @click="sortBy('state')"
+                        scope="col"
+                        class="px-6 py-3 cursor-pointer md:min-w-10 md:max-w-10"
+                    >
+                        Estado
                         <span v-if="sortKey === 'state'">
                             {{ sortAsc ? '▲' : '▼' }}
                         </span>
@@ -125,13 +149,22 @@ watch(searchQuery, () => {
                     :key="document.documentId"
                     class="bg-white border-b text-text-dark dark:border-gray-700 border-gray-200 hover:bg-gray-300"
                 >
-                    <th scope="row" class="md:min-w-10 md:max-w-10  px-6 py-4 font-medium text-text-dark whitespace-nowrap">
+                    <th
+                        scope="row"
+                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark whitespace-nowrap"
+                    >
                         {{ document.documentName }}
                     </th>
-                    <td class="max-w-[5rem] px-6 py-4 md:min-w-10 md:max-w-10">{{ document.state }}</td>
+                    <td class="max-w-[5rem] px-6 py-4 md:min-w-10 md:max-w-10">
+                        {{ document.state }}
+                    </td>
                     <td class="max-w-[10rem] px-6 py-4">
                         <div class="flex flex-wrap md:flex-nowrap gap-2 justify-start">
-                            <CustomButton label="Ver historial" :buttonType="ButtonType.outlined"/>
+                            <CustomButton
+                                label="Ver historial"
+                                :buttonType="ButtonType.outlined"
+                                :onClick="() => handleDocumentHistoryModal(document)"
+                            />
                             <CustomButton label="Enviar para revision" />
                             <CustomButton label="Descargar" />
                         </div>

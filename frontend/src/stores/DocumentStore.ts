@@ -1,4 +1,4 @@
-import { DocumentStatus, type Document } from '@/types'
+import { DocumentStatus, type Document, type DocumentHistory } from '@/types'
 import { defineStore } from 'pinia'
 
 export const useDocumentStore = defineStore('document', {
@@ -10,9 +10,60 @@ export const useDocumentStore = defineStore('document', {
             this.documents = mockDocuments()
         },
 
-        async getDocumentByDocumentId(documentId: number) {},
+        async getDocumentByDocumentId(documentId: string) {},
+
+        async getDocumentHistoryByDocumentId(documentId: string) {
+            return mockDocumentHistory().sort(
+                (a, b) => b.createdAt.getDate() - a.createdAt.getDate(),
+            )
+        },
     },
 })
+
+function mockDocumentHistory() {
+    const documentHistory: DocumentHistory[] = [
+        {
+            documentHistoryId: 'dh-001',
+            documentId: 'd-001',
+            changedBy: 'user-001',
+            action: DocumentStatus.valid,
+            createdAt: new Date('2025-06-01T10:00:00Z'),
+            commentary: 'Initial validation successful.',
+        },
+        {
+            documentHistoryId: 'dh-002',
+            documentId: 'd-001',
+            changedBy: 'user-002',
+            action: DocumentStatus.invalid,
+            createdAt: new Date('2025-06-02T12:00:00Z'),
+            commentary: 'Missing signature.',
+        },
+        {
+            documentHistoryId: 'dh-003',
+            documentId: 'd-001',
+            changedBy: 'user-001',
+            action: DocumentStatus.valid,
+            createdAt: new Date('2025-06-03T14:00:00Z'),
+            commentary: 'Approved by manager.',
+        },
+        {
+            documentHistoryId: 'dh-004',
+            documentId: 'd-001',
+            changedBy: 'user-003',
+            action: DocumentStatus.invalid,
+            createdAt: new Date('2025-06-03T15:00:00Z'),
+            commentary: 'Wrong document format.',
+        },
+        {
+            documentHistoryId: 'dh-005',
+            documentId: 'd-003',
+            changedBy: 'user-001',
+            action: DocumentStatus.valid,
+            createdAt: new Date('2025-06-04T09:00:00Z'),
+        },
+    ]
+    return documentHistory
+}
 
 function mockDocuments(): Document[] {
     const documents: Document[] = [

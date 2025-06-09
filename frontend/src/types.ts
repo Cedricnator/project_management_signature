@@ -27,6 +27,15 @@ export interface Document {
     validatedBy?: string | null
 }
 
+export interface DocumentHistory {
+    documentHistoryId: string
+    documentId: string
+    changedBy: string
+    action: DocumentStatus
+    createdAt: Date
+    commentary?: string | null
+}
+
 export enum ButtonType {
     filled = 'filled',
     outlined = 'outlined',
