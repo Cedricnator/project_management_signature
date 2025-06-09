@@ -1,13 +1,10 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
   HttpStatus,
-  ServiceUnavailableException,
-  NotFoundException,
-  ConflictException,
   Logger,
-  BadGatewayException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -15,28 +12,39 @@ import { Response } from 'express';
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger('ExceptionFilter');
 
-  catch(exception: Error, host: ArgumentsHost) {
-    this.logger.error(exception);
-
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    let statusCode: number;
-    let message: string = exception.message;
+    let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    let message = 'Internal server error';
 
-    if (exception instanceof NotFoundException) {
-      statusCode = HttpStatus.NOT_FOUND;
-    } else if (exception instanceof ServiceUnavailableException) {
-      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-    } else if (exception instanceof ConflictException) {
-      statusCode = HttpStatus.CONFLICT;
-    } else if (exception instanceof BadGatewayException) {
-      statusCode = HttpStatus.BAD_GATEWAY;
-    } else {
-      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = 'Internal server error';
+    // Logging all the unhandled exceptions.
+    this.logger.error(
+      `[${request.method}] ${request.url} -> ${statusCode}: ${JSON.stringify(
+        message,
+      )}`,
+    );
+    // Manejo explícito de HttpException (como BadRequest, Unauthorized, etc.)
+    if (exception instanceof HttpException) {
+      statusCode = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      message =
+        typeof exceptionResponse === 'string'
+          ? exceptionResponse
+          : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            (exceptionResponse as any).message || message;
+      return;
     }
 
-    response.status(statusCode).json({ statusCode, message });
+    response.status(statusCode).json({
+      statusCode,
+      message,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
   }
 }

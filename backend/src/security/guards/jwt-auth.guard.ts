@@ -23,7 +23,6 @@ export class JwtAuthGuard implements CanActivate {
       const payload: JwtPayload = await this.jwtService.verifyAsync(token);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       (request as any).user = payload; // opcional: agrega el usuario a la request
-      console.log(payload);
     } catch {
       throw new UnauthorizedException('Token not verified');
     }
