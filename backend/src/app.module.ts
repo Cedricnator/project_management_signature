@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { CommonModule } from './common/common.module';
+import { SecurityModule } from './security/security.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CommonModule } from './common/common.module';
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true }),
     CommonModule,
+    SecurityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
