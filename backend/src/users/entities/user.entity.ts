@@ -1,30 +1,31 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { UserRole } from '../../common/enum/user-role.enum';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('account')
 export class User {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
+  @Column({ name: 'first_name', nullable: false })
   firstName: string;
 
-  @Column()
+  @Column({ name: 'last_name', nullable: false })
   lastName: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ name: 'email', unique: true, nullable: false })
   email: string;
 
-  @Column({ nullable: false })
+  @Column({ name: 'password', nullable: false })
   password: string;
 
   @Column({
+    name: 'role',
     type: 'enum',
     enum: UserRole,
     default: UserRole.USER,
   })
   role: UserRole;
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 }
