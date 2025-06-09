@@ -6,12 +6,12 @@ import {
 import { SignDocumentDto } from './dto/sign-document.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccountDocument } from './entities/account-document.entity';
-import { User } from 'src/users/entities/user.entity';
-import { FilesService } from 'src/files/files.service';
 import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { createHash } from 'crypto';
-import { UserRole } from 'src/users/entities/user-role.enum';
+import { FilesService } from '../files/files.service';
+import { User } from '../users/entities/user.entity';
+import { UserRole } from '../users/entities/user-role.enum';
 
 @Injectable()
 export class SignatureService {
