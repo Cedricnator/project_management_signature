@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { join } from 'path';
-import { createReadStream, existsSync, unlinkSync } from 'fs';
+import { createReadStream, existsSync, readFileSync, unlinkSync } from 'fs';
 import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from './entities/file.entity';
@@ -15,7 +15,7 @@ import { Repository } from 'typeorm';
 import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { createHash } from 'crypto';
-
+import { UploadFileDto } from './dto/upload-file.dto';
 @Injectable()
 export class FilesService {
   constructor(
@@ -42,7 +42,7 @@ export class FilesService {
     }
   }
 
-  async uploadFile(file: Express.Multer.File) {
+  async uploadFile(file: Express.Multer.File, uploadFileDto: UploadFileDto) {
     if (!file) {
       throw new BadRequestException('No file provided!');
     }
@@ -65,7 +65,7 @@ export class FilesService {
 
     const document = this.documentRepository.create({
       name: file.originalname,
-      description: '',
+      description: uploadFileDto.description || '',
       currentStatusId: draftStatus.id,
       filePath: file.path,
       fileSize: file.size,
@@ -152,6 +152,17 @@ export class FilesService {
   ) {
     const document = await this.findOne(id);
 
+    const allowedStatuses = [
+      '01974b23-e943-7308-8185-1556429b9ff1', // rejected
+      '01974b24-bc2f-7e5f-a9d0-73a5774d2778', // pending_review
+    ];
+
+    if (!allowedStatuses.includes(document.currentStatusId)) {
+      throw new BadRequestException(
+        'Document can only be updated if it is in a rejected or pending review status',
+      );
+    }
+
     // Delete previous file if it exists
     if (
       document.filePath &&
@@ -164,6 +175,21 @@ export class FilesService {
       }
     }
 
+    let fileHash: string;
+    try {
+      if (newFile.buffer) {
+        fileHash = createHash('sha256').update(newFile.buffer).digest('hex');
+      } else if (newFile.path) {
+        const fileBuffer = readFileSync(newFile.path);
+        fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+      } else {
+        throw new BadRequestException('Unable to access file data');
+      }
+    } catch (error: unknown) {
+      console.error('Error calculating file hash:', error);
+      throw new BadRequestException(`Error calculating file hash`);
+    }
+
     // Update document properties
     document.name = newFile.originalname;
     document.filePath = newFile.path;
@@ -171,6 +197,14 @@ export class FilesService {
     document.mimetype = newFile.mimetype;
     document.originalFilename = newFile.originalname;
     document.filename = newFile.filename;
+    document.fileHash = fileHash;
+    document.description = updateFileDto?.description || document.description;
+
+    const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
+    if (document.currentStatusId === '01974b23-e943-7308-8185-1556429b9ff1') {
+      // Si estaba rechazado
+      document.currentStatusId = pendingReviewStatusId;
+    }
 
     const updatedDocument = await this.documentRepository.save(document);
 
@@ -178,7 +212,7 @@ export class FilesService {
     const historyEntry = this.documentHistoryRepository.create({
       documentId: document.id,
       statusId: document.currentStatusId,
-      changedBy: '01974b59-5913-713e-ae09-5a11333ab37e',
+      changedBy: '01974b59-5913-713e-ae09-5a11333ab37e', // TODO  SET dynamic user
       comment: 'Document file updated',
     });
 
@@ -257,7 +291,7 @@ export class FilesService {
       documentId: document.id,
       statusId: statusId,
       changedBy: changedBy,
-      comment: comment || `Status changed to ${newStatus.status}`,
+      comment: comment || `Estado cambiado a: ${newStatus.status}`,
     });
 
     await this.documentHistoryRepository.save(historyEntry);

@@ -16,6 +16,7 @@ import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { UploadFileDto } from './dto/upload-file.dto';
 
 @Controller('files')
 export class FilesController {
@@ -23,11 +24,14 @@ export class FilesController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() uploadFileDto: UploadFileDto,
+  ) {
     if (!file) {
       throw new BadRequestException('File is required');
     }
-    return this.filesService.uploadFile(file);
+    return this.filesService.uploadFile(file, uploadFileDto);
   }
 
   @Post('stream')
@@ -71,5 +75,10 @@ export class FilesController {
   @Get(':id/history')
   getFileHistory(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.filesService.getFileHistory(id);
+  }
+
+  @Get('status')
+  findAllStatusTypes() {
+    return this.filesService.getStatusTypes();
   }
 }

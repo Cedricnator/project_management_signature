@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateFileDto } from './create-file.dto';
+import { UploadFileDto } from './upload-file.dto';
 
-export class UpdateFileDto extends PartialType(CreateFileDto) {}
+export class UpdateFileDto extends PartialType(UploadFileDto) {}
