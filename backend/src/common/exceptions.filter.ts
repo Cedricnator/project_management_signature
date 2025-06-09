@@ -14,6 +14,7 @@ import {
   UnprocessableEntityException,
   UnsupportedMediaTypeException,
   PayloadTooLargeException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -34,6 +35,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode = HttpStatus.NOT_FOUND;
     } else if (exception instanceof ServiceUnavailableException) {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    } else if (exception instanceof BadRequestException) {
+      statusCode = HttpStatus.BAD_REQUEST;
     } else if (exception instanceof ConflictException) {
       statusCode = HttpStatus.CONFLICT;
     } else if (exception instanceof BadGatewayException) {
