@@ -8,6 +8,7 @@ import { DocumentHistory } from '../files/entities/document_history.entity';
 import { AccountDocument } from './entities/account-document.entity';
 import { FilesModule } from '../files/files.module';
 import { File } from '../files/entities/file.entity';
+import { SecurityModule } from '../security/security.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { File } from '../files/entities/file.entity';
       AccountDocument,
     ]),
     FilesModule,
+    SecurityModule,
   ],
   controllers: [SignatureController],
   providers: [SignatureService],

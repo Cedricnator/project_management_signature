@@ -16,6 +16,7 @@ import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { createHash } from 'crypto';
 import { UploadFileDto } from './dto/upload-file.dto';
+
 @Injectable()
 export class FilesService {
   constructor(

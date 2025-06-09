@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { File } from './entities/file.entity';
 import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
+import { SecurityModule } from 'src/security/security.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { DocumentHistory } from './entities/document_history.entity';
         fileSize: 10 * 1024 * 1024,
       },
     }),
+    SecurityModule,
   ],
   controllers: [FilesController],
   providers: [FilesService],

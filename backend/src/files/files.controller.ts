@@ -11,14 +11,20 @@ import {
   ParseUUIDPipe,
   Res,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { UploadFileDto } from './dto/upload-file.dto';
+import { RoleGuard } from '../security/guards/role.guard';
+import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Controller('files')
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
@@ -27,7 +33,9 @@ export class FilesController {
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDto: UploadFileDto,
+    @CurrentUser() user: JwtPayload,
   ) {
+    console.log('Current User:', user);
     if (!file) {
       throw new BadRequestException('File is required');
     }

@@ -16,7 +16,6 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { stat } from 'fs';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
