@@ -65,9 +65,8 @@ export class AuthService {
     try {
       const payload = jwt.verify(token, secret) as unknown as JwtPayload;
       return payload;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      throw new UnauthorizedException('Token inválido o expirado');
+    } catch (error) {
+      throw new UnauthorizedException('Token inválido o expirado' + error);
     }
   }
 }

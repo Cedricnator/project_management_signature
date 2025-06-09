@@ -11,8 +11,8 @@ import { AuthService } from './auth.service';
 import { AuthentificationInput } from './dto/auth-input-auth.dto';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser } from './decorators/current-user.decorator';
+import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from 'jsonwebtoken';
 
 @Controller('auth')

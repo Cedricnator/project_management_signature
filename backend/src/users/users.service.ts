@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import * as by from 'bcryptjs';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 import { SignInAuthDto } from '../auth/dto/sign-in-auth.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -47,8 +48,20 @@ export class UsersService {
   findOneByEmail(email: string) {
     return this.usersRepository.findOneBy({ email });
   }
-
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    // Fetch all users and map them to UserResponseDto
+    return this.usersRepository
+        .find()
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        .then((users) => users.map((user) => this.userToUserResponseDto(user))));
+  }
+
+  private userToUserResponseDto(user: User): UserResponseDto {
+    return {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    };
   }
 }

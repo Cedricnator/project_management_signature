@@ -6,6 +6,11 @@ import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { SignatureModule } from './signature/signature.module';
 import { DatabaseModule } from './common/database.module';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './users/entities/user.entity';
+import { CommonModule } from './common/common.module';
+import { SecurityModule } from './security/security.module';
 
 @Module({
   imports: [
@@ -14,6 +19,10 @@ import { DatabaseModule } from './common/database.module';
     FilesModule,
     AuthModule,
     SignatureModule,
+    UsersModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    CommonModule,
+    SecurityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
