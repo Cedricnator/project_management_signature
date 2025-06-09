@@ -48,12 +48,13 @@ export class UsersService {
   findOneByEmail(email: string) {
     return this.usersRepository.findOneBy({ email });
   }
-  async findAll(): Promise<User[]> {
+
+  async findAll(): Promise<UserResponseDto[]> {
     // Fetch all users and map them to UserResponseDto
     return this.usersRepository
-        .find()
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        .then((users) => users.map((user) => this.userToUserResponseDto(user))));
+      .find()
+
+      .then((users) => users.map((user) => this.userToUserResponseDto(user)));
   }
 
   private userToUserResponseDto(user: User): UserResponseDto {

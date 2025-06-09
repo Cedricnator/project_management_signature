@@ -11,7 +11,7 @@ import { Repository } from 'typeorm';
 import { createHash } from 'crypto';
 import { FilesService } from '../files/files.service';
 import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/entities/user-role.enum';
+import { UserRole } from '../common/enum/user-role.enum';
 
 @Injectable()
 export class SignatureService {
