@@ -8,8 +8,15 @@ import {
   ConflictException,
   Logger,
   BadGatewayException,
+  UnauthorizedException,
+  ForbiddenException,
+  MethodNotAllowedException,
+  UnprocessableEntityException,
+  UnsupportedMediaTypeException,
+  PayloadTooLargeException,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { stat } from 'fs';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -32,6 +39,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode = HttpStatus.CONFLICT;
     } else if (exception instanceof BadGatewayException) {
       statusCode = HttpStatus.BAD_GATEWAY;
+    } else if (exception instanceof UnauthorizedException) {
+      statusCode = HttpStatus.UNAUTHORIZED;
+    } else if (exception instanceof ForbiddenException) {
+      statusCode = HttpStatus.FORBIDDEN;
+    } else if (exception instanceof MethodNotAllowedException) {
+      statusCode = HttpStatus.METHOD_NOT_ALLOWED;
+    } else if (exception instanceof UnprocessableEntityException) {
+      statusCode = HttpStatus.UNPROCESSABLE_ENTITY;
+    } else if (exception instanceof UnsupportedMediaTypeException) {
+      statusCode = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+    } else if (exception instanceof PayloadTooLargeException) {
+      statusCode = HttpStatus.PAYLOAD_TOO_LARGE;
     } else {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal server error';
