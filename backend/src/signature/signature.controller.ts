@@ -7,12 +7,16 @@ import {
   Delete,
   ParseUUIDPipe,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { SignatureService } from './signature.service';
 import { SignDocumentDto } from './dto/sign-document.dto';
 import { Request } from 'express';
+import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
+import { RoleGuard } from '../security/guards/role.guard';
 
 @Controller('signature')
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class SignatureController {
   constructor(private readonly signatureService: SignatureService) {}
 
