@@ -6,7 +6,8 @@ import { User } from 'src/users/entities/user.entity';
 import { DocumentStatusType } from 'src/files/entities/document_status_type.entity';
 import { DocumentHistory } from 'src/files/entities/document_history.entity';
 import { AccountDocument } from './entities/account-document.entity';
-import { FilesModule } from 'src/files/files.module';
+import { FilesModule } from '../files/files.module';
+import { File } from '../files/entities/file.entity';
 
 @Module({
   imports: [
