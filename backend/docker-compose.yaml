@@ -35,6 +35,7 @@ services:
       DB_HOST: db.signature.project_management.local  
       DB_PORT: 5432
       DB_NAME: signature_project
+      JWT_SECRET: 'secreto'
       APP_ENV: staging
     ports:
       - "32000:3000"

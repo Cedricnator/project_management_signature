@@ -86,12 +86,12 @@ INSERT INTO document_status_type (id, status) VALUES
 
 -- Insert testing users
 INSERT INTO account (id, email, first_name, last_name, password, role) VALUES
-('01974b59-3024-74cd-9b7b-44dfa0088448', 'admin@signature.com', 'Carlos', 'Administrador', '$2b$10$hashedpassword1', 'admin'),
-('01974b59-4700-71d3-8b5d-693483582b06', 'supervisor@signature.com', 'Maria', 'Supervisora', '$2b$10$hashedpassword2', 'supervisor'),
-('01974b59-5913-713e-ae09-5a11333ab37e', 'juan.perez@signature.com', 'Juan', 'Pérez', '$2b$10$hashedpassword3', 'user'),
-('01974b59-697d-7e4b-9abf-61d073db6628', 'ana.garcia@signature.com', 'Ana', 'García', '$2b$10$hashedpassword4', 'user'),
-('01974b59-7d0e-7745-b45a-5a36316863e6', 'pedro.lopez@signature.com', 'Pedro', 'López', '$2b$10$hashedpassword5', 'user'),
-('01974b59-933f-735d-ad03-4b3f9e61a97c', 'sofia.martinez@signature.com', 'Sofía', 'Martínez', '$2b$10$hashedpassword6', 'user');
+('01974b59-3024-74cd-9b7b-44dfa0088448', 'admin@signature.com', 'Carlos', 'Administrador', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'admin'),
+('01974b59-4700-71d3-8b5d-693483582b06', 'supervisor@signature.com', 'Maria', 'Supervisora', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'supervisor'),
+('01974b59-5913-713e-ae09-5a11333ab37e', 'juan.perez@signature.com', 'Juan', 'Pérez', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'user'),
+('01974b59-697d-7e4b-9abf-61d073db6628', 'ana.garcia@signature.com', 'Ana', 'García', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'user'),
+('01974b59-7d0e-7745-b45a-5a36316863e6', 'pedro.lopez@signature.com', 'Pedro', 'López', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'user'),
+('01974b59-933f-735d-ad03-4b3f9e61a97c', 'sofia.martinez@signature.com', 'Sofía', 'Martínez', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'user');
 
 -- Indexes for better performance
 CREATE INDEX idx_account_email ON account(email);
