@@ -72,9 +72,9 @@ function toggleSidebar() {
                     <li>
                         <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="user-dashboard" />
                     </li>
-                    <li>
+                    <!-- <li>
                         <SidebarButton label="Documentos" iconName="fa-solid fa-file-invoice" to="documents" />
-                    </li>
+                    </li> -->
                     <li>
                         <SidebarButton label="Historial" iconName="fa-solid fa-list-ul" to="user-history"/>
                     </li>

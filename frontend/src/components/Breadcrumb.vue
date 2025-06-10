@@ -10,8 +10,5 @@ import { FwbBreadcrumb, FwbBreadcrumbItem } from 'flowbite-vue'
         <fwb-breadcrumb-item>
             <router-link :to="{ name: 'user-documents' }">Documents</router-link>
         </fwb-breadcrumb-item>
-        <fwb-breadcrumb-item>
-            <router-link to="">Dashboard</router-link>
-        </fwb-breadcrumb-item>
     </fwb-breadcrumb>
 </template>
