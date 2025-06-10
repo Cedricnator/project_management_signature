@@ -11,7 +11,7 @@ export const useSessionStore = defineStore('session', {
             try {
                 const currentAccount: Account = {
                     accountId: '1000',
-                    role: AccountRole.user,
+                    role: AccountRole.supervisor,
                     username: 'Cucharoth',
                     email: 'cucha@roth.rs',
                 }

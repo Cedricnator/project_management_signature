@@ -1,6 +1,7 @@
 export enum AccountRole {
     user = 'Usuario',
     admin = 'Administrador',
+    supervisor = 'Supervisor',
 }
 
 export interface Account {

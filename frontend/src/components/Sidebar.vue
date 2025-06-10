@@ -1,12 +1,19 @@
 <script setup lang="ts">
 
 import SidebarButton from '@/components/SidebarButton.vue'
+import { useSessionStore } from '@/stores/SessionStore';
+import { AccountRole } from '@/types';
+import { computed } from 'vue';
+import { onMounted } from 'vue';
 import { ref } from 'vue';
 const isSidebarOpen = ref(false)
+const sessionStore = useSessionStore()
 
 function toggleSidebar() {
     isSidebarOpen.value = !isSidebarOpen.value
 }
+
+const userType = computed(() => sessionStore.account.role)
 
 </script>
 
@@ -68,7 +75,7 @@ function toggleSidebar() {
                 </div>
             </div>
             <div class="flex h-full grow flex-col">
-                <ul class=" space-y-2 font-medium">
+                <ul v-if="userType == AccountRole.user" class=" space-y-2 font-medium">
                     <li>
                         <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="user-dashboard" />
                     </li>
@@ -77,6 +84,11 @@ function toggleSidebar() {
                     </li> -->
                     <li>
                         <SidebarButton label="Historial" iconName="fa-solid fa-list-ul" to="user-history"/>
+                    </li>
+                </ul>
+                <ul v-else-if="userType == AccountRole.supervisor">
+                    <li>
+                        <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="supervisor-dashboard" />
                     </li>
                 </ul>
             </div>
