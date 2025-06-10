@@ -25,6 +25,8 @@ export interface Document {
     state: DocumentStatus
     createdBy: string
     validatedBy?: string | null
+    description: string
+    commentary?: string | null
 }
 
 export interface UploadDocumentDto {
@@ -45,4 +47,10 @@ export interface DocumentHistory {
 export enum ButtonType {
     filled = 'filled',
     outlined = 'outlined',
+}
+
+export interface Result<T = void> {
+    success: boolean,
+    message: string,
+    data?: T
 }

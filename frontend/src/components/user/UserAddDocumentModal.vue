@@ -1,35 +1,61 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, ref } from 'vue'
+import { watch, ref, computed } from 'vue'
 import CustomButton from '../CustomButton.vue'
-import type { UploadDocumentDto } from '@/types'
+import type { UploadDocumentDto, Document, Result } from '@/types'
 import { useDocumentStore } from '@/stores/DocumentStore'
+import { sleep } from '@/utils/timeout';
+import { FwbToast } from 'flowbite-vue'
+import { ToastType, useToastStore } from '@/stores/ToastStore';
 
 const props = defineProps<{
     isOpen: boolean
+    document?: Document
 }>()
 
 const emit = defineEmits<{
     (e: 'close'): void
 }>()
 
-watch(
-    () => props.isOpen,
-    (newVal) => {
-        if (newVal) {
-            // optional info load
-        }
-    },
-)
-
 function closeModal() {
     emit('close')
 }
 
+const toastStore = useToastStore()
+const toastMessage = ref('')
+const toastType = ref('')
+const showToast = ref(false)
 const documentStore = useDocumentStore()
 const name = ref('')
 const description = ref('')
 const comentario = ref('')
 const file = ref<File | null>(null)
+
+
+const loading = ref(true)
+
+watch(
+    () => props.isOpen,
+    async (open) => {
+        if (open && props.document) {
+        const currentFile = await documentStore.getFileByDocumentId(props.document.documentId)
+        name.value = props.document.documentName
+        description.value = props.document.description
+        comentario.value = props.document.commentary ?? ''
+        file.value = currentFile
+        sleep(500)    
+        loading.value = false
+    } else if (open) {
+        // If it's a new document
+        name.value = ''
+        description.value = ''
+        comentario.value = ''
+        file.value = null
+    }
+    },
+    { immediate: true }
+)
+
+const isEditMode = computed(() => !!props.document)
 
 const errors = ref({
     name: '',
@@ -88,19 +114,26 @@ const handleSubmit = async () => {
             description: description.value,
             commentary: comentario.value,
         }
-        await documentStore.uploadDocument(uploadDocumentDto, file.value!)
+        const result: Result = await documentStore.uploadDocument(uploadDocumentDto, file.value!)
+        const toastType = result.success ? ToastType.success : ToastType.warning 
+        toastStore.addToast(toastType, result.message)
+
         console.log('Form submitted', {
             name: name.value,
             description: description.value,
             file: file.value?.name,
         })
+        closeModal()
     }
 }
+
 </script>
 
 <template>
+
     <div v-if="isOpen" class="fixed inset-0 z-40 bg-black opacity-20"></div>
     <!-- Main modal -->
+
     <div
         v-if="isOpen"
         @click.self="closeModal"
@@ -114,8 +147,10 @@ const handleSubmit = async () => {
                 <!-- Modal header -->
                 <div
                     class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
-                >
-                    <h3 class="text-lg font-semibold text-gray-900">Subir nuevo documento</h3>
+                >   
+                    <h3 v-if="!isEditMode" class="text-lg font-semibold text-gray-900">Subir nuevo documento</h3>
+                    <h3 v-else class="text-lg font-semibold text-gray-900">Editar documento</h3>
+
                     <button
                         @click="closeModal"
                         type="button"
@@ -252,7 +287,8 @@ const handleSubmit = async () => {
                     </div>
 
                     <!-- Submit Button -->
-                    <CustomButton type="submit" label="Agregar documento" />
+                    <CustomButton v-if="!isEditMode" type="submit" label="Agregar documento" />
+                    <CustomButton v-else type="submit" label="Editar documento" />
                 </form>
             </div>
         </div>

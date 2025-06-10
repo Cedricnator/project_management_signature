@@ -23,7 +23,11 @@ import {
     faMagnifyingGlass,
     faListUl,
     faFileArrowDown,
-    faPlus
+    faPlus,
+    faCircleCheck,
+    faCircleXmark,
+    faCircleInfo,
+    faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons'
 /* adds icons */
 library.add(faStar)
@@ -39,6 +43,10 @@ library.add(faMagnifyingGlass)
 library.add(faListUl)
 library.add(faFileArrowDown)
 library.add(faPlus)
+library.add(faCircleCheck)
+library.add(faCircleXmark)
+library.add(faCircleInfo)
+library.add(faTriangleExclamation)
 
 /* pinia */
 const pinia = createPinia()

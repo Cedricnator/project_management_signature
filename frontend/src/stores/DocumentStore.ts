@@ -1,4 +1,10 @@
-import { DocumentStatus, type Document, type DocumentHistory, type UploadDocumentDto } from '@/types'
+import {
+    DocumentStatus,
+    type Document,
+    type DocumentHistory,
+    type Result,
+    type UploadDocumentDto,
+} from '@/types'
 import { defineStore } from 'pinia'
 
 export const useDocumentStore = defineStore('document', {
@@ -18,9 +24,13 @@ export const useDocumentStore = defineStore('document', {
             )
         },
 
-        async uploadDocument(uploadDocumentDto: UploadDocumentDto, file: File){
-            // dosomething
-        }
+        async getFileByDocumentId(documentId: string) {
+            return new File([''], 'contrato.pdf')
+        },
+
+        async uploadDocument(uploadDocumentDto: UploadDocumentDto, file: File) {
+            return { success: true, message: 'Documento subido con éxito' } as Result
+        },
     },
 })
 
@@ -77,6 +87,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '2',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '2',
@@ -84,6 +95,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '3',
@@ -91,6 +103,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '3',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '4',
@@ -98,6 +111,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '5',
@@ -105,6 +119,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '4',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '6',
@@ -112,6 +127,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '7',
@@ -119,6 +135,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '2',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '8',
@@ -126,6 +143,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '2',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '9',
@@ -133,6 +151,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '10',
@@ -140,6 +159,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '3',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '11',
@@ -147,6 +167,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '12',
@@ -154,6 +175,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '1',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '13',
@@ -161,6 +183,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '14',
@@ -168,6 +191,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '4',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '15',
@@ -175,6 +199,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '16',
@@ -182,6 +207,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '2',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '17',
@@ -189,6 +215,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '18',
@@ -196,6 +223,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '3',
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '19',
@@ -203,6 +231,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.invalid,
             createdBy: '1',
             validatedBy: null,
+            description: 'Contrato de trabajo.',
         },
         {
             documentId: '20',
@@ -210,6 +239,7 @@ function mockDocuments(): Document[] {
             state: DocumentStatus.valid,
             createdBy: '1',
             validatedBy: '2',
+            description: 'Contrato de trabajo.',
         },
     ]
     return documents

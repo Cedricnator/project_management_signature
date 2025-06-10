@@ -5,6 +5,7 @@ import { RouterView } from 'vue-router'
 import Breadcrumbs from '@/components/Breadcrumb.vue'
 import { onMounted } from 'vue'
 import { useSessionStore } from '@/stores/SessionStore'
+import ToastContainer from '@/components/ToastContainer.vue';
 
 const sessionStore = useSessionStore();
 
@@ -29,6 +30,7 @@ onMounted(() => {
                 
             </div>
             <div class="flex grow mt-4 overflow-auto">
+                <ToastContainer />
                 <RouterView />
             </div>
         </div>

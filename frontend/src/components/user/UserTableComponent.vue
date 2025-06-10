@@ -4,6 +4,7 @@ import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
 import CustomButton from '../CustomButton.vue'
 import UserDocumentHistoryModal from '@/components/user/UserDocumentHistoryModal.vue'
+import UserAddDocumentModal from './UserAddDocumentModal.vue'
 
 const props = defineProps<{
     documents: Document[]
@@ -71,6 +72,11 @@ function openDocModal() {
     isShowModalAddDoc.value = true
 }
 
+function handleEditDoc(document: Document) {
+    currentDocument.value = document
+    isShowModalAddDoc.value = true
+}
+
 const showModal = computed(() => isShowModal.value)
 
 /**
@@ -88,6 +94,7 @@ watch(searchQuery, () => {
         @close="handleCloseModal"
         :document="currentDocument"
     />
+    <UserAddDocumentModal :isOpen="isShowModalAddDoc" @close="isShowModalAddDoc = false" :document="currentDocument"/>
     <div class="flex flex-col h-full w-full overflow-x-auto sm:rounded-lg">
         <div class="grid grid-cols-1 md:grid-cols-2 pb-4 bg-white">
             <p class="font-semibold text-2xl">Documentos</p>
@@ -170,7 +177,7 @@ watch(searchQuery, () => {
                                 :buttonType="ButtonType.outlined"
                                 :onClick="() => handleDocumentHistoryModal(document)"
                             />
-                            <CustomButton label="Editar" iconName="fa-solid fa-pen-to-square"/>
+                            <CustomButton label="Editar" iconName="fa-solid fa-pen-to-square" :onClick="() => handleEditDoc(document)"/>
                             <CustomButton label="Descargar" iconName="fa-solid fa-file-arrow-down" />
                         </div>
                     </td>
