@@ -4,6 +4,7 @@ import AuthView from '@/views/AuthView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import DocumentsView from '@/views/DocumentsView.vue'
 import UserView from '@/views/UserView.vue'
+import UserHistory from '@/views/UserHistory.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +42,14 @@ const router = createRouter({
                     path: 'documents',
                     name: 'user-documents',
                     component: DocumentsView,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+                {
+                    path: 'history',
+                    name: 'user-history',
+                    component: UserHistory,
                     meta: {
                         requireAuth: true,
                     },

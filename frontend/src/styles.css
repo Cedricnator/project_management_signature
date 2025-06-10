@@ -41,11 +41,12 @@ body,
 }
 
 @theme {
-    --color-background: #2c8ecb;
-    --primary: #3e5d75;
+    --color-user-background: #e0efff;
+    --color-primary: #244DF2;
+    --color-primary-200: #b6d5ff;
     --primary-darker: #302c3c;
     --color-secondary: #e4effa;
-    --text-white: #eff1f6;
+    --color-text-white: #eff1f6;
     --color-text-dark: #000000;
     --accent: #f0ebd8;
     --font-text: 'Poppins', sans-serif;

@@ -10,7 +10,25 @@ import router from './router'
 import { library } from '@fortawesome/fontawesome-svg-core'
 /* import font awesome icon component */
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faStar, faPenToSquare, faRobot, faPaperPlane, faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons'
+import {
+    faFileInvoice,
+    faStar,
+    faPenToSquare,
+    faRobot,
+    faPaperPlane, faEnvelope, faLock,
+    faHouse,
+    faArrowRightFromBracket,
+    faXmark,
+    faUser,
+    faMagnifyingGlass,
+    faListUl,
+    faFileArrowDown,
+    faPlus,
+    faCircleCheck,
+    faCircleXmark,
+    faCircleInfo,
+    faTriangleExclamation,
+} from '@fortawesome/free-solid-svg-icons'
 /* adds icons */
 library.add(faStar)
 library.add(faPenToSquare)
@@ -18,6 +36,19 @@ library.add(faRobot)
 library.add(faPaperPlane)
 library.add(faEnvelope)
 library.add(faLock)
+library.add(faHouse)
+library.add(faFileInvoice)
+library.add(faArrowRightFromBracket)
+library.add(faXmark)
+library.add(faUser)
+library.add(faMagnifyingGlass)
+library.add(faListUl)
+library.add(faFileArrowDown)
+library.add(faPlus)
+library.add(faCircleCheck)
+library.add(faCircleXmark)
+library.add(faCircleInfo)
+library.add(faTriangleExclamation)
 
 /* pinia */
 const pinia = createPinia()
