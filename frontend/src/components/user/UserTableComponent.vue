@@ -9,6 +9,7 @@ const props = defineProps<{
     documents: Document[]
 }>()
 
+const isShowModalAddDoc = ref(false)
 const isShowModal = ref(false)
 const searchQuery = ref('')
 const allDocuments = computed(() => props.documents)
@@ -66,6 +67,10 @@ function handleCloseModal() {
     isShowModal.value = false
 }
 
+function openDocModal() {
+    isShowModalAddDoc.value = true
+}
+
 const showModal = computed(() => isShowModal.value)
 
 /**
@@ -78,7 +83,7 @@ watch(searchQuery, () => {
 
 <template>
     <UserDocumentHistoryModal
-        v-if="currentDocument != null"
+        v-if="isShowModal"
         :isShowModal="showModal.valueOf()"
         @close="handleCloseModal"
         :document="currentDocument"
@@ -111,7 +116,7 @@ watch(searchQuery, () => {
                         v-model="searchQuery"
                         type="text"
                         id="table-search"
-                        class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:placeholder-gray-400 dark:text-text-dark dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Buscar documento.."
                     />
                 </div>
@@ -165,8 +170,8 @@ watch(searchQuery, () => {
                                 :buttonType="ButtonType.outlined"
                                 :onClick="() => handleDocumentHistoryModal(document)"
                             />
-                            <CustomButton label="Enviar para revision" />
-                            <CustomButton label="Descargar" />
+                            <CustomButton label="Editar" iconName="fa-solid fa-pen-to-square"/>
+                            <CustomButton label="Descargar" iconName="fa-solid fa-file-arrow-down" />
                         </div>
                     </td>
                 </tr>

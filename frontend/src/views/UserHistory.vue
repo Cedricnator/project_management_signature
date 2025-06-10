@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import { onMounted } from 'vue'
 import { computed } from 'vue'
 import UserHistoryTable from '@/components/user/UserHistoryTable.vue'
+import { sleep } from '@/utils/timeout'
 
 const loading = ref(true)
 const userStore = useUserStore()
@@ -15,6 +16,7 @@ const userDocumentHistory = computed(() => userStore.documentHistory)
 
 const fetchUserHistory = async () => {
     await userStore.getUserDocumentsHistoryByUserId(sessionStore.account.accountId)
+    await sleep(500)
     loading.value = false
 }
 

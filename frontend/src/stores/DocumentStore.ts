@@ -1,4 +1,4 @@
-import { DocumentStatus, type Document, type DocumentHistory } from '@/types'
+import { DocumentStatus, type Document, type DocumentHistory, type UploadDocumentDto } from '@/types'
 import { defineStore } from 'pinia'
 
 export const useDocumentStore = defineStore('document', {
@@ -17,6 +17,10 @@ export const useDocumentStore = defineStore('document', {
                 (a, b) => b.createdAt.getDate() - a.createdAt.getDate(),
             )
         },
+
+        async uploadDocument(uploadDocumentDto: UploadDocumentDto, file: File){
+            // dosomething
+        }
     },
 })
 

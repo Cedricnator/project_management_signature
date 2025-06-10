@@ -27,6 +27,12 @@ export interface Document {
     validatedBy?: string | null
 }
 
+export interface UploadDocumentDto {
+    name: string
+    description: string
+    commentary?: string | null
+}
+
 export interface DocumentHistory {
     documentHistoryId: string
     documentId: string

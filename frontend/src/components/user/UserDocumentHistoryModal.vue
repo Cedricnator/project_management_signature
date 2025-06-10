@@ -16,12 +16,15 @@ import type { Document, DocumentHistory } from '@/types'
 import { onMounted } from 'vue'
 import { useDocumentStore } from '@/stores/DocumentStore'
 import CustomButton from '@/components/CustomButton.vue'
+import { sleep } from '@/utils/timeout'
+import { FwbSpinner } from 'flowbite-vue'
 
 const props = defineProps<{
     isShowModal: boolean
     document?: Document | null
 }>()
 
+const loading = ref(true)
 const documentStore = useDocumentStore()
 var isShowModal = computed(() => props.isShowModal)
 const documentHistory = ref<DocumentHistory[]>()
@@ -32,12 +35,15 @@ const emit = defineEmits<{
 
 function handleClose() {
     emit('close')
+    
 }
 
 const fetchDocumentHistory = async () => {
     documentHistory.value = await documentStore.getDocumentHistoryByDocumentId(
         props.document!.documentId,
     )
+    await sleep(500)
+    loading.value = false
 }
 
 onMounted(() => {
@@ -53,7 +59,11 @@ onMounted(() => {
             </div>
         </template>
         <template #body>
-            <div class="border-gray-500 border-l">
+            <div v-if="loading" class="flex w-full grow justify-center items-center">
+                <fwb-spinner size="8" />
+            </div>
+
+            <div v-else class="border-gray-500 border-l">
                 <fwb-timeline class="border-gray-500">
                     <fwb-timeline-item v-for="entry in documentHistory">
                         <fwb-timeline-point class="text-white" />
