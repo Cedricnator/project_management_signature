@@ -10,12 +10,14 @@ import router from './router'
 import { library } from '@fortawesome/fontawesome-svg-core'
 /* import font awesome icon component */
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faStar, faPenToSquare, faRobot, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
+import { faStar, faPenToSquare, faRobot, faPaperPlane, faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons'
 /* adds icons */
 library.add(faStar)
 library.add(faPenToSquare)
 library.add(faRobot)
 library.add(faPaperPlane)
+library.add(faEnvelope)
+library.add(faLock)
 
 /* pinia */
 const pinia = createPinia()

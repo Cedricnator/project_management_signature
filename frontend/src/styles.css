@@ -9,6 +9,8 @@
 /* add Flowbite Vue directory using @source directive */
 @source "../node_modules/flowbite-vue";
 
+
+
 html,
 body,
 #app {
