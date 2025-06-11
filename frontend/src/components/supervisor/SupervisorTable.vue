@@ -4,12 +4,15 @@ import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
 import CustomButton from '../CustomButton.vue'
 import UserDocumentHistoryModal from '@/components/user/UserDocumentHistoryModal.vue'
+import SupervisorDocApproveModal from '@/components/supervisor/SupervisorDocApproveModal.vue'
+import { useDocumentStore } from '@/stores/DocumentStore'
 
 const props = defineProps<{
     documents: Document[]
 }>()
 
-const isShowModalAddDoc = ref(false)
+const documentStore = useDocumentStore()
+const isShowModalApproveDoc = ref(false)
 const isShowModal = ref(false)
 const searchQuery = ref('')
 const allDocuments = computed(() => props.documents)
@@ -68,12 +71,22 @@ function handleCloseModal() {
 }
 
 function openDocModal() {
-    isShowModalAddDoc.value = true
+    isShowModalApproveDoc.value = true
 }
 
-function handleEditDoc(document: Document) {
+async function handleDocPreview(document: Document) {
+    const currentFile = await documentStore.getFileByDocumentId(document.documentId);
+    const url = URL.createObjectURL(currentFile);
+    window.open(url, '_blank');
+}
+
+function handleApproveDoc(document: Document) {
     currentDocument.value = document
-    isShowModalAddDoc.value = true
+    isShowModalApproveDoc.value = true
+}
+
+function handleDocDownload(document: Document) {
+    
 }
 
 const showModal = computed(() => isShowModal.value)
@@ -93,11 +106,7 @@ watch(searchQuery, () => {
         @close="handleCloseModal"
         :document="currentDocument"
     />
-    <UserAddDocumentModal
-        :isOpen="isShowModalAddDoc"
-        @close="isShowModalAddDoc = false"
-        :document="currentDocument"
-    />
+    <SupervisorDocApproveModal :document="currentDocument" :isOpen="isShowModalApproveDoc" @close="isShowModalApproveDoc = false"/>
     <div class="flex flex-col h-full w-full overflow-x-auto sm:rounded-lg">
         <div class="grid grid-cols-1 md:grid-cols-2 pb-4 bg-white">
             <p class="font-semibold text-2xl">Documentos</p>
@@ -181,13 +190,20 @@ watch(searchQuery, () => {
                                 :onClick="() => handleDocumentHistoryModal(document)"
                             />
                             <CustomButton
-                                label="Aprobar"
-                                iconName="fa-solid fa-file-invoice"
-                                :onClick="() => handleEditDoc(document)"
+                                label="Ver"
+                                iconName="fa-solid fa-magnifying-glass"
+                                :onClick="() => handleDocPreview(document)"
                             />
+                            <CustomButton
+                                label="Procesar"
+                                iconName="fa-solid fa-file-invoice"
+                                :onClick="() => handleApproveDoc(document)"
+                            />
+                            
                             <CustomButton
                                 label="Descargar"
                                 iconName="fa-solid fa-file-arrow-down"
+                                :onClick="() => handleDocDownload(document)"
                             />
                         </div>
                     </td>

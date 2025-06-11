@@ -3,6 +3,7 @@ import {
     DocumentStatus,
     type Document,
     type DocumentHistory,
+    type ProcededDocument,
     type Result,
     type UploadDocumentDto,
 } from '@/types'
@@ -26,12 +27,16 @@ export const useDocumentStore = defineStore('document', {
         },
 
         async getFileByDocumentId(documentId: string) {
-            return new File([''], 'contrato.pdf')
+            return new File(['something something'], 'contrato.pdf', { type: 'application/pdf' })
         },
 
         async uploadDocument(uploadDocumentDto: UploadDocumentDto, file: File) {
             return { success: true, message: 'Documento subido con éxito' } as Result
         },
+
+        async processDocument(processedDocument: ProcededDocument) {
+            return { success: true, message: 'Documento procesado con éxito' } as Result
+        }
     },
 })
 
