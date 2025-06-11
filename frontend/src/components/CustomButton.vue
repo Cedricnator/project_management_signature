@@ -23,8 +23,8 @@ const props = withDefaults(
 const buttonClasses = computed(() => {
     const base = 'rounded-2xl px-4 py-2 w-full font-semibold transition-all duration-200 shadow-2xl'
 
-    const filled = `bg-${props.color} hover:bg-blue-800 text-white`
-    const outlined = `border border-${props.color}-600 text-${props.color}-600 hover:text-white hover:bg-primary`
+    const filled = `supervisor:bg-[var(--color-primary)] user:bg-[var(--color-primary)] user:hover:bg-[var(--color-primary-800)] supervisor:hover:bg-[var(--color-primary-800)] text-white`
+    const outlined = `border border-${props.color}-600 text-${props.color}-600 hover:text-white hover:bg-[var(--color-primary)]`
 
     return `${base} ${props.buttonType === ButtonType.filled ? filled : outlined}`
 })

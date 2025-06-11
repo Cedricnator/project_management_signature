@@ -10,12 +10,13 @@ import ToastContainer from '@/components/ToastContainer.vue'
 const sessionStore = useSessionStore()
 
 onMounted(() => {
+    document.documentElement.setAttribute('data-theme', 'supervisor');
     sessionStore.login()
 })
 </script>
 
 <template>
-    <main class="h-full bg-user-background overflow-auto">
+    <main class="h-full overflow-auto supervisor:bg-[var(--color-background)]">
         <Sidebar />
 
         <div class="flex h-full flex-col sm:ml-64">

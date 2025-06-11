@@ -10,6 +10,7 @@ import ToastContainer from '@/components/ToastContainer.vue';
 const sessionStore = useSessionStore();
 
 onMounted(() => {
+    document.documentElement.setAttribute('data-theme', 'user');
     sessionStore.login()
 }) 
 

@@ -40,8 +40,35 @@ body,
     -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+    --color-user-primary: #244DF2;
+    --color-user-primary-200: #b6d5ff;
+    --color-user-primary-800: #1b3cbd;
+    --color-user-background: #e0efff;
+    --color-supervisor-background: #ecfcf9;
+    --color-supervisor-primary: #147e6c;
+    --color-supervisor-primary-800: #106355;
+    --color-supervisor-primary-200: #bfe7e1;
+}
+
+[data-theme="user"] {
+    --color-background: var(--color-user-background);
+    --color-primary: var(--color-user-primary);
+    --color-primary-200: var(--color-user-primary-200);
+    --color-primary-800: var(--color-user-primary-800);
+}
+
+[data-theme="supervisor"] {
+    --color-background: var(--color-supervisor-background);
+    --color-primary: var(--color-supervisor-primary);
+    --color-primary-200: var(--color-supervisor-primary-200);
+    --color-primary-800: var(--color-supervisor-primary-800);
+}
+
 @theme {
     --color-user-background: #e0efff;
+    --color-supervisor-background: #EFFFEF;
+    --color-supervisor-primary: #006400;
     --color-primary: #244DF2;
     --color-primary-200: #b6d5ff;
     --primary-darker: #302c3c;
@@ -50,4 +77,16 @@ body,
     --color-text-dark: #000000;
     --accent: #f0ebd8;
     --font-text: 'Poppins', sans-serif;
+}
+
+@custom-variant supervisor {
+    &:where([data-theme="supervisor"] *) {
+        @slot;
+    }
+}
+
+@custom-variant user {
+    &:where([data-theme="user"] *) {
+        @slot;
+    }
 }
