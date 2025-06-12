@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +11,8 @@ import * as by from 'bcryptjs';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 import { SignInAuthDto } from '../auth/dto/sign-in-auth.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UserRole } from 'src/common/enum/user-role.enum';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UsersService {
@@ -64,5 +70,30 @@ export class UsersService {
       email: user.email,
       role: user.role,
     };
+  }
+
+  async updateRole(
+    email: string,
+    newRole: UserRole,
+    currentUser: JwtPayload,
+  ): Promise<void> {
+    if (email === currentUser.email) {
+      throw new BadRequestException(
+        'You cannot change your own role. Please contact an administrator.',
+      );
+    }
+    const user: User | null = await this.usersRepository.findOne({
+      where: { email: email },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    if (user.role === newRole) {
+      throw new BadRequestException(`User already has role ${newRole}`);
+    }
+
+    user.role = newRole;
+    await this.usersRepository.save(user);
   }
 }
