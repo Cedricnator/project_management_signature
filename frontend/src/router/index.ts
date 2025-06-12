@@ -1,23 +1,87 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomeView from '@/views/HomeView.vue'
+import AuthView from '@/views/AuthView.vue'
+import DashboardView from '@/views/user/UserDashboardView.vue'
+import DocumentsView from '@/views/user/UserDocumentsView.vue'
+import UserView from '@/views/UserView.vue'
+import UserHistory from '@/views/user/UserHistory.vue'
+import SupervisorView from '@/views/SupervisorView.vue'
+import SupervisorDashboardView from '@/views/supervisor/SupervisorDashboardView.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
-  ],
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: [
+        {
+            path: '/',
+            name: 'landing-page',
+            component: HomeView,
+            meta: {
+                requireAuth: false,
+            },
+        },
+        {
+            path: '/auth',
+            name: 'auth',
+            component: AuthView,
+            meta: {
+                requireAuth: false,
+            },
+        },
+        {
+            path: '/user',
+            component: UserView,
+            redirect: { path: '/user/dashboard' },
+            children: [
+                {
+                    path: 'dashboard',
+                    name: 'user-dashboard',
+                    component: DashboardView,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+                {
+                    path: 'documents',
+                    name: 'user-documents',
+                    component: DocumentsView,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+                {
+                    path: 'history',
+                    name: 'user-history',
+                    component: UserHistory,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+            ],
+        },
+        {
+            path: '/supervisor',
+            component: SupervisorView,
+            redirect: { path: '/supervisor/dashboard' },
+            children: [
+                {
+                    path: 'dashboard',
+                    name: 'supervisor-dashboard',
+                    component: SupervisorDashboardView,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+                {
+                    path: 'documents',
+                    name: 'user-documents',
+                    component: DocumentsView,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+            ],
+        },
+    ],
 })
 
 export default router
