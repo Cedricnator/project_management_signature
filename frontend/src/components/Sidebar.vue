@@ -57,16 +57,13 @@ const userType = computed(() => sessionStore.account.role)
     >
     
         <div class="flex flex-col h-full px-3 py-4 overflow-y-auto bg-white">
-            <div class="flex flex-2 min-h-40 justify-between">
-                <RouterLink class="flex items-center ps-2.5 mb-5" :to="{ name: 'user-dashboard' }">
+            <div class="flex h-3/5 justify-center items-start mb-10 border-b">
+                <RouterLink class="flex justify-center" :to="{ name: 'user-dashboard' }">
                     <img
-                        src="https://flowbite.com/docs/images/logo.svg"
-                        class="h-6 me-3 sm:h-7"
-                        alt="Flowbite Logo"
+                        src="../assets/logo_with_title.png"
+                        class="p-7 w-full h-auto object-contain"
+                        alt="Firmatic Logo"
                     />
-                    <span class="self-center text-xl font-bold whitespace-nowrap text-text-dark"
-                        >FirmaTic</span
-                    >
                 </RouterLink>
                 <div class="md:hidden">
                     <button @click="toggleSidebar">
@@ -74,7 +71,7 @@ const userType = computed(() => sessionStore.account.role)
                     </button>
                 </div>
             </div>
-            <div class="flex h-full grow flex-col">
+            <div class="flex h-full px-2 grow flex-col">
                 <ul v-if="userType == AccountRole.user" class=" space-y-2 font-medium">
                     <li>
                         <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="user-dashboard" />

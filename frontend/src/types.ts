@@ -30,6 +30,13 @@ export interface Document {
     commentary?: string | null
 }
 
+export interface ProcededDocument {
+    documentId: string
+    supervisorCommentary?: string | null
+    processedAt: Date
+    status: DocumentStatus
+}
+
 export interface UploadDocumentDto {
     name: string
     description: string
