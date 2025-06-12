@@ -33,11 +33,12 @@ export class DocumentHistory {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => File, (document) => document.history)
+  // Relaciones
+  @ManyToOne(() => File, (file) => file.history, { eager: false })
   @JoinColumn({ name: 'document_id' })
   document: File;
 
-  @ManyToOne(() => DocumentStatusType)
+  @ManyToOne(() => DocumentStatusType, { eager: false })
   @JoinColumn({ name: 'status_id' })
   status: DocumentStatusType;
 }

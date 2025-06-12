@@ -1,3 +1,4 @@
+// files/files.controller.ts
 import {
   BadRequestException,
   Body,
@@ -30,7 +31,6 @@ export class FilesController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  @UseGuards(JwtAuthGuard, RoleGuard)
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDto: UploadFileDto,
@@ -43,43 +43,57 @@ export class FilesController {
   }
 
   @Post('stream')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  streamFile(@Param('id', new ParseUUIDPipe()) id: string) {
+  streamFile(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.streamFile(id);
   }
 
+  @Get('history')
+  getAllFileHistory() {
+    return this.filesService.getFilesHistory();
+  }
+
+  @Get('status')
+  findAllStatusTypes() {
+    return this.filesService.getStatusTypes();
+  }
+
+  @Get()
+  findAll() {
+    return this.filesService.findAll();
+  }
+
+  @Get('users/:id')
+  findFilesByUser(@Param('id', ParseUUIDPipe) userId: string) {
+    return this.filesService.findFilesByUser(userId);
+  }
+
+  @Get('users/:id/history')
+  getUserFileHistory(@Param('id', ParseUUIDPipe) id: string) {
+    return this.filesService.getFileHistoryByUserId(id);
+  }
+
   @Get(':id/download')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   downloadFile(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Res({ passthrough: true }) res: Response,
   ) {
     return this.filesService.downloadFile(id, res);
   }
 
-  @Get('users/:id')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  findFilesByUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
-    return this.filesService.findFilesByUser(userId);
-  }
-
-  @Get()
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  findAll() {
-    return this.filesService.findAll();
+  @Get(':id/history')
+  getFileHistory(@Param('id', ParseUUIDPipe) id: string) {
+    return this.filesService.getFileHistoryById(id);
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.findOne(id);
   }
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
-  @UseGuards(JwtAuthGuard, RoleGuard)
   update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() updateFileDto: UpdateFileDto,
   ) {
@@ -87,20 +101,7 @@ export class FilesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.remove(id);
-  }
-
-  @Get(':id/history')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  getFileHistory(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.filesService.getFileHistory(id);
-  }
-
-  @Get('status')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  findAllStatusTypes() {
-    return this.filesService.getStatusTypes();
   }
 }
