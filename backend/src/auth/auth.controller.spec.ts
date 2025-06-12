@@ -10,23 +10,27 @@ describe('AuthController', () => {
   let controller: AuthController;
 
   const mockAuthService = {
-    autenticate: jest.fn(),
+    authenticate: jest.fn(),
   };
 
   const mockUsersService = {
     create: jest.fn(),
   };
-
+  const mockGuard = {
+    canActivate: jest.fn(() => true), // siempre deja pasar
+  };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: UsersService, useValue: mockUsersService },
-        JwtAuthGuard,
         ConfigService,
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue(mockGuard)
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
     module.get<AuthService>(AuthService);
@@ -41,11 +45,11 @@ describe('AuthController', () => {
     const input: AuthentificationInput = { email: 'john', password: '1234' };
     const expectedResponse = { access_token: 'token123' };
 
-    mockAuthService.autenticate.mockResolvedValue(expectedResponse);
+    mockAuthService.authenticate.mockResolvedValue(expectedResponse);
 
     const result = await controller.create(input);
 
-    expect(mockAuthService.autenticate).toHaveBeenCalledWith(input);
+    expect(mockAuthService.authenticate).toHaveBeenCalledWith(input);
     expect(result).toEqual(expectedResponse);
   });
 
