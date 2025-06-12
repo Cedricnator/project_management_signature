@@ -30,6 +30,7 @@ export class FilesController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard, RoleGuard)
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDto: UploadFileDto,
@@ -43,6 +44,7 @@ export class FilesController {
   }
 
   @Post('stream')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   streamFile(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.filesService.streamFile(id);
   }
@@ -53,6 +55,12 @@ export class FilesController {
     @Res({ passthrough: true }) res: Response,
   ) {
     return this.filesService.downloadFile(id, res);
+  }
+
+  @Get('users/:userId')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  findFilesByUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
+    return this.filesService.findFilesByUser(userId);
   }
 
   @Get()
