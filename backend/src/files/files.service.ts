@@ -112,7 +112,6 @@ export class FilesService {
 
     const documents = await this.documentRepository.find({
       where: { uploadedBy: user.id },
-      relations: ['currentStatus'],
     });
 
     if (!documents || documents.length === 0) {
