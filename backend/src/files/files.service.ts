@@ -104,6 +104,24 @@ export class FilesService {
     return { ...savedDocument };
   }
 
+  async findFilesByUser(userId: string): Promise<File[]> {
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    const documents = await this.documentRepository.find({
+      where: { uploadedBy: user.id },
+      relations: ['currentStatus'],
+    });
+
+    if (!documents || documents.length === 0) {
+      throw new NotFoundException(`No documents found for user ${user.email}`);
+    }
+
+    return documents;
+  }
+
   async findAll() {
     const documents = await this.documentRepository.find();
     return documents;
