@@ -9,6 +9,7 @@ import { File } from './entities/file.entity';
 import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { SecurityModule } from '../security/security.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { SecurityModule } from '../security/security.module';
       },
     }),
     SecurityModule,
+    UsersModule,
   ],
   controllers: [FilesController],
   providers: [FilesService],

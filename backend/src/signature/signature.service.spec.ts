@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SignatureService } from './signature.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { AccountDocument } from './entities/account-document.entity';
+import { SignDocument } from './entities/account-document.entity';
 import { User } from '../users/entities/user.entity';
 import { FilesService } from '../files/files.service';
 
@@ -13,7 +13,7 @@ describe('SignatureService', () => {
       providers: [
         SignatureService,
         {
-          provide: getRepositoryToken(AccountDocument),
+          provide: getRepositoryToken(SignDocument),
           useValue: {
             findOne: jest.fn(),
             find: jest.fn(),

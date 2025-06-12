@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { SignDocumentDto } from './dto/sign-document.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AccountDocument } from './entities/account-document.entity';
+import { SignDocument } from './entities/account-document.entity';
 import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { createHash } from 'crypto';
@@ -16,8 +16,8 @@ import { UserRole } from '../common/enum/user-role.enum';
 @Injectable()
 export class SignatureService {
   constructor(
-    @InjectRepository(AccountDocument)
-    private readonly accountDocumentRepository: Repository<AccountDocument>,
+    @InjectRepository(SignDocument)
+    private readonly accountDocumentRepository: Repository<SignDocument>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly filesService: FilesService,
@@ -115,7 +115,7 @@ export class SignatureService {
 
     await this.filesService.changeFileStatus(
       documentId,
-      '01974b23-fecc-7863-b7ac-b64554d34cde', // 'signed' status ID
+      '01974b23-d84d-7319-95b3-02322c982216', // 'signed' status ID
       `Document signed by supervisor: ${user!.email}`,
       userId,
     );

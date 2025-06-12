@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { DocumentStatusType } from './document_status_type.entity';
 import { DocumentHistory } from './document_history.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity('document')
 export class File {
@@ -49,9 +50,16 @@ export class File {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  @Column({ name: 'uploaded_by', type: 'uuid', nullable: false })
+  uploadedBy: string;
+
   @ManyToOne(() => DocumentStatusType)
   @JoinColumn({ name: 'current_status_id' })
   currentStatus: DocumentStatusType;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'uploaded_by' })
+  uploadBy: User;
 
   @OneToMany(() => DocumentHistory, (history) => history.documentId)
   history: DocumentHistory[];
