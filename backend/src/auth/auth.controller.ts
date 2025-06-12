@@ -26,7 +26,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   create(@Body() input: AuthentificationInput) {
-    return this.authService.autenticate(input);
+    return this.authService.authenticate(input);
   }
 
   @ApiProperty({ title: 'Register a new user' })
