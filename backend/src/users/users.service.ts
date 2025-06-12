@@ -55,6 +55,22 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
+  async findByEmail(email: string) {
+    const user = await this.usersRepository.findOneBy({ email });
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
   async findAll(): Promise<UserResponseDto[]> {
     // Fetch all users and map them to UserResponseDto
     return this.usersRepository
