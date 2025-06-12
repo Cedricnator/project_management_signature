@@ -65,7 +65,6 @@ const handleSubmit = async () => {
         supervisorCommentary: supervisorCommentary.value || null,
         status: docStatus,
     }
-    console.log(processedDocument)
     const result = await documentStore.processDocument(processedDocument)
     const toastType = result.success ? ToastType.success : ToastType.warning
     toastStore.addToast(toastType, result.message)
@@ -216,6 +215,7 @@ const handleSubmit = async () => {
                                 label="Rechazar documento"
                                 iconName="fa-solid fa-circle-xmark"
                                 @click="() => (actionClicked = 'reject')"
+                                color="bg-red-800"
                             />
                         </div>
                     </div>

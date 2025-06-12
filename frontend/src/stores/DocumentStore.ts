@@ -7,6 +7,7 @@ import {
     type Result,
     type UploadDocumentDto,
 } from '@/types'
+import { logger } from '@/utils/logger'
 import { defineStore } from 'pinia'
 
 export const useDocumentStore = defineStore('document', {
@@ -35,8 +36,9 @@ export const useDocumentStore = defineStore('document', {
         },
 
         async processDocument(processedDocument: ProcededDocument) {
+            logger.info('[DOC_STORE]', 'Processed document: ', processedDocument)
             return { success: true, message: 'Documento procesado con éxito' } as Result
-        }
+        },
     },
 })
 
