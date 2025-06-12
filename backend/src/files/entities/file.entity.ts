@@ -53,14 +53,16 @@ export class File {
   @Column({ name: 'uploaded_by', type: 'uuid', nullable: false })
   uploadedBy: string;
 
-  @ManyToOne(() => DocumentStatusType)
+  @ManyToOne(() => DocumentStatusType, { eager: false })
   @JoinColumn({ name: 'current_status_id' })
   currentStatus: DocumentStatusType;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { eager: false })
   @JoinColumn({ name: 'uploaded_by' })
   uploadBy: User;
 
-  @OneToMany(() => DocumentHistory, (history) => history.documentId)
+  @OneToMany(() => DocumentHistory, (history) => history.documentId, {
+    cascade: false,
+  })
   history: DocumentHistory[];
 }

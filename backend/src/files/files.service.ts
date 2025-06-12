@@ -138,6 +138,39 @@ export class FilesService {
     return document;
   }
 
+  async getFileHistoryByUserId(userId: string) {
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    const documents = await this.documentRepository.find({
+      where: { uploadedBy: user.id },
+    });
+
+    const documentHistory: DocumentHistory[] = [];
+
+    for (const document of documents) {
+      const history = await this.documentHistoryRepository.findOne({
+        where: { documentId: document.id },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (!history) {
+        // Skip if no history found for this document
+        continue;
+      } else {
+        documentHistory.push(history);
+      }
+    }
+
+    return documentHistory;
+  }
+
+  async getFilesHistory() {
+    return await this.documentHistoryRepository.find();
+  }
+
   async downloadFile(id: string, res: Response) {
     const document = await this.findOne(id);
 
@@ -333,7 +366,7 @@ export class FilesService {
     };
   }
 
-  async getFileHistory(id: string) {
+  async getFileHistoryById(id: string) {
     const document = await this.findOne(id);
 
     const history = await this.documentHistoryRepository.find({
