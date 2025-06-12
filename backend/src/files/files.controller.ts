@@ -1,17 +1,17 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseInterceptors,
-  UploadedFile,
-  ParseUUIDPipe,
-  Res,
   BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -20,7 +20,7 @@ import { Response } from 'express';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { RoleGuard } from '../security/guards/role.guard';
 import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from 'jsonwebtoken';
 
 @Controller('files')
