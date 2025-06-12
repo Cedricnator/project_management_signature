@@ -16,6 +16,7 @@ import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { createHash } from 'crypto';
 import { UploadFileDto } from './dto/upload-file.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class FilesService {
@@ -26,6 +27,7 @@ export class FilesService {
     private documentStatusRepository: Repository<DocumentStatusType>,
     @InjectRepository(DocumentHistory)
     private documentHistoryRepository: Repository<DocumentHistory>,
+    private readonly userService: UsersService,
   ) {}
 
   private async findDocumentStatus(id: string): Promise<DocumentStatusType> {
@@ -43,13 +45,23 @@ export class FilesService {
     }
   }
 
-  async uploadFile(file: Express.Multer.File, uploadFileDto: UploadFileDto) {
+  async uploadFile(
+    file: Express.Multer.File,
+    uploadFileDto: UploadFileDto,
+    userEmail: string,
+  ) {
     if (!file) {
       throw new BadRequestException('No file provided!');
     }
 
     if (!file.buffer && !file.path) {
       throw new BadRequestException('File data is missing');
+    }
+
+    const user = await this.userService.findOneByEmail(userEmail);
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${userEmail} not found`);
     }
 
     const draftStatus = await this.findDocumentStatus(
@@ -73,6 +85,7 @@ export class FilesService {
       mimetype: file.mimetype,
       originalFilename: file.originalname,
       filename: file.filename,
+      uploadedBy: user.id,
       fileHash: documentHash,
     });
 
@@ -81,7 +94,7 @@ export class FilesService {
     const historyEntry = this.documentHistoryRepository.create({
       documentId: savedDocument.id,
       statusId: draftStatus.id,
-      changedBy: '01974b59-5913-713e-ae09-5a11333ab37e', //TODO: SET dynamic user
+      changedBy: user.id,
       comment: 'File uploaded',
       createdAt: new Date(),
     });

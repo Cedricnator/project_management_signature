@@ -43,9 +43,11 @@ CREATE TABLE document (
   file_hash VARCHAR(255) NOT NULL UNIQUE,
   original_name VARCHAR(255) NOT NULL,
   current_status_id UUID NOT NULL, 
+  uploaded_by UUID NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  FOREIGN KEY (current_status_id) REFERENCES document_status_type(id) 
+  FOREIGN KEY (current_status_id) REFERENCES document_status_type(id),
+  FOREIGN KEY (uploaded_by) REFERENCES account(id) ON DELETE CASCADE
 );
 
 -- For tracking document status changes
@@ -62,8 +64,8 @@ CREATE TABLE document_history (
   FOREIGN KEY (changed_by) REFERENCES account(id)
 );
 
--- Account-Document relationship table
-CREATE TABLE account_document (
+-- Signed-Document relationship table
+CREATE TABLE signed_document (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   account_id UUID NOT NULL, 
   document_id UUID NOT NULL, 
@@ -81,7 +83,6 @@ INSERT INTO document_status_type (id, status) VALUES
 ('01974b23-bc2f-7e5f-a9d0-73a5774d2778', 'pending_review'),
 ('01974b23-d84d-7319-95b3-02322c982216', 'approved'),
 ('01974b23-e943-7308-8185-1556429b9ff1', 'rejected'),
-('01974b23-fecc-7863-b7ac-b64554d34cde', 'signed'),
 ('01974b24-093b-7014-aa21-9f964b822156', 'deleted');
 
 -- Insert testing users
@@ -95,7 +96,7 @@ INSERT INTO account (id, email, first_name, last_name, password, role) VALUES
 
 -- Indexes for better performance
 CREATE INDEX idx_account_email ON account(email);
-CREATE INDEX idx_account_document_account_id ON account_document(account_id);
-CREATE INDEX idx_account_document_document_id ON account_document(document_id);
+CREATE INDEX idx_signed_document_account_id ON signed_document(account_id);
+CREATE INDEX idx_signed_document_document_id ON signed_document(document_id);
 CREATE INDEX idx_document_history_document_id ON document_history(document_id);
 CREATE INDEX idx_document_history_created_at ON document_history(created_at);

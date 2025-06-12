@@ -8,8 +8,8 @@ import {
 import { File } from '../../files/entities/file.entity';
 import { User } from '../../users/entities/user.entity';
 
-@Entity('account_document')
-export class AccountDocument {
+@Entity('signed_document')
+export class SignDocument {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

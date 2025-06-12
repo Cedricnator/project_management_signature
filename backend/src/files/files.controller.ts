@@ -21,7 +21,7 @@ import { UploadFileDto } from './dto/upload-file.dto';
 import { RoleGuard } from '../security/guards/role.guard';
 import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -35,11 +35,11 @@ export class FilesController {
     @Body() uploadFileDto: UploadFileDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    console.log('Current User:', user);
+    console.log('CURRENT USER', user);
     if (!file) {
       throw new BadRequestException('File is required');
     }
-    return this.filesService.uploadFile(file, uploadFileDto);
+    return this.filesService.uploadFile(file, uploadFileDto, user.email);
   }
 
   @Post('stream')
