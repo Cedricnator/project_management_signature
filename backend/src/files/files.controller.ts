@@ -36,7 +36,6 @@ export class FilesController {
     @Body() uploadFileDto: UploadFileDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    console.log('CURRENT USER', user);
     if (!file) {
       throw new BadRequestException('File is required');
     }
@@ -50,6 +49,7 @@ export class FilesController {
   }
 
   @Get(':id/download')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   downloadFile(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res({ passthrough: true }) res: Response,
@@ -57,24 +57,27 @@ export class FilesController {
     return this.filesService.downloadFile(id, res);
   }
 
-  @Get('users/:userId')
+  @Get('users/:id')
   @UseGuards(JwtAuthGuard, RoleGuard)
   findFilesByUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
     return this.filesService.findFilesByUser(userId);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RoleGuard)
   findAll() {
     return this.filesService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.filesService.findOne(id);
   }
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard, RoleGuard)
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -84,16 +87,19 @@ export class FilesController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.filesService.remove(id);
   }
 
   @Get(':id/history')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   getFileHistory(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.filesService.getFileHistory(id);
   }
 
   @Get('status')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   findAllStatusTypes() {
     return this.filesService.getStatusTypes();
   }
