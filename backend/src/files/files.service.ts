@@ -88,7 +88,7 @@ export class FilesService {
 
     await this.documentHistoryRepository.save(historyEntry);
 
-    return { document: savedDocument };
+    return { ...savedDocument };
   }
 
   async findAll() {
