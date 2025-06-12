@@ -29,7 +29,6 @@ onMounted(() => {
                 </div>
             </div>
             <div class="flex grow mt-4 overflow-auto">
-                <ToastContainer />
                 <RouterView />
             </div>
         </div>

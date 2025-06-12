@@ -20,7 +20,7 @@ const props = withDefaults(
     <div>
         <button
             @click="router.push({name: props.to})"
-            class="flex w-full justify-start items-center p-2 rounded-lg hover:bg-primary hover:text-text-white group border-b-1" 
+            class="flex w-full justify-start items-center p-2 rounded-lg hover:bg-primary hover:text-text-white group border-b-1 shadow-xl/10" 
             :class="{'text-red-800': danger, 'text-text-dark': !danger}"
         >
             <div class="flex justify-center flex-1">
