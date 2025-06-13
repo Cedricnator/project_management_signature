@@ -19,6 +19,7 @@ import { UploadFileDto } from './dto/upload-file.dto';
 import { UsersService } from '../users/users.service';
 import { DocumentHistoryModified } from './interfaces/document-historym.interface';
 import { formatFriendlyDate } from '../common/helpers/format-date.helper';
+import { DocumentStatus } from './enum/document-status.enum';
 
 @Injectable()
 export class FilesService {
@@ -67,7 +68,7 @@ export class FilesService {
     }
 
     const draftStatus = await this.findDocumentStatus(
-      '01974b23-bc2f-7e5f-a9d0-73a5774d2778',
+      DocumentStatus.PENDING_REVIEW,
     );
 
     if (!draftStatus) {
@@ -262,11 +263,11 @@ export class FilesService {
     }
 
     const allowedStatuses = [
-      '01974b23-e943-7308-8185-1556429b9ff1', // rejected
-      '01974b24-bc2f-7e5f-a9d0-73a5774d2778', // pending_review
+      DocumentStatus.REJECTED, // rejected
+      DocumentStatus.PENDING_REVIEW, // pending_review
     ];
 
-    if (!allowedStatuses.includes(document.currentStatusId)) {
+    if (!allowedStatuses.includes(document.currentStatusId as DocumentStatus)) {
       throw new BadRequestException(
         'Document can only be updated if it is in a rejected or pending review status',
       );
@@ -432,13 +433,15 @@ export class FilesService {
 
   verifyFileIntegrity(document: File): boolean {
     try {
-      if (document.fileHash) {
-        const currentHash = createHash('sha256')
-          .update(document.filePath)
-          .digest('hex');
-        return currentHash === document.fileHash;
-      }
-      return false;
+      if(document.fileHash || !document.filePath) return false;
+
+      const fileBuffer = readFileSync(document.filePath);
+      
+      const currentHash = createHash('sha256')
+        .update(fileBuffer)
+        .digest('hex');
+
+      return currentHash === document.fileHash;
     } catch (error) {
       console.error('Error verifying file integrity:', error);
       throw new InternalServerErrorException('Could not verify file integrity');
