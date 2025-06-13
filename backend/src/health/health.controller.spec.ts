@@ -16,4 +16,8 @@ describe('HealthController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should return "OK" on health check', () => {
+    expect(controller.check()).toEqual({ status: 'OK', message: 'Service is OK' });
+  });
 });
