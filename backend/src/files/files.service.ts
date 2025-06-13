@@ -79,7 +79,7 @@ export class FilesService {
       .digest('hex');
 
     const document = this.documentRepository.create({
-      name: file.originalname,
+      name: uploadFileDto.name,
       description: uploadFileDto.description || '',
       currentStatusId: draftStatus.id,
       filePath: file.path,
@@ -97,7 +97,9 @@ export class FilesService {
       documentId: savedDocument.id,
       statusId: draftStatus.id,
       changedBy: user.id,
-      comment: 'File uploaded',
+      comment:
+        uploadFileDto.comment ||
+        `Documento subido el ${formatFriendlyDate(new Date())}`,
       createdAt: new Date(),
     });
 
