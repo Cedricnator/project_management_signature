@@ -22,7 +22,7 @@ import { UploadFileDto } from './dto/upload-file.dto';
 import { RoleGuard } from '../security/guards/role.guard';
 import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)

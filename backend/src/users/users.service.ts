@@ -11,7 +11,7 @@ import * as by from 'bcryptjs';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 import { SignInAuthDto } from '../auth/dto/sign-in-auth.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { UserRole } from 'src/common/enum/user-role.enum';
+import { UserRole } from '../common/enum/user-role.enum';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @Injectable()

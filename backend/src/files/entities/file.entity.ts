@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { DocumentStatusType } from './document_status_type.entity';
 import { DocumentHistory } from './document_history.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('document')
 export class File {

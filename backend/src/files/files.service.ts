@@ -16,12 +16,11 @@ import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { createHash } from 'crypto';
 import { UploadFileDto } from './dto/upload-file.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 export interface DocumentHistoryModified {
   id: string;
   documentId: string;
-  documentName: string;
   statusId: string;
   changedBy: string;
   comment: string;
@@ -181,7 +180,6 @@ export class FilesService {
           comment: history.comment,
           createdAt: history.createdAt,
           updatedAt: history.updatedAt,
-          documentName: document.name,
         };
         documentHistory.push(transformedHistory);
       }
@@ -191,7 +189,31 @@ export class FilesService {
   }
 
   async getFilesHistory() {
-    return await this.documentHistoryRepository.find();
+    const documentsHistory = await this.documentHistoryRepository.find();
+    const transformedsHistory: DocumentHistoryModified[] = [];
+
+    for (const documentHistory of documentsHistory) {
+      const user = await this.userService.findOne(documentHistory.changedBy);
+
+      if (!user) {
+        throw new NotFoundException(
+          `User with id ${documentHistory.changedBy} not found`,
+        );
+      }
+
+      const transformedHistory: DocumentHistoryModified = {
+        id: documentHistory.id,
+        documentId: documentHistory.documentId,
+        statusId: documentHistory.statusId,
+        changedBy: user.id ? `${user.firstName} ${user.lastName}` : user.id,
+        comment: documentHistory.comment,
+        createdAt: documentHistory.createdAt,
+        updatedAt: documentHistory.updatedAt,
+      };
+      transformedsHistory.push(transformedHistory);
+    }
+
+    return transformedsHistory;
   }
 
   async downloadFile(id: string, res: Response) {
