@@ -12,6 +12,7 @@ import { createHash } from 'crypto';
 import { FilesService } from '../files/files.service';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/enum/user-role.enum';
+import { DocumentStatus } from '../files/enum/document-status.enum';
 
 @Injectable()
 export class SignatureService {
@@ -35,9 +36,7 @@ export class SignatureService {
       return { isValid: false, message: 'User is not a supervisor' };
     }
 
-    const pendingReviewStatus = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
-
-    if (document.currentStatusId !== pendingReviewStatus) {
+    if (document.currentStatusId !== DocumentStatus.PENDING_REVIEW) {
       return {
         isValid: false,
         message: 'Document is not in a valid status for signing',
@@ -115,7 +114,7 @@ export class SignatureService {
 
     await this.filesService.changeFileStatus(
       documentId,
-      '01974b23-d84d-7319-95b3-02322c982216', // 'signed' status ID
+      DocumentStatus.SIGNED, 
       `Document signed by supervisor: ${user!.email}`,
       userId,
     );
