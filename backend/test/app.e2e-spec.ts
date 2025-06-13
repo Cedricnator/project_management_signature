@@ -15,11 +15,11 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/health (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/health')
       .expect(200)
-      .expect('Hello World!');
+      .expect('{"status":"OK","message":"Service is OK"}');
   });
   afterAll(async () => {
     await app.close();
