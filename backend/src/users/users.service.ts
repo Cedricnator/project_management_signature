@@ -112,4 +112,16 @@ export class UsersService {
     user.role = newRole;
     await this.usersRepository.save(user);
   }
+
+  deleteByEmail(email: string): Promise<void> {
+    return this.usersRepository
+      .delete({ email: email })
+      .then(() => {
+        return;
+      })
+      .catch(() => {
+        // Handle any errors that occur during deletion
+        throw new NotFoundException(`User with email ${email} not found`);
+      });
+  }
 }

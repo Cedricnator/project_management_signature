@@ -17,9 +17,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async authenticate(
-    authInput: AuthentificationInput,
-  ): Promise<AuthResult | undefined> {
+  async authenticate(authInput: AuthentificationInput): Promise<AuthResult> {
     const user = await this.validateUser(authInput);
     if (!user) throw new UnauthorizedException('Unauthorized');
     return this.signIn(user);
