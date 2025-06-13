@@ -1,4 +1,3 @@
-// files/files.controller.ts
 import {
   BadRequestException,
   Body,
@@ -95,9 +94,10 @@ export class FilesController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload,
     @Body() updateFileDto: UpdateFileDto,
   ) {
-    return this.filesService.update(id, file, updateFileDto);
+    return this.filesService.update(id, file, user.email, updateFileDto);
   }
 
   @Delete(':id')
