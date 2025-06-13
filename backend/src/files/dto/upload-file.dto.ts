@@ -1,8 +1,15 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsString, MaxLength } from 'class-validator';
 
 export class UploadFileDto {
-  @IsOptional()
+  @IsString()
+  @MaxLength(255, { message: 'Name cannot exceed 255 characters' })
+  name: string;
+
   @IsString()
   @MaxLength(255, { message: 'Description cannot exceed 255 characters' })
-  description?: string;
+  description: string;
+
+  @IsString()
+  @MaxLength(500, { message: 'File path cannot exceed 500 characters' })
+  comment?: string;
 }

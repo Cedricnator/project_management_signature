@@ -1,4 +1,3 @@
-// files/files.controller.ts
 import {
   BadRequestException,
   Body,
@@ -22,7 +21,7 @@ import { UploadFileDto } from './dto/upload-file.dto';
 import { RoleGuard } from '../security/guards/role.guard';
 import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -95,9 +94,10 @@ export class FilesController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload,
     @Body() updateFileDto: UpdateFileDto,
   ) {
-    return this.filesService.update(id, file, updateFileDto);
+    return this.filesService.update(id, file, user.email, updateFileDto);
   }
 
   @Delete(':id')
