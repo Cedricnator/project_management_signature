@@ -6,7 +6,6 @@ import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { SignatureModule } from './signature/signature.module';
 import { DatabaseModule } from './common/database.module';
-import { CommonModule } from './common/common.module';
 import { SecurityModule } from './security/security.module';
 
 @Module({
@@ -17,7 +16,6 @@ import { SecurityModule } from './security/security.module';
     AuthModule,
     SignatureModule,
     UsersModule,
-    CommonModule,
     SecurityModule,
   ],
   controllers: [AppController],
