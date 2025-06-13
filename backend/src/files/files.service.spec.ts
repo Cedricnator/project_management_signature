@@ -5,10 +5,12 @@ import { File } from './entities/file.entity';
 import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { Repository } from 'typeorm';
+import { UsersService } from '../users/users.service';
 
 describe('FilesService', () => {
   let service: FilesService;
 
+  let mockUserService: Partial<UsersService>;
   let mockFileRepo: Partial<Repository<File>>;
   let mockStatusRepo: Partial<Repository<DocumentStatusType>>;
   let mockHistoryRepo: Partial<Repository<DocumentHistory>>;
@@ -20,6 +22,7 @@ describe('FilesService', () => {
       create: jest.fn(),
       find: jest.fn(),
       remove: jest.fn(),
+      createQueryBuilder: jest.fn(),
     };
 
     mockStatusRepo = {
@@ -31,6 +34,16 @@ describe('FilesService', () => {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
+      findOne: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
+
+    mockUserService = {
+      findOne: jest.fn(),
+      findOneByEmail: jest.fn(),
+      findAll: jest.fn(),
+      create: jest.fn(),
+      updateRole: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -48,6 +61,10 @@ describe('FilesService', () => {
           provide: getRepositoryToken(DocumentHistory),
           useValue: mockHistoryRepo,
         },
+        {
+          provide: UsersService,
+          useValue: mockUserService,
+        },
       ],
     }).compile();
 
@@ -64,6 +81,9 @@ describe('FilesService', () => {
     await expect(service.findOne('fake-id')).rejects.toThrow(
       'Document with id fake-id not found',
     );
+    await expect(
+      service.getFileHistoryByUserId('fake-user-id'),
+    ).rejects.toThrow('User with id fake-user-id not found');
   });
 
   it('should return a document if found', async () => {

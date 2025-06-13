@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -17,6 +19,7 @@ import { RoleGuard } from '../security/guards/role.guard';
 import { UpdateUserRoleDto } from './dto/update-rol.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -36,6 +39,11 @@ export class UsersController {
   @Get()
   @Role(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RoleGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all users',
+    type: [UserResponseDto],
+  })
   findAll(): Promise<UserResponseDto[]> {
     return this.usersService.findAll();
   }
@@ -49,5 +57,13 @@ export class UsersController {
   ) {
     await this.usersService.updateRole(dto.email, dto.newRole, user);
     return { message: `User role updated to ${dto.newRole}` };
+  }
+
+  @Delete('email/:email')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role(UserRole.ADMIN)
+  @HttpCode(204)
+  deleteUser(@Param('email') email: string) {
+    return this.usersService.deleteByEmail(email);
   }
 }

@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from 'jsonwebtoken';
 import { ApiBearerAuth, ApiProperty, ApiResponse } from '@nestjs/swagger';
+import { AuthResult } from './dto/auth-result-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +26,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  create(@Body() input: AuthentificationInput) {
+  create(@Body() input: AuthentificationInput): Promise<AuthResult> {
     return this.authService.authenticate(input);
   }
 

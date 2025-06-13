@@ -16,18 +16,9 @@ import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { createHash } from 'crypto';
 import { UploadFileDto } from './dto/upload-file.dto';
-import { UsersService } from 'src/users/users.service';
-
-export interface DocumentHistoryModified {
-  id: string;
-  documentId: string;
-  documentName: string;
-  statusId: string;
-  changedBy: string;
-  comment: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { UsersService } from '../users/users.service';
+import { DocumentHistoryModified } from './interfaces/document-historym.interface';
+import { formatFriendlyDate } from '../common/helpers/format-date.helper';
 
 @Injectable()
 export class FilesService {
@@ -88,7 +79,7 @@ export class FilesService {
       .digest('hex');
 
     const document = this.documentRepository.create({
-      name: file.originalname,
+      name: uploadFileDto.name,
       description: uploadFileDto.description || '',
       currentStatusId: draftStatus.id,
       filePath: file.path,
@@ -106,7 +97,9 @@ export class FilesService {
       documentId: savedDocument.id,
       statusId: draftStatus.id,
       changedBy: user.id,
-      comment: 'File uploaded',
+      comment:
+        uploadFileDto.comment ||
+        `Documento subido el ${formatFriendlyDate(new Date())}`,
       createdAt: new Date(),
     });
 
@@ -181,7 +174,6 @@ export class FilesService {
           comment: history.comment,
           createdAt: history.createdAt,
           updatedAt: history.updatedAt,
-          documentName: document.name,
         };
         documentHistory.push(transformedHistory);
       }
@@ -191,7 +183,31 @@ export class FilesService {
   }
 
   async getFilesHistory() {
-    return await this.documentHistoryRepository.find();
+    const documentsHistory = await this.documentHistoryRepository.find();
+    const transformedsHistory: DocumentHistoryModified[] = [];
+
+    for (const documentHistory of documentsHistory) {
+      const user = await this.userService.findOne(documentHistory.changedBy);
+
+      if (!user) {
+        throw new NotFoundException(
+          `User with id ${documentHistory.changedBy} not found`,
+        );
+      }
+
+      const transformedHistory: DocumentHistoryModified = {
+        id: documentHistory.id,
+        documentId: documentHistory.documentId,
+        statusId: documentHistory.statusId,
+        changedBy: user.id ? `${user.firstName} ${user.lastName}` : user.id,
+        comment: documentHistory.comment,
+        createdAt: documentHistory.createdAt,
+        updatedAt: documentHistory.updatedAt,
+      };
+      transformedsHistory.push(transformedHistory);
+    }
+
+    return transformedsHistory;
   }
 
   async downloadFile(id: string, res: Response) {
@@ -235,9 +251,15 @@ export class FilesService {
   async update(
     id: string,
     newFile: Express.Multer.File,
+    userEmail: string,
     updateFileDto?: UpdateFileDto,
   ) {
     const document = await this.findOne(id);
+    const user = await this.userService.findOneByEmail(userEmail);
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${userEmail} not found`);
+    }
 
     const allowedStatuses = [
       '01974b23-e943-7308-8185-1556429b9ff1', // rejected
@@ -289,25 +311,24 @@ export class FilesService {
 
     const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
     if (document.currentStatusId === '01974b23-e943-7308-8185-1556429b9ff1') {
-      // Si estaba rechazado
+      // If the document was rejected, set it to pending review
       document.currentStatusId = pendingReviewStatusId;
     }
 
     const updatedDocument = await this.documentRepository.save(document);
 
-    // Crear entrada en historial
+    // Create history entry for the update
     const historyEntry = this.documentHistoryRepository.create({
       documentId: document.id,
       statusId: document.currentStatusId,
-      changedBy: '01974b59-5913-713e-ae09-5a11333ab37e', // TODO  SET dynamic user
-      comment: 'Document file updated',
+      changedBy: user.id,
+      comment: `Documento actualizado el ${formatFriendlyDate(new Date())}`,
     });
 
     await this.documentHistoryRepository.save(historyEntry);
 
     return {
-      message: 'File updated successfully',
-      document: updatedDocument,
+      ...updatedDocument,
     };
   }
 
@@ -330,27 +351,9 @@ export class FilesService {
     await this.documentRepository.remove(document);
 
     return {
-      message: 'File deleted successfully',
-      deletedDocument: {
-        id: document.id,
-        documentName: document.name,
-      },
+      id: document.id,
+      documentName: document.name,
     };
-  }
-
-  verifyFileIntegrity(document: File): boolean {
-    try {
-      if (document.fileHash) {
-        const currentHash = createHash('sha256')
-          .update(document.filePath)
-          .digest('hex');
-        return currentHash === document.fileHash;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error verifying file integrity:', error);
-      throw new InternalServerErrorException('Could not verify file integrity');
-    }
   }
 
   async changeFileStatus(
@@ -424,6 +427,21 @@ export class FilesService {
       throw new InternalServerErrorException(
         'Could not fetch document status types',
       );
+    }
+  }
+
+  verifyFileIntegrity(document: File): boolean {
+    try {
+      if (document.fileHash) {
+        const currentHash = createHash('sha256')
+          .update(document.filePath)
+          .digest('hex');
+        return currentHash === document.fileHash;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error verifying file integrity:', error);
+      throw new InternalServerErrorException('Could not verify file integrity');
     }
   }
 }
