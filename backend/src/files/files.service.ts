@@ -18,6 +18,17 @@ import { createHash } from 'crypto';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { UsersService } from 'src/users/users.service';
 
+export interface DocumentHistoryModified {
+  id: string;
+  documentId: string;
+  documentName: string;
+  statusId: string;
+  changedBy: string;
+  comment: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 @Injectable()
 export class FilesService {
   constructor(
@@ -148,7 +159,7 @@ export class FilesService {
       where: { uploadedBy: user.id },
     });
 
-    const documentHistory: DocumentHistory[] = [];
+    const documentHistory: DocumentHistoryModified[] = [];
 
     for (const document of documents) {
       const history = await this.documentHistoryRepository.findOne({
@@ -160,7 +171,19 @@ export class FilesService {
         // Skip if no history found for this document
         continue;
       } else {
-        documentHistory.push(history);
+        const transformedHistory: DocumentHistoryModified = {
+          id: history.id,
+          documentId: history.documentId,
+          statusId: history.statusId,
+          changedBy: user.id
+            ? `${user.firstName} ${user.lastName}`
+            : 'Unknown User',
+          comment: history.comment,
+          createdAt: history.createdAt,
+          updatedAt: history.updatedAt,
+          documentName: document.name,
+        };
+        documentHistory.push(transformedHistory);
       }
     }
 
