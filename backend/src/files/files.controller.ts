@@ -23,6 +23,8 @@ import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { ChangeFileStatusDto } from './dto/change-status.dto';
+import { Role } from '../common/decorators/role.decorator';
+import { UserRole } from '../common/enum/user-role.enum';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -31,6 +33,7 @@ export class FilesController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard)
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDto: UploadFileDto,
@@ -43,36 +46,43 @@ export class FilesController {
   }
 
   @Post('stream')
+  @UseGuards(JwtAuthGuard)
   streamFile(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.streamFile(id);
   }
 
   @Get('history')
+  @UseGuards(JwtAuthGuard)
   getAllFileHistory() {
     return this.filesService.getFilesHistory();
   }
 
   @Get('status')
+  @UseGuards(JwtAuthGuard)
   findAllStatusTypes() {
     return this.filesService.getStatusTypes();
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.filesService.findAll();
   }
 
   @Get('users/:id')
+  @UseGuards(JwtAuthGuard)
   findFilesByUser(@Param('id', ParseUUIDPipe) userId: string) {
     return this.filesService.findFilesByUser(userId);
   }
 
   @Get('users/:id/history')
+  @UseGuards(JwtAuthGuard)
   getUserFileHistory(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.getFileHistoryByUserId(id);
   }
 
   @Get(':id/download')
+  @UseGuards(JwtAuthGuard)
   downloadFile(
     @Param('id', ParseUUIDPipe) id: string,
     @Res({ passthrough: true }) res: Response,
@@ -81,16 +91,19 @@ export class FilesController {
   }
 
   @Get(':id/history')
+  @UseGuards(JwtAuthGuard)
   getFileHistory(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.getFileHistoryById(id);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -102,6 +115,8 @@ export class FilesController {
   }
 
   @Delete(':id')
+  @Role(UserRole.USER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.remove(id);
   }
