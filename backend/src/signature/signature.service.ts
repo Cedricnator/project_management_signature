@@ -141,7 +141,7 @@ export class SignatureService {
     try {
       const signature = await this.findOne(signatureId);
       const document = await this.filesService.findOne(signature.documentId);
-
+ 
       // Verify if the document not has been modified
       const isFileValid = this.filesService.verifyFileIntegrity(document);
       if (!isFileValid) {

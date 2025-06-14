@@ -360,10 +360,16 @@ export class FilesService {
   async changeFileStatus(
     id: string,
     statusId: string,
+    changedBy: string,
     comment?: string,
-    changedBy?: string,
   ) {
     const document = await this.findOne(id);
+
+    const user = await this.userService.findOneByEmail(changedBy);
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${changedBy} not found`);
+    }
 
     const newStatus = await this.documentStatusRepository.findOne({
       where: { id: statusId },
@@ -381,15 +387,16 @@ export class FilesService {
     const historyEntry = this.documentHistoryRepository.create({
       documentId: document.id,
       statusId: statusId,
-      changedBy: changedBy,
+      changedBy: user.id,
       comment: comment || `Estado cambiado a: ${newStatus.status}`,
     });
 
     await this.documentHistoryRepository.save(historyEntry);
 
+    const updatedDocument = await this.findOne(id);
+    
     return {
-      message: `Document status updated to ${newStatus.status}`,
-      document: await this.findOne(id),
+      ...updatedDocument,
     };
   }
 

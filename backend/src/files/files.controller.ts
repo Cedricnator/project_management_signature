@@ -22,6 +22,7 @@ import { RoleGuard } from '../security/guards/role.guard';
 import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { ChangeFileStatusDto } from './dto/change-status.dto';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -103,5 +104,20 @@ export class FilesController {
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.remove(id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard)
+  async changeFileStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() changeFileStatusDto: ChangeFileStatusDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.filesService.changeFileStatus(
+      id, 
+      changeFileStatusDto.statusId, 
+      user.email, 
+      changeFileStatusDto.comment,
+    );
   }
 }
