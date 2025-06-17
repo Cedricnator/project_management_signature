@@ -1,3 +1,5 @@
+import type { ToastType } from "./stores/ToastStore"
+
 export enum AccountRole {
     user = 'Usuario',
     admin = 'Administrador',
@@ -18,6 +20,7 @@ export enum DocumentStatus {
     rejected = 'Rechazado',
     signed = 'Firmado',
     deleted = 'Eliminado',
+    pending_review = 'Por validar',
 }
 
 export interface Document {
@@ -61,4 +64,5 @@ export interface Result<T = void> {
     success: boolean,
     message: string,
     data?: T
+    type: ToastType
 }
