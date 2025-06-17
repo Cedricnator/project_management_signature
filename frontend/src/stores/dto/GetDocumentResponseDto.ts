@@ -29,7 +29,7 @@ export function documentResponseToDocument(documentResponse: GetDocumentResponse
     return document
 }
 
-function parseDocumentStatus(documentStatus: string) {
+export function parseDocumentStatus(documentStatus: string) {
     switch (documentStatus) {
         case '01974b23-bc2f-7e5f-a9d0-73a5774d2778':
             return DocumentStatus.pending_review

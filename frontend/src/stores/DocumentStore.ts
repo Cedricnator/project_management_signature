@@ -16,6 +16,11 @@ import type { UploadDocumentResponseDto } from './dto/UploadDocumentResultDto'
 import { useUserStore } from './UserStore'
 import api from '@/utils/axios'
 import { ToastType } from './ToastStore'
+import {
+    responseToDocumentHistory,
+    type UserHistoryResponseDto,
+} from './dto/UserHistoryResponseDto'
+import { DocumentHistoryResponse } from './dto/DocumentHistoryResponseDto'
 
 export const useDocumentStore = defineStore('document', {
     state: () => ({
@@ -29,9 +34,36 @@ export const useDocumentStore = defineStore('document', {
         async getDocumentByDocumentId(documentId: string) {},
 
         async getDocumentHistoryByDocumentId(documentId: string) {
-            return mockDocumentHistory().sort(
-                (a, b) => b.createdAt.getDate() - a.createdAt.getDate(),
-            )
+            try {
+                const response = await api.get<DocumentHistoryResponse>(
+                    `${API_ROUTE}/files/${documentId}/history`,
+                )
+                logger.info('[DOC_HISTORY]', 'response: ', response)
+
+                if (response.status == 200) {
+                    const documentHistory: DocumentHistory[] = DocumentHistoryResponse.fromJson(
+                        response.data,
+                    ).toDocumentHistory()
+                    return {
+                        success: true,
+                        message: 'Historial obtenido con éxito',
+                        data: documentHistory,
+                        type: ToastType.success,
+                    } as Result<DocumentHistory[]>
+                }
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result<DocumentHistory[]>
+            } catch (error: any) {
+                logger.error('[UPDATE_DOC]', error)
+                return {
+                    success: false,
+                    message: error.message,
+                    type: ToastType.error,
+                } as Result<DocumentHistory[]>
+            }
         },
 
         async getFileByDocumentId(currentDocument: CustomDocument) {
