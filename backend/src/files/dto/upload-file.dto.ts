@@ -11,6 +11,6 @@ export class UploadFileDto {
 
   @IsString()
   @IsOptional()
-  @MaxLength(500, { message: 'File path cannot exceed 500 characters' })
+  @MaxLength(500, { message: 'Comment cannot exceed 500 characters' })
   comment?: string;
 }
