@@ -195,7 +195,7 @@ export class FilesService {
         order: { createdAt: 'DESC' },
       });
 
-      if (!history) {
+      if (!history || history.length === 0) {
         continue;
       } else {
         for (const entry of history) {
