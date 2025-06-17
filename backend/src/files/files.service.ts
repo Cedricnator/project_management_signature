@@ -136,7 +136,6 @@ export class FilesService {
       statusId: draftStatus.id,
       changedBy: user.id,
       comment: uploadFileDto.comment || `Documento subido el ${formatFriendlyDate(new Date())}`,
-      createdAt: new Date(),
     });
 
     await this.documentHistoryRepository.save(historyEntry);
