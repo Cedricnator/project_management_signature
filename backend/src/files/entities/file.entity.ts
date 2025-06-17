@@ -44,6 +44,9 @@ export class File {
   @Column({ name: 'file_hash', length: 255, nullable: false })
   fileHash: string;
 
+  @Column({ name: 'file_buffer', type: 'bytea', nullable: false })
+  fileBuffer: Buffer;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

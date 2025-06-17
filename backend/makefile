@@ -11,8 +11,8 @@ up:
 # Tear down all services
 .PHONY: down
 down:
-	@docker compose down
-
+	@docker compose down --volumes
+	
 .PHONY: ps
 ps:
 	@docker compose ps

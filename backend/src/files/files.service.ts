@@ -70,14 +70,10 @@ export class FilesService {
     // Calculate file hash
     let documentHash: string;
     try {
-      if (file.buffer) {
-        documentHash = createHash('sha256').update(file.buffer).digest('hex');
-      } else if (file.path) {
-        const fileBuffer = readFileSync(file.path);
-        documentHash = createHash('sha256').update(fileBuffer).digest('hex');
-      } else {
+      if (!file.buffer) {
         throw new BadRequestException('Unable to access file data');
-      }
+      } 
+      documentHash = createHash('sha256').update(file.buffer).digest('hex');
     } catch (error) {
       console.error('Error calculating file hash:', error);
       throw new BadRequestException('Error calculating file hash');
@@ -125,6 +121,7 @@ export class FilesService {
       mimetype: file.mimetype,
       originalFilename: file.originalname,
       filename: file.filename,
+      fileBuffer: file.buffer,
       uploadedBy: user.id,
       fileHash: documentHash,
     });
@@ -322,14 +319,11 @@ export class FilesService {
 
     let fileHash: string;
     try {
-      if (newFile.buffer) {
-        fileHash = createHash('sha256').update(newFile.buffer).digest('hex');
-      } else if (newFile.path) {
-        const fileBuffer = readFileSync(newFile.path);
-        fileHash = createHash('sha256').update(fileBuffer).digest('hex');
-      } else {
+      if (!newFile.buffer) {
         throw new BadRequestException('Unable to access file data');
-      }
+      } 
+
+      fileHash = createHash('sha256').update(newFile.buffer).digest('hex');
     } catch (error: unknown) {
       console.error('Error calculating file hash:', error);
       throw new BadRequestException(`Error calculating file hash`);
@@ -343,6 +337,7 @@ export class FilesService {
     document.originalFilename = newFile.originalname;
     document.filename = newFile.filename;
     document.fileHash = fileHash;
+    document.fileBuffer = newFile.buffer;
     document.description = updateFileDto.description ?? document.description;
 
     const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
@@ -475,12 +470,10 @@ export class FilesService {
 
   verifyFileIntegrity(document: File): boolean {
     try {
-      if(document.fileHash || !document.filePath) return false;
-
-      const fileBuffer = readFileSync(document.filePath);
+      if(document.fileHash || !document.fileBuffer) return false;
       
       const currentHash = createHash('sha256')
-        .update(fileBuffer)
+        .update(document.fileBuffer)
         .digest('hex');
 
       return currentHash === document.fileHash;

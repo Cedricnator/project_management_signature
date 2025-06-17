@@ -48,12 +48,8 @@ export class FilesController {
 
   @Get(':id/stream')
   @UseGuards(JwtAuthGuard)
-  async streamFile(
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
-    const fileStream = await this.filesService.streamFile(id);
-
-    return fileStream;
+  streamFile(@Param('id', ParseUUIDPipe) id: string) {
+    return this.filesService.streamFile(id);
   }
 
   @Get('history')

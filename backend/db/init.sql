@@ -46,6 +46,7 @@ CREATE TABLE document (
   original_name VARCHAR(255) NOT NULL,
   current_status_id UUID NOT NULL, 
   uploaded_by UUID NOT NULL,
+  file_buffer BYTEA NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN KEY (current_status_id) REFERENCES document_status_type(id),
