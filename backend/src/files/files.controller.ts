@@ -25,6 +25,7 @@ import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { ChangeFileStatusDto } from './dto/change-status.dto';
 import { Role } from '../common/decorators/role.decorator';
 import { UserRole } from '../common/enum/user-role.enum';
+import { STATUS_CODES } from 'http';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -49,16 +50,8 @@ export class FilesController {
   @UseGuards(JwtAuthGuard)
   async streamFile(
     @Param('id', ParseUUIDPipe) id: string,
-    @Res({ passthrough: true }) res: Response,
   ) {
     const fileStream = await this.filesService.streamFile(id);
-    
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'X-Content-Type-Options': 'nosniff',
-    });
 
     return fileStream;
   }
