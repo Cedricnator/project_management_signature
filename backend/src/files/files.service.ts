@@ -253,7 +253,7 @@ export class FilesService {
     id: string,
     newFile: Express.Multer.File,
     userEmail: string,
-    updateFileDto?: UpdateFileDto,
+    updateFileDto: UpdateFileDto,
   ) {
     const document = await this.findOne(id);
     const user = await this.userService.findOneByEmail(userEmail);
@@ -301,14 +301,14 @@ export class FilesService {
     }
 
     // Update document properties
-    document.name = newFile.originalname;
+    document.name = updateFileDto.name ?? document.name;
     document.filePath = newFile.path;
     document.fileSize = newFile.size;
     document.mimetype = newFile.mimetype;
     document.originalFilename = newFile.originalname;
     document.filename = newFile.filename;
     document.fileHash = fileHash;
-    document.description = updateFileDto?.description || document.description;
+    document.description = updateFileDto.description ?? document.description;
 
     const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
     if (document.currentStatusId === '01974b23-e943-7308-8185-1556429b9ff1') {
@@ -323,7 +323,7 @@ export class FilesService {
       documentId: document.id,
       statusId: document.currentStatusId,
       changedBy: user.id,
-      comment: `Documento actualizado el ${formatFriendlyDate(new Date())}`,
+      comment: updateFileDto.comment ?? `Documento actualizado el ${formatFriendlyDate(new Date())}`,
     });
 
     await this.documentHistoryRepository.save(historyEntry);
