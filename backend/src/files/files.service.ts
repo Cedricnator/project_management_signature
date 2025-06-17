@@ -190,27 +190,28 @@ export class FilesService {
     const documentHistory: DocumentHistoryModified[] = [];
 
     for (const document of documents) {
-      const history = await this.documentHistoryRepository.findOne({
+      const history = await this.documentHistoryRepository.find({
         where: { documentId: document.id },
         order: { createdAt: 'DESC' },
       });
 
       if (!history) {
-        // Skip if no history found for this document
         continue;
       } else {
-        const transformedHistory: DocumentHistoryModified = {
-          id: history.id,
-          documentId: history.documentId,
-          statusId: history.statusId,
-          changedBy: user.id
-            ? `${user.firstName} ${user.lastName}`
-            : 'Unknown User',
-          comment: history.comment,
-          createdAt: history.createdAt,
-          updatedAt: history.updatedAt,
-        };
-        documentHistory.push(transformedHistory);
+        for (const entry of history) {
+          const transformedHistory: DocumentHistoryModified = {
+            id: entry.id,
+            documentId: entry.documentId,
+            statusId: entry.statusId,
+            changedBy: user.id
+              ? `${user.firstName} ${user.lastName}`
+              : 'Unknown User',
+            comment: entry.comment,
+            createdAt: entry.createdAt,
+            updatedAt: entry.updatedAt,
+          };
+          documentHistory.push(transformedHistory);
+        }
       }
     }
 
