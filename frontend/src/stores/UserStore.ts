@@ -6,6 +6,7 @@ import {
     type DocumentHistory,
     type Document as CustomDocument,
     type UploadDocumentDto,
+    type UpdateDocumentDto,
     type Result,
 } from '@/types'
 import { defineStore } from 'pinia'
@@ -18,7 +19,7 @@ import {
     type GetDocumentResponseDto,
 } from './dto/GetDocumentResponseDto'
 import {
-    UploadDocumentResponseToDocument,
+    uploadDocumentResponseToDocument,
     type UploadDocumentResponseDto,
 } from './dto/UploadDocumentResultDto'
 import {
@@ -26,6 +27,11 @@ import {
     type UserHistoryResponseDto,
 } from './dto/UserHistoryResponseDto'
 import { ToastType } from './ToastStore'
+import api from '@/utils/axios'
+import {
+    updateDocumentResponseToDocument,
+    type UpdateDocumentResponseDto,
+} from './dto/UpdateDocumentResultDto'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -114,7 +120,7 @@ export const useUserStore = defineStore('user', {
                 logger.info('[UPLOAD_DOC]', 'document_response: ', response)
 
                 if (response.status == 201) {
-                    const currentDocument: CustomDocument = UploadDocumentResponseToDocument(
+                    const currentDocument: CustomDocument = uploadDocumentResponseToDocument(
                         response.data,
                     )
 
@@ -129,6 +135,41 @@ export const useUserStore = defineStore('user', {
                 return { success: false, message: response.statusText, type: ToastType.warning }
             } catch (error: any) {
                 logger.error('[UPLOAD_DOC]', error)
+                return { success: false, message: error.message, type: ToastType.error } as Result
+            }
+        },
+        async updateDocument(updateDocumentDto: UpdateDocumentDto, file: File) {
+            try {
+                const formData = new FormData()
+
+                formData.append('file', file)
+                formData.append('description', updateDocumentDto.description)
+                formData.append('name', updateDocumentDto.name)
+                formData.append('comment', updateDocumentDto.commentary ?? '')
+
+                const response = await api.patch<UpdateDocumentResponseDto>(
+                    `${API_ROUTE}/files/${updateDocumentDto.documentId}/`,
+                    formData,
+                )
+
+                logger.info('[UPDATE_DOC]', 'document_response: ', response)
+
+                if (response.status == 200) {
+                    const currentDocument: CustomDocument = updateDocumentResponseToDocument(
+                        response.data,
+                    )
+
+                    this.handleUpdateDocumentResponse(currentDocument)
+
+                    return {
+                        success: true,
+                        message: 'Documento editado con éxito.',
+                        type: ToastType.success,
+                    } as Result
+                }
+                return { success: false, message: response.statusText, type: ToastType.warning }
+            } catch (error: any) {
+                logger.error('[UPDATE_DOC]', error)
                 return { success: false, message: error.message, type: ToastType.error } as Result
             }
         },
@@ -168,6 +209,15 @@ export const useUserStore = defineStore('user', {
                 }
             } catch (error) {
                 logger.error('[DOWNLOAD_DOC]', error)
+            }
+        },
+        handleUpdateDocumentResponse(updated: CustomDocument) {
+            const idx = this.documents.findIndex((doc) => doc.documentId === updated.documentId)
+
+            if (idx !== -1) {
+                this.documents[idx] = { ...updated }
+            } else {
+                this.documents.push({ ...updated })
             }
         },
     },

@@ -1,6 +1,6 @@
 import { DocumentStatus, type Document } from '@/types'
 
-export interface GetDocumentResponseDto {
+export interface UpdateDocumentResponseDto {
     id: string
     name: string
     description: string
@@ -13,16 +13,15 @@ export interface GetDocumentResponseDto {
     fileHash: string
     createdAt: Date
     updatedAt: Date
-    uploadedBy: string
 }
 
-export function documentResponseToDocument(documentResponse: GetDocumentResponseDto) {
+export function updateDocumentResponseToDocument(uploadDocument: UpdateDocumentResponseDto) {
     const document: Document = {
-        documentId: documentResponse.id,
-        documentName: documentResponse.name,
-        description: documentResponse.description,
-        state: parseDocumentStatus(documentResponse.currentStatusId),
-        createdBy: documentResponse.uploadedBy,
+        documentId: uploadDocument.id,
+        documentName: uploadDocument.name,
+        description: uploadDocument.description,
+        state: parseDocumentStatus(uploadDocument.currentStatusId),
+        createdBy: '',
         validatedBy: '',
         commentary: null,
     }

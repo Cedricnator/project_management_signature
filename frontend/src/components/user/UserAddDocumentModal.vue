@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { watch, ref, computed } from 'vue'
 import CustomButton from '../CustomButton.vue'
-import type { UploadDocumentDto, Document, Result } from '@/types'
+import type { UploadDocumentDto, Document, Result, UpdateDocumentDto } from '@/types'
 import { useDocumentStore } from '@/stores/DocumentStore'
 import { sleep } from '@/utils/timeout';
-import { FwbToast } from 'flowbite-vue'
-import { ToastType, useToastStore } from '@/stores/ToastStore';
+import { useToastStore } from '@/stores/ToastStore';
 import { useUserStore } from '@/stores/UserStore';
+import { FwbSpinner } from 'flowbite-vue'
 
 const props = defineProps<{
     isOpen: boolean
@@ -23,10 +23,9 @@ function closeModal() {
 
 const userStore = useUserStore()
 const toastStore = useToastStore()
-const toastMessage = ref('')
-const toastType = ref('')
-const showToast = ref(false)
 const documentStore = useDocumentStore()
+const actionClicked = ref<'create' |'edit'>("create")
+
 const name = ref('')
 const description = ref('')
 const comentario = ref('')
@@ -39,12 +38,12 @@ watch(
     () => props.isOpen,
     async (open) => {
         if (open && props.document) {
-        const currentFile = await documentStore.getFileByDocumentId(props.document.documentId)
+        const getFileResult = await documentStore.getFileByDocumentId(props.document)
+        if (!getFileResult.success) toastStore.addToast(getFileResult.type, getFileResult.message)
         name.value = props.document.documentName
         description.value = props.document.description
         comentario.value = props.document.commentary ?? ''
-        file.value = currentFile
-        sleep(500)    
+        file.value = getFileResult.data ?? null
         loading.value = false
     } else if (open) {
         // If it's a new document
@@ -52,6 +51,7 @@ watch(
         description.value = ''
         comentario.value = ''
         file.value = null
+        loading.value = false
     }
     },
     { immediate: true }
@@ -111,16 +111,30 @@ function handleFileChange(event: Event) {
 
 const handleSubmit = async () => {
     if (validateForm()) {
-        const uploadDocumentDto: UploadDocumentDto = {
-            name: name.value,
-            description: description.value,
-            commentary: comentario.value,
-        }
-        const result: Result = await userStore.uploadDocument(uploadDocumentDto, file.value!)
-        toastStore.addToast(result.type, result.message)
-
+        actionClicked.value == 'create' ? handleUpload() : handleEdit()
         closeModal()
     }
+}
+
+const handleUpload = async () => {
+    const uploadDocumentDto: UploadDocumentDto = {
+        name: name.value,
+        description: description.value,
+        commentary: comentario.value || null,
+    }
+    const result: Result = await userStore.uploadDocument(uploadDocumentDto, file.value!)
+    toastStore.addToast(result.type, result.message)
+}
+
+const handleEdit = async () => {
+    const updateDocument: UpdateDocumentDto = {
+        documentId: props.document?.documentId!,
+        name: name.value,
+        description: description.value,
+        commentary: comentario.value || null
+    }
+    const result: Result = await userStore.updateDocument(updateDocument, file.value!)
+    toastStore.addToast(result.type, result.message)
 }
 
 </script>
@@ -172,7 +186,11 @@ const handleSubmit = async () => {
                     </button>
                 </div>
                 <!-- Modal body -->
-                <form class="p-4 md:p-5" @submit.prevent="handleSubmit">
+                <div v-if="loading" class="flex justify-center items-center min-h-100">
+                    <fwb-spinner size="8" />
+                </div>
+
+                <form v-else class="p-4 md:p-5" @submit.prevent="handleSubmit">
                     <div class="grid gap-4 mb-4 grid-cols-2">
                         <!-- Name -->
                         <div class="col-span-2">
@@ -283,8 +301,8 @@ const handleSubmit = async () => {
                     </div>
 
                     <!-- Submit Button -->
-                    <CustomButton v-if="!isEditMode" type="submit" label="Agregar documento" />
-                    <CustomButton v-else type="submit" label="Editar documento" />
+                    <CustomButton v-if="!isEditMode" type="submit" label="Agregar documento" @click="actionClicked = 'create'"/>
+                    <CustomButton v-else type="submit" label="Editar documento" @click="actionClicked = 'edit'"/>
                 </form>
             </div>
         </div>

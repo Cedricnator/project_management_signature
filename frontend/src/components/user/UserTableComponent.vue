@@ -169,7 +169,7 @@ watch(searchQuery, () => {
                 >
                     <th
                         scope="row"
-                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark whitespace-nowrap"
+                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark text-ellipsis"
                     >
                         {{ document.documentName }}
                     </th>

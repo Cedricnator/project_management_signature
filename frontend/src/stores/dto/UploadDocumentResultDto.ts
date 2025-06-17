@@ -15,7 +15,7 @@ export interface UploadDocumentResponseDto {
     updatedAt: Date
 }
 
-export function UploadDocumentResponseToDocument(uploadDocument: UploadDocumentResponseDto) {
+export function uploadDocumentResponseToDocument(uploadDocument: UploadDocumentResponseDto) {
     const document: Document = {
         documentId: uploadDocument.id,
         documentName: uploadDocument.name,
