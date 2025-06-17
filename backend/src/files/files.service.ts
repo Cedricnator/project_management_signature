@@ -85,7 +85,6 @@ export class FilesService {
 
     const existingDocument = await this.documentRepository.findOne({
       where: { fileHash: documentHash },
-      relations: ['account'] 
     });
 
     if (existingDocument) {
