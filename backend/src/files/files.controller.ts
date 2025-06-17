@@ -45,10 +45,22 @@ export class FilesController {
     return this.filesService.uploadFile(file, uploadFileDto, user.email);
   }
 
-  @Post('stream')
+  @Post(':id/stream')
   @UseGuards(JwtAuthGuard)
-  streamFile(@Param('id', ParseUUIDPipe) id: string) {
-    return this.filesService.streamFile(id);
+  async streamFile(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const fileStream = await this.filesService.streamFile(id);
+    
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'X-Content-Type-Options': 'nosniff',
+    });
+
+    return fileStream;
   }
 
   @Get('history')
