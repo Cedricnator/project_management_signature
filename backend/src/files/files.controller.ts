@@ -45,7 +45,7 @@ export class FilesController {
     return this.filesService.uploadFile(file, uploadFileDto, user.email);
   }
 
-  @Post(':id/stream')
+  @Get(':id/stream')
   @UseGuards(JwtAuthGuard)
   async streamFile(
     @Param('id', ParseUUIDPipe) id: string,
