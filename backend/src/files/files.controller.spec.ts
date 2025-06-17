@@ -7,7 +7,7 @@ import { RoleGuard } from '../security/guards/role.guard';
 describe('FilesController', () => {
   let controller: FilesController;
   const mockGuard = {
-    canActivate: jest.fn(() => true), // siempre deja pasar
+    canActivate: jest.fn(() => true),
   };
   const mockFilesService = {
     uploadFile: jest.fn(),
@@ -18,7 +18,7 @@ describe('FilesController', () => {
     update: jest.fn(),
     remove: jest.fn(),
     getFileHistory: jest.fn(),
-    getStatusTypes: jest.fn(), // 👈 era `findAllStatusTypes`, debe ser igual que en tu controller
+    getStatusTypes: jest.fn(),
   };
 
   beforeEach(async () => {
