@@ -9,6 +9,11 @@ import {
 } from '@/types'
 import { logger } from '@/utils/logger'
 import { defineStore } from 'pinia'
+import { useSessionStore } from './SessionStore'
+import { API_ROUTE } from '@/utils/const'
+import axios from 'axios'
+import type { UploadDocumentResponseDto } from './dto/UploadDocumentResultDto'
+import { useUserStore } from './UserStore'
 
 export const useDocumentStore = defineStore('document', {
     state: () => ({
@@ -31,9 +36,7 @@ export const useDocumentStore = defineStore('document', {
             return new File(['something something'], 'contrato.pdf', { type: 'application/pdf' })
         },
 
-        async uploadDocument(uploadDocumentDto: UploadDocumentDto, file: File) {
-            return { success: true, message: 'Documento subido con éxito' } as Result
-        },
+        
 
         async processDocument(processedDocument: ProcededDocument) {
             logger.info('[DOC_STORE]', 'Processed document: ', processedDocument)

@@ -5,13 +5,15 @@ import CustomButton from '@/components/CustomButton.vue';
 import TableComponent from '@/components/user/UserTableComponent.vue';
 import router from '@/router';
 import UserAddDocumentModal from '@/components/user/UserAddDocumentModal.vue';
+import { useUserStore } from '@/stores/UserStore';
 
+const userStore = useUserStore()
 const documentStore = useDocumentStore();
-const documents = computed(() => documentStore.documents);
+const documents = computed(() => userStore.documents);
 const isShowModalAddDoc = ref(false)
 
 const fetchDocuments = () => {
-    documentStore.getAllDocuments();
+    userStore.getAllUserDocumentsByUserId()
 }
 
 function openDocModal() {

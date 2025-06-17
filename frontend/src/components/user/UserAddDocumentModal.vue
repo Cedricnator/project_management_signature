@@ -6,6 +6,7 @@ import { useDocumentStore } from '@/stores/DocumentStore'
 import { sleep } from '@/utils/timeout';
 import { FwbToast } from 'flowbite-vue'
 import { ToastType, useToastStore } from '@/stores/ToastStore';
+import { useUserStore } from '@/stores/UserStore';
 
 const props = defineProps<{
     isOpen: boolean
@@ -20,6 +21,7 @@ function closeModal() {
     emit('close')
 }
 
+const userStore = useUserStore()
 const toastStore = useToastStore()
 const toastMessage = ref('')
 const toastType = ref('')
@@ -114,15 +116,9 @@ const handleSubmit = async () => {
             description: description.value,
             commentary: comentario.value,
         }
-        const result: Result = await documentStore.uploadDocument(uploadDocumentDto, file.value!)
-        const toastType = result.success ? ToastType.success : ToastType.warning 
-        toastStore.addToast(toastType, result.message)
+        const result: Result = await userStore.uploadDocument(uploadDocumentDto, file.value!)
+        toastStore.addToast(result.type, result.message)
 
-        console.log('Form submitted', {
-            name: name.value,
-            description: description.value,
-            file: file.value?.name,
-        })
         closeModal()
     }
 }
