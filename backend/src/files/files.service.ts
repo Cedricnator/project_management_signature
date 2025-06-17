@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -47,7 +48,7 @@ export class FilesService {
       throw new InternalServerErrorException(`Error finding document status`);
     }
   }
-
+  
   async uploadFile(
     file: Express.Multer.File,
     uploadFileDto: UploadFileDto,
@@ -62,22 +63,58 @@ export class FilesService {
     }
 
     const user = await this.userService.findOneByEmail(userEmail);
-
     if (!user) {
       throw new NotFoundException(`User with email ${userEmail} not found`);
     }
 
-    const draftStatus = await this.findDocumentStatus(
-      DocumentStatus.PENDING_REVIEW,
-    );
+    // Calculate file hash
+    let documentHash: string;
+    try {
+      if (file.buffer) {
+        documentHash = createHash('sha256').update(file.buffer).digest('hex');
+      } else if (file.path) {
+        const fileBuffer = readFileSync(file.path);
+        documentHash = createHash('sha256').update(fileBuffer).digest('hex');
+      } else {
+        throw new BadRequestException('Unable to access file data');
+      }
+    } catch (error) {
+      console.error('Error calculating file hash:', error);
+      throw new BadRequestException('Error calculating file hash');
+    }
 
+    const existingDocument = await this.documentRepository.findOne({
+      where: { fileHash: documentHash },
+      relations: ['account'] 
+    });
+
+    if (existingDocument) {
+      if (existingDocument.uploadedBy === user.id) {
+        // The same user is uploading the same file
+        throw new ConflictException({
+          message: 'You have already uploaded this file',
+          existingDocument: {
+            id: existingDocument.id,
+            name: existingDocument.name,
+            uploadedAt: existingDocument.createdAt,
+            currentStatus: existingDocument.currentStatusId
+          }
+        });
+      } else {
+        // Another user
+        throw new ConflictException({
+          message: 'This file has already been uploaded by another user',
+          suggestion: 'Please verify this is not a duplicate submission',
+          existingFileId: existingDocument.id,
+          uploadedAt: existingDocument.createdAt
+        });
+      }
+    }
+
+    const draftStatus = await this.findDocumentStatus(DocumentStatus.PENDING_REVIEW);
     if (!draftStatus) {
       throw new NotFoundException('pending_review status not found');
     }
-
-    const documentHash = createHash('sha256')
-      .update(file.buffer || file.path)
-      .digest('hex');
 
     const document = this.documentRepository.create({
       name: uploadFileDto.name,
@@ -98,9 +135,7 @@ export class FilesService {
       documentId: savedDocument.id,
       statusId: draftStatus.id,
       changedBy: user.id,
-      comment:
-        uploadFileDto.comment ||
-        `Documento subido el ${formatFriendlyDate(new Date())}`,
+      comment: uploadFileDto.comment || `Documento subido el ${formatFriendlyDate(new Date())}`,
       createdAt: new Date(),
     });
 
