@@ -253,7 +253,7 @@ const handleEdit = async () => {
                         </div>
 
                         <!-- File Upload -->
-                        <div class="col-span-2">
+                        <div  class="col-span-2">
                             <div class="flex items-center justify-center w-full">
                                 <label
                                     for="dropzone-file"

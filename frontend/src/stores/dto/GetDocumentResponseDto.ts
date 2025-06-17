@@ -25,6 +25,7 @@ export function documentResponseToDocument(documentResponse: GetDocumentResponse
         createdBy: documentResponse.uploadedBy,
         validatedBy: '',
         commentary: null,
+        originalName: documentResponse.originalFilename
     }
     return document
 }
