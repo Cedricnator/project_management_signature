@@ -1,5 +1,7 @@
 CREATE DATABASE signature_project;
 
+ALTER DATABASE signature_project SET timezone = 'America/Santiago';
+
 \c signature_project;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

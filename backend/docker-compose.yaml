@@ -12,6 +12,8 @@ services:
       retries: 10
     restart: always
     environment:
+      - TZ=America/Santiago
+      - PGTZ=America/Santiago
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
