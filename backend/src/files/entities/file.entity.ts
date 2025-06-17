@@ -52,7 +52,7 @@ export class File {
 
   @Column({ name: 'uploaded_by', type: 'uuid', nullable: false })
   uploadedBy: string;
-
+  
   @ManyToOne(() => DocumentStatusType, { eager: false })
   @JoinColumn({ name: 'current_status_id' })
   currentStatus: DocumentStatusType;

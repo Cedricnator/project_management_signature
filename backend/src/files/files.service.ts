@@ -85,10 +85,11 @@ export class FilesService {
 
     const existingDocument = await this.documentRepository.findOne({
       where: { fileHash: documentHash },
+      relations: ['uploadBy'],
     });
-
+    
     if (existingDocument) {
-      if (existingDocument.uploadedBy === user.id) {
+      if (existingDocument.uploadBy.id === user.id) {
         // The same user is uploading the same file
         throw new ConflictException({
           message: 'You have already uploaded this file',
