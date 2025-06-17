@@ -1,6 +1,6 @@
 import { DocumentStatus, type Document } from '@/types'
 
-export interface UploadDocumentResponseDto {
+export interface UpdateDocumentResponseDto {
     id: string
     name: string
     description: string
@@ -15,7 +15,7 @@ export interface UploadDocumentResponseDto {
     updatedAt: Date
 }
 
-export function uploadDocumentResponseToDocument(uploadDocument: UploadDocumentResponseDto) {
+export function updateDocumentResponseToDocument(uploadDocument: UpdateDocumentResponseDto) {
     const document: Document = {
         documentId: uploadDocument.id,
         documentName: uploadDocument.name,

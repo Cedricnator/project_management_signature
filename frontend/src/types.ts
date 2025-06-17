@@ -46,6 +46,10 @@ export interface UploadDocumentDto {
     commentary?: string | null
 }
 
+export interface UpdateDocumentDto extends UploadDocumentDto {
+    documentId: string
+}
+
 export interface DocumentHistory {
     documentHistoryId: string
     documentId: string
