@@ -24,6 +24,7 @@ export function uploadDocumentResponseToDocument(uploadDocument: UploadDocumentR
         createdBy: '',
         validatedBy: '',
         commentary: null,
+        originalName: uploadDocument.originalFilename,
     }
     return document
 }

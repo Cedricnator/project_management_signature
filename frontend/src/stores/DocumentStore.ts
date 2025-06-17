@@ -79,7 +79,7 @@ export const useDocumentStore = defineStore('document', {
                 if (response.status == 200) {
                     // Best‑effort MIME from server, fallback to PDF
                     const mime = response.headers['content-type'] ?? 'application/pdf'
-                    const file = new File([response.data], `${currentDocument.documentName}.pdf`, {
+                    const file = new File([response.data], `${currentDocument.originalName}`, {
                         type: mime,
                         lastModified: Date.now(),
                     })

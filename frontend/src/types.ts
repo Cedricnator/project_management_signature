@@ -31,6 +31,7 @@ export interface Document {
     validatedBy?: string | null
     description: string
     commentary?: string | null
+    originalName: string
 }
 
 export interface ProcededDocument {

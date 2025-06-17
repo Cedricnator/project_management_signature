@@ -86,6 +86,7 @@ export const useUserStore = defineStore('user', {
                 if (response.status == 200) {
                     this.documents = response.data.map((data) => documentResponseToDocument(data))
                 }
+                //TODO ARREGLA ESTA CUSTION
             } catch (error) {
                 logger.error('[DOCS]', error)
             }
@@ -107,7 +108,9 @@ export const useUserStore = defineStore('user', {
                 formData.append('file', file)
                 formData.append('description', uploadDocumentDto.description)
                 formData.append('name', uploadDocumentDto.name)
-                formData.append('comment', uploadDocumentDto.commentary ?? '')
+                if (uploadDocumentDto.commentary) {
+                    formData.append('comment', uploadDocumentDto.commentary)
+                }
 
                 const response = await axios.post<UploadDocumentResponseDto>(
                     `${API_ROUTE}/files/upload/`,
@@ -145,8 +148,10 @@ export const useUserStore = defineStore('user', {
                 formData.append('file', file)
                 formData.append('description', updateDocumentDto.description)
                 formData.append('name', updateDocumentDto.name)
-                formData.append('comment', updateDocumentDto.commentary ?? '')
-
+                if (updateDocumentDto.commentary) {
+                    formData.append('comment', updateDocumentDto.commentary)
+                }
+                
                 const response = await api.patch<UpdateDocumentResponseDto>(
                     `${API_ROUTE}/files/${updateDocumentDto.documentId}/`,
                     formData,
