@@ -36,7 +36,7 @@ export interface Document {
 
 export interface ProcededDocument {
     documentId: string
-    supervisorCommentary?: string | null
+    supervisorCommentary?: string
     processedAt: Date
     status: DocumentStatus
 }
