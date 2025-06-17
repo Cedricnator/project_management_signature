@@ -17,7 +17,7 @@ export function responseToDocumentHistory(response: UserHistoryResponseDto) {
         documentId: response.documentId,
         action: parseDocumentStatus(response.statusId),
         changedBy: response.changedBy,
-        createdAt: response.createdAt,
+        createdAt: new Date(response.createdAt),
         commentary: response.comment,
     }
     return documentHistory

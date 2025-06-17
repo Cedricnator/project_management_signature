@@ -28,7 +28,7 @@ export class DocumentHistoryResponse {
                 documentId: this.document.id,
                 changedBy: h.changedBy,
                 action: parseDocumentStatus(h.status),
-                createdAt: h.createdAt,
+                createdAt: new Date(h.createdAt),
                 commentary: h.comment ?? null,
             }),
         )
