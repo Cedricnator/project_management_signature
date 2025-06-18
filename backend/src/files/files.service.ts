@@ -58,8 +58,8 @@ export class FilesService {
       throw new BadRequestException('No file provided!');
     }
 
-    if (!file.buffer && !file.path) {
-      throw new BadRequestException('File data is missing');
+    if (!file.path || !existsSync(file.path)) {
+      throw new BadRequestException('File not saved properly to disk');
     }
 
     const user = await this.userService.findOneByEmail(userEmail);
@@ -67,16 +67,16 @@ export class FilesService {
       throw new NotFoundException(`User with email ${userEmail} not found`);
     }
 
-    // Calculate file hash
+    let fileBuffer: Buffer;
     let documentHash: string;
+    
     try {
-      if (!file.buffer) {
-        throw new BadRequestException('Unable to access file data');
-      } 
-      documentHash = createHash('sha256').update(file.buffer).digest('hex');
+      fileBuffer = readFileSync(file.path);
+      documentHash = createHash('sha256').update(fileBuffer).digest('hex');
+      
     } catch (error) {
-      console.error('Error calculating file hash:', error);
-      throw new BadRequestException('Error calculating file hash');
+      console.error('Error reading file or calculating hash:', error);
+      throw new BadRequestException(`Error processing file: ${error.message}`);
     }
 
     const existingDocument = await this.documentRepository.findOne({
@@ -85,8 +85,13 @@ export class FilesService {
     });
     
     if (existingDocument) {
+      try {
+        unlinkSync(file.path);
+      } catch (cleanupError) {
+        console.warn('Could not cleanup temporary file:', cleanupError);
+      }
+      
       if (existingDocument.uploadBy.id === user.id) {
-        // The same user is uploading the same file
         throw new ConflictException({
           message: 'You have already uploaded this file',
           existingDocument: {
@@ -97,7 +102,6 @@ export class FilesService {
           }
         });
       } else {
-        // Another user
         throw new ConflictException({
           message: 'This file has already been uploaded by another user',
           suggestion: 'Please verify this is not a duplicate submission',
@@ -108,9 +112,6 @@ export class FilesService {
     }
 
     const draftStatus = await this.findDocumentStatus(DocumentStatus.PENDING_REVIEW);
-    if (!draftStatus) {
-      throw new NotFoundException('pending_review status not found');
-    }
 
     const document = this.documentRepository.create({
       name: uploadFileDto.name,
@@ -121,9 +122,9 @@ export class FilesService {
       mimetype: file.mimetype,
       originalFilename: file.originalname,
       filename: file.filename,
-      fileBuffer: file.buffer,
       uploadedBy: user.id,
       fileHash: documentHash,
+      fileBuffer: fileBuffer, 
     });
 
     const savedDocument = await this.documentRepository.save(document);
@@ -137,7 +138,8 @@ export class FilesService {
 
     await this.documentHistoryRepository.save(historyEntry);
 
-    return { ...savedDocument };
+    const { fileBuffer: _, ...documentWithoutBuffer } = savedDocument;
+    return documentWithoutBuffer;
   }
 
   async findFilesByUser(userId: string): Promise<File[]> {
@@ -148,6 +150,20 @@ export class FilesService {
 
     const documents = await this.documentRepository.find({
       where: { uploadedBy: user.id },
+      select: [
+        'id',
+        'name',
+        'description',
+        'filePath',
+        'fileSize',
+        'mimetype',
+        'originalFilename',
+        'filename',
+        'uploadedBy',
+        'currentStatusId',
+        'createdAt',
+        'updatedAt',
+      ]
     });
 
     if (!documents || documents.length === 0) {
@@ -158,13 +174,53 @@ export class FilesService {
   }
 
   async findAll() {
-    const documents = await this.documentRepository.find();
+    const documents = await this.documentRepository.find({
+      select: [
+        'id',
+        'name',
+        'description',
+        'filePath',
+        'fileSize',
+        'mimetype',
+        'originalFilename',
+        'filename',
+        'uploadedBy',
+        'currentStatusId',
+        'createdAt',
+        'updatedAt',
+      ]
+    });
     return documents;
+  }
+
+  async findDocumentWithBuffer(id: string): Promise<File> {
+    const document = await this.documentRepository.findOne({
+      where: { id },
+    });
+    if (!document) {
+      throw new NotFoundException(`Document with id ${id} not found`);
+    }
+
+    return document;
   }
 
   async findOne(id: string): Promise<File> {
     const document = await this.documentRepository.findOne({
       where: { id },
+      select: [
+        'id',
+        'name',
+        'description',
+        'filePath',
+        'fileSize',
+        'mimetype',
+        'originalFilename',
+        'filename',
+        'uploadedBy',
+        'currentStatusId',
+        'createdAt',
+        'updatedAt',
+      ]
     });
 
     if (!document) {
@@ -182,6 +238,20 @@ export class FilesService {
 
     const documents = await this.documentRepository.find({
       where: { uploadedBy: user.id },
+      select: [
+        'id',
+        'name',
+        'description',
+        'filePath',
+        'fileSize',
+        'mimetype',
+        'originalFilename',
+        'filename',
+        'uploadedBy',
+        'currentStatusId',
+        'createdAt',
+        'updatedAt',
+      ]
     });
 
     const documentHistory: DocumentHistoryModified[] = [];
@@ -196,17 +266,24 @@ export class FilesService {
         continue;
       } else {
         for (const entry of history) {
+          const changeUser = await this.userService.findOne(entry.changedBy);
+
+          if (!changeUser) {
+            throw new NotFoundException(
+              `User with id ${entry.changedBy} not found`,
+            );
+          }
+
           const transformedHistory: DocumentHistoryModified = {
             id: entry.id,
             documentId: entry.documentId,
             statusId: entry.statusId,
-            changedBy: user.id
-              ? `${user.firstName} ${user.lastName}`
-              : 'Unknown User',
+            changedBy: `${changeUser.firstName} ${changeUser.lastName}`,
             comment: entry.comment,
             createdAt: entry.createdAt,
             updatedAt: entry.updatedAt,
           };
+
           documentHistory.push(transformedHistory);
         }
       }
@@ -232,7 +309,7 @@ export class FilesService {
         id: documentHistory.id,
         documentId: documentHistory.documentId,
         statusId: documentHistory.statusId,
-        changedBy: user.id ? `${user.firstName} ${user.lastName}` : user.id,
+        changedBy: `${user.firstName} ${user.lastName}`,
         comment: documentHistory.comment,
         createdAt: documentHistory.createdAt,
         updatedAt: documentHistory.updatedAt,
@@ -321,9 +398,9 @@ export class FilesService {
     try {
       if (!newFile.buffer) {
         throw new BadRequestException('Unable to access file data');
-      } 
-
-      fileHash = createHash('sha256').update(newFile.buffer).digest('hex');
+      } else {
+        fileHash = createHash('sha256').update(newFile.buffer).digest('hex');
+      }
     } catch (error: unknown) {
       console.error('Error calculating file hash:', error);
       throw new BadRequestException(`Error calculating file hash`);
@@ -358,8 +435,10 @@ export class FilesService {
 
     await this.documentHistoryRepository.save(historyEntry);
 
+     const { fileBuffer: _, ...rest } = updatedDocument;
+
     return {
-      ...updatedDocument,
+      ...rest,
     };
   }
 
@@ -470,8 +549,16 @@ export class FilesService {
 
   verifyFileIntegrity(document: File): boolean {
     try {
-      if(document.fileHash || !document.fileBuffer) return false;
-      
+      if (!document.fileBuffer) {
+        console.warn('Document does not have a file buffer to verify');
+        return false;
+      }
+
+      if (!document.fileHash) {
+        console.warn('Document does not have a file hash to compare against');
+        return false;
+      }
+     
       const currentHash = createHash('sha256')
         .update(document.fileBuffer)
         .digest('hex');

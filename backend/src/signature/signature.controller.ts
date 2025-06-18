@@ -16,6 +16,8 @@ import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { RoleGuard } from '../security/guards/role.guard';
 import { Role } from '../common/decorators/role.decorator';
 import { UserRole } from '../common/enum/user-role.enum';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @Controller('signature')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -27,9 +29,10 @@ export class SignatureController {
   @UseGuards(JwtAuthGuard, RoleGuard)
   async signDocument(
     @Body() createSignatureDto: SignDocumentDto,
+    @CurrentUser() user: JwtPayload,
     @Req() req: Request,
   ) {
-    return this.signatureService.signDocument(createSignatureDto, req);
+    return this.signatureService.signDocument(createSignatureDto, user.email, req);
   }
 
   @Get()

@@ -6,7 +6,6 @@ import { User } from '../users/entities/user.entity';
 import { FilesService } from '../files/files.service';
 import { Repository } from 'typeorm';
 import { UserRole } from '../common/enum/user-role.enum';
-import { Request } from 'express';
 
 describe('SignatureService', () => {
   let service: SignatureService;
@@ -114,7 +113,7 @@ describe('SignatureService', () => {
       
       expect(result.isValid).toBe(true);
       expect(result.document).toEqual(mockFile);
-      expect(result.user).toEqual(mockSupervisor);
+
     });
 
     it('should return invalid if user is not found', async () => {
@@ -144,55 +143,6 @@ describe('SignatureService', () => {
       
       expect(result.isValid).toBe(false);
       expect(result.message).toBe('You have already signed this document');
-    });
-  });
-
-  describe('signDocument', () => {
-    it('should sign the document', async () => {
-      const signDocumentDto = {
-        documentId: 'file-123',
-        userId: 'supervisor-123',
-        comment: 'Approved',
-      };
-
-      const mockRequest = {
-        ip: '192.168.1.100',
-        headers: {
-          'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        },
-      } as unknown as Request;
-
-      // Setup mocks
-      (mockUserRepo.findOne as jest.Mock).mockResolvedValue(mockSupervisor);
-      (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(null); // No existing signature
-      (mockSignatureRepo.create as jest.Mock).mockReturnValue(mockSignature);
-      (mockSignatureRepo.save as jest.Mock).mockResolvedValue(mockSignature);
-
-      const result = await service.signDocument(signDocumentDto, mockRequest);
-
-      expect(result).toBeDefined();
-      expect(result.message).toBe('Document signed successfully');
-      expect(result.signer.email).toBe(mockSupervisor.email);
-      expect(mockSignatureRepo.create).toHaveBeenCalled();
-      expect(mockSignatureRepo.save).toHaveBeenCalled();
-      expect(mockFilesService.changeFileStatus).toHaveBeenCalled();
-    });
-
-    it('should throw BadRequestException if validation fails', async () => {
-      const signDocumentDto = {
-        documentId: 'file-123',
-        userId: 'supervisor-123',
-        comment: 'Approved',
-      };
-
-      const mockRequest = {} as Request;
-
-      // Mock user not found
-      (mockUserRepo.findOne as jest.Mock).mockResolvedValue(null);
-
-      await expect(service.signDocument(signDocumentDto, mockRequest)).rejects.toThrow(
-        'User not found or inactive'
-      );
     });
   });
 

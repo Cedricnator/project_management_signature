@@ -1,12 +1,13 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class SignDocumentDto {
   @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   documentId: string;
-  @IsUUID()
-  userId: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   comment?: string;
 }

@@ -9,6 +9,7 @@ import { SignDocument } from './entities/account-document.entity';
 import { FilesModule } from '../files/files.module';
 import { File } from '../files/entities/file.entity';
 import { SecurityModule } from '../security/security.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SecurityModule } from '../security/security.module';
     ]),
     FilesModule,
     SecurityModule,
+    UsersModule,
   ],
   controllers: [SignatureController],
   providers: [SignatureService],

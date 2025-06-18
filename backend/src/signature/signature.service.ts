@@ -10,26 +10,24 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { createHash } from 'crypto';
 import { FilesService } from '../files/files.service';
-import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/enum/user-role.enum';
 import { DocumentStatus } from '../files/enum/document-status.enum';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class SignatureService {
   constructor(
     @InjectRepository(SignDocument)
     private readonly accountDocumentRepository: Repository<SignDocument>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly filesService: FilesService,
+    private readonly userService: UsersService,
   ) {}
 
-  private async validateDocumentForSigning(documentId: string, userId: string) {
-    const document = await this.filesService.findOne(documentId);
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  private async validateDocumentForSigning(documentId: string, user: any) {
+    const document = await this.filesService.findDocumentWithBuffer(documentId);
 
-    if (!user || !user.isActive) {
-      return { isValid: false, message: 'User not found or inactive' };
+    if (!user) {
+      return { isValid: false, message: 'User not found' };
     }
 
     if (user.role !== UserRole.SUPERVISOR) {
@@ -54,7 +52,7 @@ export class SignatureService {
     const existingSignature = await this.accountDocumentRepository.findOne({
       where: {
         documentId: documentId,
-        accountId: userId,
+        accountId: user.id,
       },
     });
 
@@ -68,27 +66,28 @@ export class SignatureService {
     return {
       isValid: true,
       document,
-      user,
     };
   }
 
-  async signDocument(signDocumentDto: SignDocumentDto, req: Request) {
-    const { documentId, comment, userId } = signDocumentDto;
+  async signDocument(signDocumentDto: SignDocumentDto, userEmail: string, req: Request) {
+    const user = await this.userService.findByEmail(userEmail);
+
+    const { documentId, comment } = signDocumentDto;
 
     // Make all verifications before proceeding
     const validationResult = await this.validateDocumentForSigning(
       documentId,
-      userId,
+      user,
     );
 
     if (!validationResult.isValid) {
       throw new BadRequestException(validationResult.message);
     }
-    const { document, user } = validationResult;
+    const { document } = validationResult;
 
     const signatureData = {
       documentId,
-      userId,
+      userId: user.id,
       timestamp: new Date().toISOString(),
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip,
@@ -103,7 +102,7 @@ export class SignatureService {
     // Create new signature
     const newSignature = this.accountDocumentRepository.create({
       documentId: documentId,
-      accountId: userId,
+      accountId: user.id,
       validated: true,
       validatedAt: new Date(),
       signatureHash: signatureHash,
@@ -112,23 +111,22 @@ export class SignatureService {
     });
     const signature = await this.accountDocumentRepository.save(newSignature);
 
-    await this.filesService.changeFileStatus(
+    await this.filesService.changeFileStatus(   
       documentId,
-      DocumentStatus.SIGNED, 
-      `Document signed by supervisor: ${user!.email}`,
-      userId,
+      DocumentStatus.SIGNED,
+      user.email,
+      comment || `Documento firmado por: ${user.email}`
     );
 
     return {
-      message: 'Document signed successfully',
       signatureHash: signatureHash,
       signedAt: signature.validatedAt,
       signer: {
-        id: user!.id,
-        email: user!.email,
-        firstName: user!.firstName,
-        lastName: user!.lastName,
-        role: user!.role,
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
       },
     };
   }
