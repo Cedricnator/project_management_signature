@@ -47,6 +47,7 @@ export const useDocumentStore = defineStore('document', {
                 }
             } catch (error: any) {
                 logger.error('[ALL_DOCS]', error)
+                this.documents = []
             }
         },
 

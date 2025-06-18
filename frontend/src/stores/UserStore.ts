@@ -62,10 +62,6 @@ export const useUserStore = defineStore('user', {
             } catch (error) {
                 logger.error('[USER_HISTORY]', error)
             }
-
-            // this.documentHistory = mockUserDocumentHistory().sort(
-            //     (a, b) => b.createdAt.getDate() - a.createdAt.getDate(),
-            // )
         },
         async getAllUserDocumentsByUserId() {
             try {
@@ -86,9 +82,9 @@ export const useUserStore = defineStore('user', {
                 if (response.status == 200) {
                     this.documents = response.data.map((data) => documentResponseToDocument(data))
                 }
-                //TODO ARREGLA ESTA CUSTION
             } catch (error) {
                 logger.error('[DOCS]', error)
+                this.documents = []
             }
         },
 
