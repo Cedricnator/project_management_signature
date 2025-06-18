@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SignatureService } from './signature.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { SignDocument } from './entities/account-document.entity';
-import { User } from '../users/entities/user.entity';
 import { FilesService } from '../files/files.service';
+import { UsersService } from '../users/users.service';
 import { Repository } from 'typeorm';
 import { UserRole } from '../common/enum/user-role.enum';
 
@@ -11,7 +11,7 @@ describe('SignatureService', () => {
   let service: SignatureService;
   let mockFilesService: Partial<FilesService>;
   let mockSignatureRepo: Partial<Repository<SignDocument>>;
-  let mockUserRepo: Partial<Repository<User>>
+  let mockUsersService: Partial<UsersService>;
 
   const mockSupervisor = {
     id: 'supervisor-123',
@@ -35,6 +35,7 @@ describe('SignatureService', () => {
     uploadedBy: 'user-123',
     currentStatusId: '01974b23-bc2f-7e5f-a9d0-73a5774d2778', // pending status
     fileHash: 'abc123hash',
+    fileBuffer: Buffer.from('test content'), 
   };
 
   const mockSignature = {
@@ -56,19 +57,19 @@ describe('SignatureService', () => {
       create: jest.fn(),
       save: jest.fn(),
       remove: jest.fn(),
-      createQueryBuilder: jest.fn(),
     };
 
-    mockUserRepo = {
-      findOne: jest.fn(),
-      find: jest.fn(),
-    };
-
-    // Mock FilesService
     mockFilesService = {
       findOne: jest.fn().mockResolvedValue(mockFile),
+      findDocumentWithBuffer: jest.fn().mockResolvedValue(mockFile),
       verifyFileIntegrity: jest.fn().mockReturnValue(true),
       changeFileStatus: jest.fn().mockResolvedValue({ message: 'Status updated' }),
+    };
+
+    mockUsersService = {
+      findOne: jest.fn().mockResolvedValue(mockSupervisor),
+      findByEmail: jest.fn().mockResolvedValue(mockSupervisor),
+      findOneByEmail: jest.fn().mockResolvedValue(mockSupervisor),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -79,12 +80,12 @@ describe('SignatureService', () => {
           useValue: mockSignatureRepo,
         },
         {
-          provide: getRepositoryToken(User),
-          useValue: mockUserRepo,
-        },
-        {
           provide: FilesService,
           useValue: mockFilesService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -102,44 +103,38 @@ describe('SignatureService', () => {
 
   describe('validateDocumentForSigning', () => {
     const documentId = 'file-123';
-    const userId = 'supervisor-123';
+    const mockUser = mockSupervisor;
 
     it('should return valid document and user for signing', async () => {
       // Setup mocks
-      (mockUserRepo.findOne as jest.Mock).mockResolvedValue(mockSupervisor);
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(null); // No existing signature
       
-      const result = await service['validateDocumentForSigning'](documentId, userId);
+      const result = await service['validateDocumentForSigning'](documentId, mockUser);
       
       expect(result.isValid).toBe(true);
       expect(result.document).toEqual(mockFile);
-
     });
 
     it('should return invalid if user is not found', async () => {
-      (mockUserRepo.findOne as jest.Mock).mockResolvedValue(null);
-      
-      const result = await service['validateDocumentForSigning'](documentId, userId);
+      const result = await service['validateDocumentForSigning'](documentId, null);
       
       expect(result.isValid).toBe(false);
-      expect(result.message).toBe('User not found or inactive');
+      expect(result.message).toBe('User not found');
     });
 
     it('should return invalid if user is not a supervisor', async () => {
       const regularUser = { ...mockSupervisor, role: UserRole.USER };
-      (mockUserRepo.findOne as jest.Mock).mockResolvedValue(regularUser);
       
-      const result = await service['validateDocumentForSigning'](documentId, userId);
+      const result = await service['validateDocumentForSigning'](documentId, regularUser);
       
       expect(result.isValid).toBe(false);
       expect(result.message).toBe('User is not a supervisor');
     });
 
     it('should return invalid if document already signed by user', async () => {
-      (mockUserRepo.findOne as jest.Mock).mockResolvedValue(mockSupervisor);
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(mockSignature); // Existing signature
       
-      const result = await service['validateDocumentForSigning'](documentId, userId);
+      const result = await service['validateDocumentForSigning'](documentId, mockUser);
       
       expect(result.isValid).toBe(false);
       expect(result.message).toBe('You have already signed this document');
