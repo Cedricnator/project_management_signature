@@ -382,11 +382,12 @@ export class FilesService {
       );
     }
 
+    if (!newFile.path || !existsSync(newFile.path)) {
+      throw new BadRequestException('New file not saved properly to disk');
+    }
+
     // Delete previous file if it exists
-    if (
-      document.filePath &&
-      existsSync(join(process.cwd(), document.filePath))
-    ) {
+    if (document.filePath && existsSync(join(process.cwd(), document.filePath))) {
       try {
         unlinkSync(join(process.cwd(), document.filePath));
       } catch (error) {
@@ -394,16 +395,15 @@ export class FilesService {
       }
     }
 
+    let fileBuffer: Buffer;
     let fileHash: string;
+    
     try {
-      if (!newFile.buffer) {
-        throw new BadRequestException('Unable to access file data');
-      } else {
-        fileHash = createHash('sha256').update(newFile.buffer).digest('hex');
-      }
-    } catch (error: unknown) {
-      console.error('Error calculating file hash:', error);
-      throw new BadRequestException(`Error calculating file hash`);
+      fileBuffer = readFileSync(newFile.path);
+      fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+    } catch (error) {
+      console.error('Error reading file or calculating hash:', error);
+      throw new BadRequestException(`Error processing updated file: ${error.message}`);
     }
 
     // Update document properties
@@ -414,8 +414,9 @@ export class FilesService {
     document.originalFilename = newFile.originalname;
     document.filename = newFile.filename;
     document.fileHash = fileHash;
-    document.fileBuffer = newFile.buffer;
+    document.fileBuffer = fileBuffer;
     document.description = updateFileDto.description ?? document.description;
+
 
     const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
     if (document.currentStatusId === '01974b23-e943-7308-8185-1556429b9ff1') {
@@ -490,8 +491,12 @@ export class FilesService {
 
     // Update state of document
     document.currentStatusId = statusId;
-    await this.documentRepository.save(document);
-
+      
+    await this.documentRepository.update(
+      { id }, 
+      { currentStatusId: statusId }
+    );
+    
     // Create history entry
     const historyEntry = this.documentHistoryRepository.create({
       documentId: document.id,
