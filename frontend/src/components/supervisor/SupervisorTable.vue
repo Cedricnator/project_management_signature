@@ -6,11 +6,13 @@ import CustomButton from '../CustomButton.vue'
 import UserDocumentHistoryModal from '@/components/user/UserDocumentHistoryModal.vue'
 import SupervisorDocApproveModal from '@/components/supervisor/SupervisorDocApproveModal.vue'
 import { useDocumentStore } from '@/stores/DocumentStore'
+import { useToastStore } from '@/stores/ToastStore'
 
 const props = defineProps<{
     documents: Document[]
 }>()
 
+const toastStore = useToastStore()
 const documentStore = useDocumentStore()
 const isShowModalApproveDoc = ref(false)
 const isShowModal = ref(false)
@@ -75,9 +77,9 @@ function openDocModal() {
 }
 
 async function handleDocPreview(document: Document) {
-    const currentFile = await documentStore.getFileByDocumentId(document.documentId);
-    const url = URL.createObjectURL(currentFile);
-    window.open(url, '_blank');
+    const fetchResult = await documentStore.getPreview(document.documentId);
+    if (!fetchResult.success) toastStore.addToast(fetchResult.type, fetchResult.message)
+
 }
 
 function handleApproveDoc(document: Document) {

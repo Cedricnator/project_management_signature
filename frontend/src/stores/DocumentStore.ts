@@ -21,6 +21,11 @@ import {
     type UserHistoryResponseDto,
 } from './dto/UserHistoryResponseDto'
 import { DocumentHistoryResponse } from './dto/DocumentHistoryResponseDto'
+import {
+    documentResponseToDocument,
+    type GetDocumentResponseDto,
+} from './dto/GetDocumentResponseDto'
+import { RejectDocumentDto } from './dto/RejectDocumentDto'
 
 export const useDocumentStore = defineStore('document', {
     state: () => ({
@@ -28,7 +33,21 @@ export const useDocumentStore = defineStore('document', {
     }),
     actions: {
         async getAllDocuments() {
-            this.documents = mockDocuments()
+            try {
+                const response = await api.get<GetDocumentResponseDto[]>(`${API_ROUTE}/files`)
+
+                logger.info('[ALL_DOCS]', 'response: ', response)
+
+                if (response.status == 200) {
+                    const allDocuments: CustomDocument[] = response.data.map((data) =>
+                        documentResponseToDocument(data),
+                    )
+
+                    this.documents = allDocuments
+                }
+            } catch (error: any) {
+                logger.error('[ALL_DOCS]', error)
+            }
         },
 
         async getDocumentByDocumentId(documentId: string) {},
@@ -105,9 +124,108 @@ export const useDocumentStore = defineStore('document', {
             }
         },
 
-        async processDocument(processedDocument: ProcededDocument) {
-            logger.info('[DOC_STORE]', 'Processed document: ', processedDocument)
-            return { success: true, message: 'Documento procesado con éxito' } as Result
+        async approveDocument(processedDocument: ProcededDocument) {
+            try {
+                const sessionStore = useSessionStore()
+
+                const data = {
+                    documentId: processedDocument.documentId,
+                    userId: sessionStore.account.accountId,
+                    comment: processedDocument.supervisorCommentary,
+                }
+
+                const response = await api.post(`${API_ROUTE}/signature`, { ...data })
+
+                logger.info('[PROCESS_DOC]', 'response: ', response)
+
+                if (response.status == 200) {
+                    return {
+                        success: true,
+                        message: 'Documento rechazado con éxito',
+                        type: ToastType.success,
+                    } as Result
+                }
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result
+            } catch (error: any) {
+                logger.error('[PROCESS_DOC]', error)
+                return {
+                    success: false,
+                    message: error.message,
+                    type: ToastType.error,
+                } as Result
+            }
+        },
+
+        async rejectDocument(processedDocument: ProcededDocument) {
+            try {
+                const data = new RejectDocumentDto(
+                    processedDocument.status,
+                    processedDocument.supervisorCommentary,
+                )
+
+                const response = await api.patch(
+                    `${API_ROUTE}/files/${processedDocument.documentId}/status`,
+                    { ...data },
+                )
+
+                logger.info('[PROCESS_DOC]', 'response: ', response)
+
+                if (response.status == 200) {
+                    return {
+                        success: true,
+                        message: 'Documento aprobado con éxito',
+                        type: ToastType.success,
+                    } as Result
+                }
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result
+            } catch (error: any) {
+                logger.error('[PROCESS_DOC]', error)
+                return {
+                    success: false,
+                    message: error.message,
+                    type: ToastType.error,
+                } as Result
+            }
+        },
+
+        async getPreview(documentId: string) {
+            try {
+                const response = await api.get(`${API_ROUTE}/files/${documentId}/stream`, {
+                    responseType: 'arraybuffer',
+                })
+                logger.info('[DOC_PREVIEW]', 'response: ', response)
+                if (response.status == 200) {
+                    const mime = response.headers['application/pdf'] ?? 'application/pdf' // fallback
+                    const url = URL.createObjectURL(new Blob([response.data], { type: mime }))
+                    window.open(url, '_blank')
+
+                    return {
+                        success: true,
+                        message: 'Documento obtenido con éxito',
+                        type: ToastType.success,
+                    } as Result
+                }
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result
+            } catch (error: any) {
+                logger.error('[DOC_PREVIEW]', error)
+                return {
+                    success: false,
+                    message: error.message,
+                    type: ToastType.error,
+                } as Result
+            }
         },
     },
 })
