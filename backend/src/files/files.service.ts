@@ -360,7 +360,7 @@ export class FilesService {
 
   async update(
     id: string,
-    newFile: Express.Multer.File,
+    newFile: Express.Multer.File | undefined, 
     userEmail: string,
     updateFileDto: UpdateFileDto,
   ) {
@@ -372,8 +372,8 @@ export class FilesService {
     }
 
     const allowedStatuses = [
-      DocumentStatus.REJECTED, // rejected
-      DocumentStatus.PENDING_REVIEW, // pending_review
+      DocumentStatus.REJECTED,
+      DocumentStatus.PENDING_REVIEW,
     ];
 
     if (!allowedStatuses.includes(document.currentStatusId as DocumentStatus)) {
@@ -382,11 +382,36 @@ export class FilesService {
       );
     }
 
+    if (!newFile) {
+      const updatedFields: Partial<File> = {};
+      
+      if (updateFileDto.name !== undefined) {
+        updatedFields.name = updateFileDto.name;
+      }
+      
+      if (updateFileDto.description !== undefined) {
+        updatedFields.description = updateFileDto.description;
+      }
+
+      await this.documentRepository.update({ id }, updatedFields);
+
+      const historyEntry = this.documentHistoryRepository.create({
+        documentId: id,
+        statusId: document.currentStatusId,
+        changedBy: user.id,
+        comment: updateFileDto.comment ?? `Metadatos actualizados el ${formatFriendlyDate(new Date())}`,
+      });
+
+      await this.documentHistoryRepository.save(historyEntry);
+
+      const updatedDocument = await this.findOne(id);
+      return updatedDocument;
+    }
+
     if (!newFile.path || !existsSync(newFile.path)) {
       throw new BadRequestException('New file not saved properly to disk');
     }
 
-    // Delete previous file if it exists
     if (document.filePath && existsSync(join(process.cwd(), document.filePath))) {
       try {
         unlinkSync(join(process.cwd(), document.filePath));
@@ -402,45 +427,46 @@ export class FilesService {
       fileBuffer = readFileSync(newFile.path);
       fileHash = createHash('sha256').update(fileBuffer).digest('hex');
     } catch (error) {
-      console.error('Error reading file or calculating hash:', error);
-      throw new BadRequestException(`Error processing updated file: ${error.message}`);
+      console.error('Error processing new file:', error);
+      throw new BadRequestException(`Error processing new file: ${error.message}`);
     }
 
-    // Update document properties
-    document.name = updateFileDto.name ?? document.name;
-    document.filePath = newFile.path;
-    document.fileSize = newFile.size;
-    document.mimetype = newFile.mimetype;
-    document.originalFilename = newFile.originalname;
-    document.filename = newFile.filename;
-    document.fileHash = fileHash;
-    document.fileBuffer = fileBuffer;
-    document.description = updateFileDto.description ?? document.description;
+    const updateData: Partial<File> = {
+      filePath: newFile.path,
+      fileSize: newFile.size,
+      mimetype: newFile.mimetype,
+      originalFilename: newFile.originalname,
+      filename: newFile.filename,
+      fileHash: fileHash,
+      fileBuffer: fileBuffer,
+    };
 
+    if (updateFileDto.name !== undefined) {
+      updateData.name = updateFileDto.name;
+    }
+    
+    if (updateFileDto.description !== undefined) {
+      updateData.description = updateFileDto.description;
+    }
 
     const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
     if (document.currentStatusId === '01974b23-e943-7308-8185-1556429b9ff1') {
-      // If the document was rejected, set it to pending review
-      document.currentStatusId = pendingReviewStatusId;
+      updateData.currentStatusId = pendingReviewStatusId;
     }
 
-    const updatedDocument = await this.documentRepository.save(document);
+    await this.documentRepository.update({ id }, updateData);
 
-    // Create history entry for the update
     const historyEntry = this.documentHistoryRepository.create({
-      documentId: document.id,
+      documentId: id,
       statusId: document.currentStatusId,
       changedBy: user.id,
-      comment: updateFileDto.comment ?? `Documento actualizado el ${formatFriendlyDate(new Date())}`,
+      comment: updateFileDto.comment ?? `Documento y archivo actualizados el ${formatFriendlyDate(new Date())}`,
     });
 
     await this.documentHistoryRepository.save(historyEntry);
 
-     const { fileBuffer: _, ...rest } = updatedDocument;
-
-    return {
-      ...rest,
-    };
+    const updatedDocument = await this.findOne(id);
+    return updatedDocument;
   }
 
   async remove(id: string) {
