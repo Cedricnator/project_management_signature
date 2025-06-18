@@ -98,7 +98,6 @@ describe('FilesService', () => {
     mockUserService = {
       findOne: jest.fn(),
       findOneByEmail: jest.fn(),
-      findByIds: jest.fn(),
       findAll: jest.fn(),
       create: jest.fn(),
       updateRole: jest.fn(),
