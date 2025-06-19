@@ -31,7 +31,7 @@ onMounted(() => {
             </div>
             <div class="flex md:min-h-30 justify-end">
                 <div class="flex md:mr-5 md:w-2/5 items-center justify-end">
-                    <CustomButton class="mr-2 md:mr-5" label="Ver historial" :onClick="() => router.push({name: 'user-history'})" />
+                    <!-- <CustomButton class="mr-2 md:mr-5" label="Ver historial" :onClick="() => router.push({name: 'user-history'})" /> -->
                 </div>
             </div>
         </div>

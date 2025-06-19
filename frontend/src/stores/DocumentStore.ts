@@ -127,19 +127,22 @@ export const useDocumentStore = defineStore('document', {
 
         async approveDocument(processedDocument: ProcededDocument) {
             try {
-                const sessionStore = useSessionStore()
-
                 const data = {
                     documentId: processedDocument.documentId,
-                    userId: sessionStore.account.accountId,
                     comment: processedDocument.supervisorCommentary,
                 }
 
-                const response = await api.post(`${API_ROUTE}/signature`, { ...data })
+                const response = await api.post<GetDocumentResponseDto>(`${API_ROUTE}/signature`, {
+                    ...data,
+                })
 
                 logger.info('[PROCESS_DOC]', 'response: ', response)
 
-                if (response.status == 200) {
+                if (response.status == 201) {
+                    const customDocument: CustomDocument = documentResponseToDocument(response.data)
+
+                    this.handleUpdateDocumentResponse(customDocument)
+
                     return {
                         success: true,
                         message: 'Documento rechazado con éxito',
@@ -168,7 +171,7 @@ export const useDocumentStore = defineStore('document', {
                     processedDocument.supervisorCommentary,
                 )
 
-                const response = await api.patch(
+                const response = await api.patch<GetDocumentResponseDto>(
                     `${API_ROUTE}/files/${processedDocument.documentId}/status`,
                     { ...data },
                 )
@@ -176,9 +179,13 @@ export const useDocumentStore = defineStore('document', {
                 logger.info('[PROCESS_DOC]', 'response: ', response)
 
                 if (response.status == 200) {
+                    const customDocument: CustomDocument = documentResponseToDocument(response.data)
+
+                    this.handleUpdateDocumentResponse(customDocument)
+
                     return {
                         success: true,
-                        message: 'Documento aprobado con éxito',
+                        message: 'Documento rechazado con éxito',
                         type: ToastType.success,
                     } as Result
                 }
@@ -226,6 +233,15 @@ export const useDocumentStore = defineStore('document', {
                     message: error.message,
                     type: ToastType.error,
                 } as Result
+            }
+        },
+        handleUpdateDocumentResponse(updated: CustomDocument) {
+            const idx = this.documents.findIndex((doc) => doc.documentId === updated.documentId)
+
+            if (idx !== -1) {
+                this.documents[idx] = { ...updated }
+            } else {
+                this.documents.push({ ...updated })
             }
         },
     },

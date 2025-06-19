@@ -207,9 +207,20 @@ export const useUserStore = defineStore('user', {
 
                     // Clean up the object URL
                     window.URL.revokeObjectURL(url)
+                    return {
+                        success: true,
+                        message: 'Documento descargado con éxito.',
+                        type: ToastType.success,
+                    } as Result
                 }
-            } catch (error) {
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result
+            } catch (error: any) {
                 logger.error('[DOWNLOAD_DOC]', error)
+                return { success: false, message: error.message, type: ToastType.warning } as Result
             }
         },
         handleUpdateDocumentResponse(updated: CustomDocument) {
