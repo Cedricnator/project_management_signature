@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Document } from '@/types'
+import { DocumentStatus } from '@/types'
 import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
 import CustomButton from '../CustomButton.vue'
@@ -7,11 +8,14 @@ import UserDocumentHistoryModal from '@/components/user/UserDocumentHistoryModal
 import SupervisorDocApproveModal from '@/components/supervisor/SupervisorDocApproveModal.vue'
 import { useDocumentStore } from '@/stores/DocumentStore'
 import { useToastStore } from '@/stores/ToastStore'
+import { useUserStore } from '@/stores/UserStore'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps<{
     documents: Document[]
 }>()
 
+const userStore = useUserStore()
 const toastStore = useToastStore()
 const documentStore = useDocumentStore()
 const isShowModalApproveDoc = ref(false)
@@ -87,8 +91,9 @@ function handleApproveDoc(document: Document) {
     isShowModalApproveDoc.value = true
 }
 
-function handleDocDownload(document: Document) {
-    
+async function handleDocDownload(document: Document) {
+    const result = await userStore.downloadDocument(document)
+    if (!result.success) toastStore.addToast(result.type, result.message)
 }
 
 const showModal = computed(() => isShowModal.value)
@@ -177,7 +182,7 @@ watch(searchQuery, () => {
                 >
                     <th
                         scope="row"
-                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark whitespace-nowrap"
+                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark"
                     >
                         {{ document.documentName }}
                     </th>
@@ -197,6 +202,7 @@ watch(searchQuery, () => {
                                 :onClick="() => handleDocPreview(document)"
                             />
                             <CustomButton
+                                v-if="document.state === DocumentStatus.pending_review"
                                 label="Procesar"
                                 iconName="fa-solid fa-file-invoice"
                                 :onClick="() => handleApproveDoc(document)"

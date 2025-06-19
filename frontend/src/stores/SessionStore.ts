@@ -25,7 +25,8 @@ export const useSessionStore = defineStore('session', {
                 }
 
                 const newlogin: NewLogin = {
-                    email: 'pedro.lopez@signature.com',
+                    // email: 'pedro.lopez@signature.com',
+                    email: 'supervisor@signature.com',
                     password: '123456789',
                 }
 

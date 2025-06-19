@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Document } from '@/types'
+import { DocumentStatus } from '@/types'
 import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
 import CustomButton from '../CustomButton.vue'
@@ -183,7 +184,7 @@ watch(searchQuery, () => {
                                 :buttonType="ButtonType.outlined"
                                 :onClick="() => handleDocumentHistoryModal(document)"
                             />
-                            <CustomButton label="Editar" iconName="fa-solid fa-pen-to-square" :onClick="() => handleEditDoc(document)"/>
+                            <CustomButton v-if="document.state != DocumentStatus.approved" label="Editar" iconName="fa-solid fa-pen-to-square" :onClick="() => handleEditDoc(document)"/>
                             <CustomButton label="Descargar" iconName="fa-solid fa-file-arrow-down" :onClick="() => handleDownload(document)"/>
                         </div>
                     </td>
