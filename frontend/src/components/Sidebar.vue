@@ -88,6 +88,11 @@ const userType = computed(() => sessionStore.account.role)
                         <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="supervisor-dashboard" />
                     </li>
                 </ul>
+                <ul v-else-if="userType == AccountRole.admin">
+                    <li>
+                        <SidebarButton label="Dashboard" iconName="fa-solid fa-house" to="admin-dashboard" />
+                    </li>
+                </ul>
             </div>
             <div class="w-full mb-5">
                 <SidebarButton label="Cerrar sesión" iconName="fa-solid fa-arrow-right-from-bracket" :rotation="180" :danger="true" to="login" />
