@@ -2,8 +2,6 @@ import axios from 'axios'
 import { API_ROUTE } from './const'
 import { useSessionStore } from '@/stores/SessionStore'
 
-const sessionStore = useSessionStore()
-
 const api = axios.create({
     baseURL: API_ROUTE,
     timeout: 10000,
@@ -11,7 +9,8 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = sessionStore.token
+        const raw = localStorage.getItem('session')
+        const token = raw ? (JSON.parse(raw) as { token?: string }).token : null
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
         }

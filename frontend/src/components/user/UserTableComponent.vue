@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import type { Document } from '@/types'
+import { DocumentStatus } from '@/types'
 import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
 import CustomButton from '../CustomButton.vue'
 import UserDocumentHistoryModal from '@/components/user/UserDocumentHistoryModal.vue'
 import UserAddDocumentModal from './UserAddDocumentModal.vue'
+import { useUserStore } from '@/stores/UserStore';
 
 const props = defineProps<{
     documents: Document[]
 }>()
 
+const userStore = useUserStore()
 const isShowModalAddDoc = ref(false)
 const isShowModal = ref(false)
 const searchQuery = ref('')
@@ -75,6 +78,10 @@ function openDocModal() {
 function handleEditDoc(document: Document) {
     currentDocument.value = document
     isShowModalAddDoc.value = true
+}
+
+function handleDownload(document: Document) {
+    userStore.downloadDocument(document)
 }
 
 const showModal = computed(() => isShowModal.value)
@@ -163,7 +170,7 @@ watch(searchQuery, () => {
                 >
                     <th
                         scope="row"
-                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark whitespace-nowrap"
+                        class="md:min-w-10 md:max-w-10 px-6 py-4 font-medium text-text-dark text-ellipsis"
                     >
                         {{ document.documentName }}
                     </th>
@@ -177,8 +184,8 @@ watch(searchQuery, () => {
                                 :buttonType="ButtonType.outlined"
                                 :onClick="() => handleDocumentHistoryModal(document)"
                             />
-                            <CustomButton label="Editar" iconName="fa-solid fa-pen-to-square" :onClick="() => handleEditDoc(document)"/>
-                            <CustomButton label="Descargar" iconName="fa-solid fa-file-arrow-down" />
+                            <CustomButton v-if="document.state != DocumentStatus.approved" label="Editar" iconName="fa-solid fa-pen-to-square" :onClick="() => handleEditDoc(document)"/>
+                            <CustomButton label="Descargar" iconName="fa-solid fa-file-arrow-down" :onClick="() => handleDownload(document)"/>
                         </div>
                     </td>
                 </tr>

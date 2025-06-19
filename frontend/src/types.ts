@@ -1,3 +1,5 @@
+import type { ToastType } from "./stores/ToastStore"
+
 export enum AccountRole {
     user = 'Usuario',
     admin = 'Administrador',
@@ -18,6 +20,7 @@ export enum DocumentStatus {
     rejected = 'Rechazado',
     signed = 'Firmado',
     deleted = 'Eliminado',
+    pending_review = 'Por validar',
 }
 
 export interface Document {
@@ -28,11 +31,12 @@ export interface Document {
     validatedBy?: string | null
     description: string
     commentary?: string | null
+    originalName: string
 }
 
 export interface ProcededDocument {
     documentId: string
-    supervisorCommentary?: string | null
+    supervisorCommentary?: string
     processedAt: Date
     status: DocumentStatus
 }
@@ -41,6 +45,10 @@ export interface UploadDocumentDto {
     name: string
     description: string
     commentary?: string | null
+}
+
+export interface UpdateDocumentDto extends UploadDocumentDto {
+    documentId: string
 }
 
 export interface DocumentHistory {
@@ -61,4 +69,5 @@ export interface Result<T = void> {
     success: boolean,
     message: string,
     data?: T
+    type: ToastType
 }

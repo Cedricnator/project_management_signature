@@ -18,6 +18,7 @@ import { useDocumentStore } from '@/stores/DocumentStore'
 import CustomButton from '@/components/CustomButton.vue'
 import { sleep } from '@/utils/timeout'
 import { FwbSpinner } from 'flowbite-vue'
+import { useToastStore } from '@/stores/ToastStore'
 
 const props = defineProps<{
     isShowModal: boolean
@@ -28,6 +29,7 @@ const loading = ref(true)
 const documentStore = useDocumentStore()
 var isShowModal = computed(() => props.isShowModal)
 const documentHistory = ref<DocumentHistory[]>()
+const toastStore = useToastStore()
 
 const emit = defineEmits<{
     (e: 'close'): void
@@ -39,9 +41,11 @@ function handleClose() {
 }
 
 const fetchDocumentHistory = async () => {
-    documentHistory.value = await documentStore.getDocumentHistoryByDocumentId(
+    const fetchResult = await documentStore.getDocumentHistoryByDocumentId(
         props.document!.documentId,
     )
+    if (!fetchResult.success) toastStore.addToast(fetchResult.type, fetchResult.message)
+    documentHistory.value = fetchResult.data ?? []
     await sleep(500)
     loading.value = false
 }
