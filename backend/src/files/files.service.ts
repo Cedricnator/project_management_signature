@@ -557,7 +557,7 @@ export class FilesService {
       },
       history: history.map((h) => ({
         id: h.id,
-        status: h.status?.status,
+        statusId: h.status?.id,
         comment: h.comment,
         changedBy: h.changedBy,
         createdAt: h.createdAt,
