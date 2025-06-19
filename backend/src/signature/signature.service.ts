@@ -109,16 +109,21 @@ export class SignatureService {
       ipAddress: req.ip || '',
       userAgent: req.headers['user-agent'] || '',
     });
+    
     const signature = await this.accountDocumentRepository.save(newSignature);
 
     await this.filesService.changeFileStatus(   
       documentId,
-      DocumentStatus.SIGNED,
+      DocumentStatus.APPROVED,
       user.email,
       comment || `Documento firmado por: ${user.email}`
     );
 
+    const updatedDocument = await this.filesService.findOne(documentId);
+    const { fileBuffer, ...rest } = updatedDocument;
+
     return {
+      ...rest,
       signatureHash: signatureHash,
       signedAt: signature.validatedAt,
       signer: {
