@@ -11,7 +11,7 @@ onMounted(() => {})
 
 <template>
     <div class="flex w-full">
-        <div class="flex flex-1"></div>
+        <div class="md:flex flex-1 hidden"></div>
         <div class="flex min-w-60 md:min-w-90 p-3 justify-center align-center">
             <AccountCard :account="sessionStore.account" />
         </div>

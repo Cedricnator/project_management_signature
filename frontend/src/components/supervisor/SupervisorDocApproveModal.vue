@@ -34,6 +34,7 @@ const description = ref('')
 const comentario = ref('')
 const supervisorCommentary = ref('')
 const file = ref<File | null>(null)
+const fileName = ref('')
 
 const loading = ref(true)
 
@@ -41,11 +42,10 @@ watch(
     () => props.isOpen,
     async (open) => {
         if (open && props.document) {
-            const currentFile = await documentStore.getFileByDocumentId(props.document.documentId)
             name.value = props.document.documentName
             description.value = props.document.description
             comentario.value = props.document.commentary ?? ''
-            file.value = currentFile
+            fileName.value = props.document.originalName
             sleep(500)
             loading.value = false
         }
@@ -62,15 +62,25 @@ const handleSubmit = async () => {
     const processedDocument: ProcededDocument = {
         documentId: props.document?.documentId!,
         processedAt: new Date(),
-        supervisorCommentary: supervisorCommentary.value || null,
+        supervisorCommentary: supervisorCommentary.value || undefined,
         status: docStatus,
     }
-    const result = await documentStore.processDocument(processedDocument)
-    const toastType = result.success ? ToastType.success : ToastType.warning
-    toastStore.addToast(toastType, result.message)
+
+    docStatus == DocumentStatus.approved ? handleApproveDoc(processedDocument) : handleRejectDoc(processedDocument)    
 
     closeModal()
 }
+
+const handleApproveDoc = async (processedDocument: ProcededDocument) => {
+    const result = await documentStore.approveDocument(processedDocument)
+    if (!result.success) toastStore.addToast(result.type, result.message)
+}
+
+const handleRejectDoc = async (processedDocument: ProcededDocument) => {
+    const result = await documentStore.rejectDocument(processedDocument)
+    if (!result.success) toastStore.addToast(result.type, result.message)
+}
+
 </script>
 
 <template>
@@ -178,7 +188,7 @@ const handleSubmit = async () => {
                                 Documento:
                             </label>
                             <span class="text-sm font-semibold text-[var(--color-primary)]">
-                                {{ file?.name }}
+                                {{ fileName }}
                             </span>
                         </div>
                         <div class="col-span-2">
