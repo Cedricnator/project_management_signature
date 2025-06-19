@@ -33,7 +33,17 @@ export class FilesService {
     private documentHistoryRepository: Repository<DocumentHistory>,
     private readonly userService: UsersService,
   ) {}
-
+  
+  /**
+   * FindDocumentStatus
+   * ------------------
+   * Finds a document status by its ID.
+   * 
+   * @param {string} id - The ID of the document status to find.
+   * @returns {Promise<DocumentStatusType>} - The found DocumentStatusType.
+   * @throws {NotFoundException} - if the status is not found.
+   * @throws {InternalServerErrorException} - if there is an error during the database operation.
+   */
   private async findDocumentStatus(id: string): Promise<DocumentStatusType> {
     try {
       const status = await this.documentStatusRepository.findOne({
@@ -49,6 +59,18 @@ export class FilesService {
     }
   }
   
+  /**
+   * UploadFile
+   * ----------
+   * Uploads a file and creates a document entry in the database.
+   * 
+   * @param {Express.Multer.File} file - The file to upload.
+   * @param {UploadFileDto} uploadFileDto - DTO containing file metadata.
+   * @param {string} userEmail - Email of the user uploading the file.
+   * @returns {Promise<File>} - The saved document entry.
+   * @throws {BadRequestException} - If no file is provided or file data is missing.
+   * @throws {NotFoundException} - If the user or draft status is not found.
+   */
   async uploadFile(
     file: Express.Multer.File,
     uploadFileDto: UploadFileDto,
@@ -141,7 +163,15 @@ export class FilesService {
     const { fileBuffer: _, ...documentWithoutBuffer } = savedDocument;
     return documentWithoutBuffer;
   }
-
+  /**
+   * FindFilesByUser
+   * ---------------
+   * Finds all files uploaded by a specific user.
+   * 
+   * @param {string} userId - The ID of the user whose files to find.
+   * @returns {Promise<File[]>} - An array of files uploaded by the user.
+   * @throws {NotFoundException} - If the user or their documents are not found.
+   */
   async findFilesByUser(userId: string): Promise<File[]> {
     const user = await this.userService.findOne(userId);
     if (!user) {
@@ -173,7 +203,14 @@ export class FilesService {
     return documents;
   }
 
-  async findAll() {
+  /**
+   * FindAll
+   * -------
+   * Retrieves all documents from the database.
+   * 
+   * @returns {Promise<File[]>} - An array of all documents.
+   */
+  async findAll(): Promise<File[]> {
     const documents = await this.documentRepository.find({
       select: [
         'id',
@@ -204,6 +241,15 @@ export class FilesService {
     return document;
   }
 
+  /**
+   * FindOne
+   * -------
+   * Finds a document by its ID.
+   * 
+   * @param {string} id - The ID of the document to find.
+   * @returns {Promise<File>} - The found document.
+   * @throws {NotFoundException} - If the document with the given ID is not found.
+   */ 
   async findOne(id: string): Promise<File> {
     const document = await this.documentRepository.findOne({
       where: { id },
@@ -229,8 +275,17 @@ export class FilesService {
 
     return document;
   }
-
-  async getFileHistoryByUserId(userId: string) {
+  
+  /**
+   * GetFileHistoryByUserId
+   * -----------------------
+   * Retrieves the file history for a specific user.
+   * 
+   * @param {string} userId - The ID of the user whose file history to retrieve.
+   * @returns {Promise<DocumentHistoryModified[]>} - An array of document history entries for the user.
+   * @throws {NotFoundException} - If the user or their documents are not found.
+   */
+  async getFileHistoryByUserId(userId: string): Promise<DocumentHistoryModified[]> {
     const user = await this.userService.findOne(userId);
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
@@ -292,7 +347,15 @@ export class FilesService {
     return documentHistory;
   }
 
-  async getFilesHistory() {
+  /**
+   * GetFilesHistory
+   * ---------------
+   * Retrieves the history of all documents.
+   * 
+   * @returns {Promise<DocumentHistoryModified[]>} - An array of document history entries.
+   * @throws {NotFoundException} - If a user in the history is not found.
+   */
+  async getFilesHistory(): Promise<DocumentHistoryModified[]> {
     const documentsHistory = await this.documentHistoryRepository.find();
     const transformedsHistory: DocumentHistoryModified[] = [];
 
@@ -320,10 +383,21 @@ export class FilesService {
     return transformedsHistory;
   }
 
-  async downloadFile(id: string, res: Response) {
+  /**
+   * DownloadFile
+   * ------------
+   * Downloads a file by its ID.
+   * 
+   * @param {string} id - The ID of the document to download.
+   * @param {Response} res - The Express response object.
+   * @returns {Promise<StreamableFile>} - A streamable file for download.
+   * @throws {NotFoundException} - If the file is not found on disk.
+   */
+  async downloadFile(id: string, res: Response): Promise<StreamableFile> {
     const document = await this.findOne(id);
 
     const filePath = join(process.cwd(), document.filePath);
+
     if (!existsSync(filePath)) {
       throw new NotFoundException('File not found on disk');
     }
@@ -332,12 +406,23 @@ export class FilesService {
       'Content-Disposition',
       `attachment; filename="${document.originalFilename}"`,
     );
+
     res.setHeader('Content-Type', document.mimetype);
+    
     const fileStream = createReadStream(filePath);
     return new StreamableFile(fileStream);
   }
 
-  async streamFile(id: string) {
+  /**
+   * StreamFile
+   * ----------
+   * Streams a file by its ID.
+   * 
+   * @param {string} id - The ID of the document to stream.
+   * @returns {Promise<StreamableFile>} - A streamable file for inline viewing.
+   * @throws {NotFoundException} - If the file path is not found or the file does not exist on disk.
+   */
+  async streamFile(id: string): Promise<StreamableFile> {
     const document = await this.findOne(id);
 
     if (!document.filePath) {
@@ -357,13 +442,26 @@ export class FilesService {
       disposition: `inline; filename="${document.originalFilename}"`,
     });
   }
-
+  
+  /**
+   * Update
+   * ------
+   * Updates an existing document with a new file and metadata.
+   * 
+   * @param {string} id - The ID of the document to update.
+   * @param {Express.Multer.File} newFile - The new file to upload.
+   * @param {string} userEmail - Email of the user updating the file.
+   * @param {UpdateFileDto} updateFileDto - DTO containing updated file metadata.
+   * @returns {Promise<File>} - The updated document entry.
+   * @throws {NotFoundException} - If the document or user is not found.
+   * @throws {BadRequestException} - If the document is not in a valid status for updating.
+   */
   async update(
     id: string,
     newFile: Express.Multer.File | undefined, 
     userEmail: string,
     updateFileDto: UpdateFileDto,
-  ) {
+  ): Promise<File> {
     const document = await this.findOne(id);
     const user = await this.userService.findOneByEmail(userEmail);
 
@@ -449,9 +547,9 @@ export class FilesService {
       updateData.description = updateFileDto.description;
     }
 
-    const pendingReviewStatusId = '01974b23-bc2f-7e5f-a9d0-73a5774d2778';
-    if (document.currentStatusId === '01974b23-e943-7308-8185-1556429b9ff1') {
-      updateData.currentStatusId = pendingReviewStatusId;
+   // If the document was rejected, set it to pending review
+    if (document.currentStatusId === DocumentStatus.REJECTED) {
+      document.currentStatusId = DocumentStatus.PENDING_REVIEW;
     }
 
     await this.documentRepository.update({ id }, updateData);
@@ -469,7 +567,16 @@ export class FilesService {
     return updatedDocument;
   }
 
-  async remove(id: string) {
+  /**
+   * Remove
+   * ------
+   * Deletes a document and its associated file from disk.
+   * 
+   * @param {string} id - The ID of the document to remove.
+   * @returns {Promise<{ id: string, documentName: string }>} - Confirmation of deletion.
+   * @throws {NotFoundException} - If the document with the given ID is not found.
+   */
+  async remove(id: string): Promise<{ id: string; documentName: string; }> {
     const document = await this.findOne(id);
 
     // Delete file from disk
@@ -492,7 +599,18 @@ export class FilesService {
       documentName: document.name,
     };
   }
-
+  
+  /**
+   * ChangeFileStatus
+   * ----------------
+   * Changes the status of a document and logs the change in history.
+   * 
+   * @param {string} id - The ID of the document to change status.
+   * @param {string} statusId - The ID of the new status to set.
+   * @param {string} changedBy - Email of the user changing the status.
+   * @param {string} [comment] - Optional comment for the status change.
+   * @throws {NotFoundException} - If the user or new status is not found.
+   */
   async changeFileStatus(
     id: string,
     statusId: string,
@@ -540,7 +658,16 @@ export class FilesService {
     };
   }
 
-  async getFileHistoryById(id: string) {
+  /**
+   * GetFileHistoryById
+   * ------------------
+   * Retrieves the history of a specific document by its ID.
+   * 
+   * @param {string} id - The ID of the document to retrieve history for.
+   * @returns {Promise<{ document: File, history: DocumentHistory[] }>} - An object containing the document and its history.
+   * @throws {NotFoundException} - If the document with the given ID is not found.
+   */
+  async getFileHistoryById(id: string): Promise<{ document: File; history: DocumentHistory[] }> {
     const document = await this.findOne(id);
 
     const history = await this.documentHistoryRepository.find({
@@ -550,22 +677,19 @@ export class FilesService {
     });
 
     return {
-      document: {
-        id: document.id,
-        documentName: document.name,
-        currentStatus: document.currentStatus?.status,
-      },
-      history: history.map((h) => ({
-        id: h.id,
-        statusId: h.status?.id,
-        comment: h.comment,
-        changedBy: h.changedBy,
-        createdAt: h.createdAt,
-      })),
+      document,
+      history,
     };
   }
-
-  async getStatusTypes() {
+  
+  /**
+   * GetStatusTypes
+   * ---------------
+   * Retrieves all available document status types.
+   * 
+   * @returns {Promise<DocumentStatusType[]>} - An array of document status types.
+   */
+  async getStatusTypes(): Promise<DocumentStatusType[]> {
     try {
       return await this.documentStatusRepository.find({
         order: { status: 'ASC' },
@@ -578,6 +702,14 @@ export class FilesService {
     }
   }
 
+  /**
+   * VerifyFileIntegrity
+   * -------------------
+   * Verifies the integrity of a file by comparing its hash.
+   * 
+   * @param {File} document - The file document to verify.
+   * @returns {boolean} - True if the file is intact, false otherwise.
+   */
   verifyFileIntegrity(document: File): boolean {
     try {
       if (!document.fileBuffer) {
