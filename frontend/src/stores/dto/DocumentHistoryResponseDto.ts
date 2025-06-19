@@ -3,7 +3,7 @@ import { parseDocumentStatus } from './GetDocumentResponseDto'
 
 interface History {
     id: string
-    status: string
+    statusId: string
     comment: string
     changedBy: string
     createdAt: Date
@@ -27,7 +27,7 @@ export class DocumentHistoryResponse {
                 documentHistoryId: h.id,
                 documentId: this.document.id,
                 changedBy: h.changedBy,
-                action: parseDocumentStatus(h.status),
+                action: parseDocumentStatus(h.statusId),
                 createdAt: new Date(h.createdAt),
                 commentary: h.comment ?? null,
             }),
