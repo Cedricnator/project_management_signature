@@ -163,6 +163,7 @@ export class FilesService {
     const { fileBuffer: _, ...documentWithoutBuffer } = savedDocument;
     return documentWithoutBuffer;
   }
+  
   /**
    * FindFilesByUser
    * ---------------
