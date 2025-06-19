@@ -83,11 +83,10 @@ CREATE TABLE signed_document (
 
 -- Insert initial document status types
 INSERT INTO document_status_type (id, status) VALUES
-('01974b23-bc2f-7e5f-a9d0-73a5774d2778', 'pending_review'),
-('01974b23-d84d-7319-95b3-02322c982216', 'approved'),
-('01974b23-e943-7308-8185-1556429b9ff1', 'rejected'),
-('01974b24-093b-7014-aa21-9f964b822156', 'deleted');
-
+('01974b23-bc2f-7e5f-a9d0-73a5774d2778', 'Por validar'),
+('01974b23-d84d-7319-95b3-02322c982216', 'Aprovado'),
+('01974b23-e943-7308-8185-1556429b9ff1', 'Rechazado'),
+('01974b24-093b-7014-aa21-9f964b822156', 'Eliminado');
 -- Insert testing users
 INSERT INTO account (id, email, first_name, last_name, password, role) VALUES
 ('01974b59-3024-74cd-9b7b-44dfa0088448', 'admin@signature.com', 'Carlos', 'Administrador', '$2a$10$yfzNcCgoDGUNDYbyr88kFuReiJsW3TtyUy1vLr5mcGtj1fVgKfI3m', 'admin'),
