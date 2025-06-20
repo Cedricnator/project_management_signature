@@ -1,15 +1,28 @@
 <script setup lang="ts">
-import { useDocumentStore } from '@/stores/DocumentStore'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { onMounted } from 'vue'
-import router from '@/router'
-import TableComponent from '@/components/supervisor/SupervisorTable.vue'
-import CustomButton from '@/components/CustomButton.vue'
+import { useAdminStore } from '@/stores/AdminStore'
+import AdminTable from '@/components/admin/AdminTable.vue'
+import { ButtonType } from '@/types'
+import CustomButton from '@/components/CustomButton.vue';
+
+const adminStore = useAdminStore()
+
+const isCreateUserModal = ref(false)
+
+const users = computed(() => adminStore.users)
 
 
+const createUserModal = () => {
+    isCreateUserModal.value = true
+}
+
+const fetchUser = async () => {
+    adminStore.getAllUsers()
+}
 
 onMounted(() => {
-
+    fetchUser()
 })
 </script>
 
@@ -19,11 +32,14 @@ onMounted(() => {
             class="flex flex-col h-full w-full p-4 rounded-3xl overflow-auto bg-white shadow-xl/10"
         >
             <div class="flex grow mb-4 p-1 md:p-5">
-
+                <div v-if="users.length == 0" class="flex grow justify-center items-center">
+                    No hay usuarios disponibles.
+                </div>
+                <AdminTable v-else :users="users" />
             </div>
             <div class="flex md:min-h-30 justify-end">
                 <div class="flex md:mr-5 md:w-2/5 items-center justify-end">
-
+                    <CustomButton label="Crear usuario" iconName="fa-solid fa-plus" :onClick="createUserModal" />
                 </div>
             </div>
         </div>

@@ -16,7 +16,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="h-full bg-user-background overflow-auto">
+    <main class="h-full admin:bg-[var(--color-background)] overflow-auto">
         <Sidebar />
 
         <div class="flex h-full flex-col sm:ml-64">

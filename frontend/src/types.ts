@@ -13,6 +13,13 @@ export interface Account {
     email: string
 }
 
+export interface AdminUser {
+    email: string
+    firstName: string
+    lastName: string
+    role: AccountRole
+}
+
 export enum DocumentStatus {
     valid = 'Validado',
     invalid = 'Por validar',

@@ -3,6 +3,9 @@ import { ButtonType } from '@/types'
 import { computed } from 'vue'
 import { FwbSpinner } from 'flowbite-vue'
 
+const primaryColor = 'bg-[var(--color-primary)]'
+const hoverColor = 'bg-[var(--color-primary-800)]'
+
 const props = withDefaults(
     defineProps<{
         label: string
@@ -13,7 +16,7 @@ const props = withDefaults(
         iconName?: null | string
     }>(),
     {
-        color: 'supervisor:bg-[var(--color-primary)] user:bg-[var(--color-primary)]',
+        color: `supervisor:${primaryColor} user:${primaryColor} admin:${primaryColor}`,
         buttonType: ButtonType.filled,
         onClick: () => {},
         loading: false,
@@ -23,8 +26,8 @@ const props = withDefaults(
 const buttonClasses = computed(() => {
     const base = 'rounded-2xl px-4 py-2 w-full font-semibold transition-all duration-200 shadow-2xl'
 
-    const filled = `${props.color} user:hover:bg-[var(--color-primary-800)] supervisor:hover:bg-[var(--color-primary-800)] text-white`
-    const outlined = `border border-${props.color}-600 text-${props.color}-600 hover:text-white hover:bg-[var(--color-primary)]`
+    const filled = `${props.color} user:hover:${hoverColor} supervisor:hover:${hoverColor} admin:hover:${hoverColor} text-white`
+    const outlined = `border hover:text-white hover:bg-[var(--color-primary)]`
 
     return `${base} ${props.buttonType === ButtonType.filled ? filled : outlined}`
 })
