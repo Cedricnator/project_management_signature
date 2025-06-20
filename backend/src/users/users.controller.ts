@@ -28,8 +28,8 @@ export class UsersController {
   @Post()
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Role(UserRole.ADMIN)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get('email/:email')
