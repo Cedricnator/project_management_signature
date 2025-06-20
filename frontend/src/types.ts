@@ -20,6 +20,13 @@ export interface AdminUser {
     role: AccountRole
 }
 
+export interface NewUser {
+    email: string,
+    firstName: string,
+    lastName: string,
+    password: string,
+}
+
 export enum DocumentStatus {
     valid = 'Validado',
     invalid = 'Por validar',

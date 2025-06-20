@@ -3,8 +3,8 @@ import { computed, ref } from 'vue'
 import { onMounted } from 'vue'
 import { useAdminStore } from '@/stores/AdminStore'
 import AdminTable from '@/components/admin/AdminTable.vue'
-import { ButtonType } from '@/types'
 import CustomButton from '@/components/CustomButton.vue';
+import AdminUserModal from '@/components/admin/AdminUserModal.vue';
 
 const adminStore = useAdminStore()
 
@@ -27,6 +27,7 @@ onMounted(() => {
 </script>
 
 <template>
+    <AdminUserModal :isOpen="isCreateUserModal" @close="isCreateUserModal = false"/>
     <div class="p-4 grow">
         <div
             class="flex flex-col h-full w-full p-4 rounded-3xl overflow-auto bg-white shadow-xl/10"

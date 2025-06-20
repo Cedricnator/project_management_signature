@@ -107,7 +107,7 @@ watch(searchQuery, () => {
                     <th
                         @click="sortBy('email')"
                         scope="col"
-                        class="px-6 py-3 cursor-pointer md:min-w-10 md:max-w-10"
+                        class="px-2 py-2 md:px-6 md:py-3 cursor-pointer md:min-w-10 md:max-w-10"
                     >
                         Email
                         <span v-if="sortKey === 'email'">
@@ -117,7 +117,7 @@ watch(searchQuery, () => {
                     <th
                         @click="sortBy('lastName')"
                         scope="col"
-                        class="px-6 py-3 cursor-pointer md:min-w-10 md:max-w-10"
+                        class="px-2 py-2 md:px-6 md:py-3 cursor-pointer min-w-30 md:min-w-10 md:max-w-10"
                     >
                         Apellido
                         <span v-if="sortKey === 'lastName'">
@@ -127,14 +127,14 @@ watch(searchQuery, () => {
                     <th
                         @click="sortBy('role')"
                         scope="col"
-                        class="px-6 py-3 cursor-pointer md:min-w-10 md:max-w-10"
+                        class="px-2 py-2 md:px-6 md:py-3 cursor-pointer min-w-30 md:min-w-10 md:max-w-10"
                     >
                         Rol
                         <span v-if="sortKey === 'role'">
                             {{ sortAsc ? '▲' : '▼' }}
                         </span>
                     </th>
-                    <th scope="col" class="px-6 py-3">Acciones</th>
+                    <th scope="col" class="px-2 py-2 md:px-6 md:py-3 min-w-40"><p class="flex justify-center">Acciones</p></th>
                 </tr>
             </thead>
             <tbody>
@@ -145,24 +145,26 @@ watch(searchQuery, () => {
                 >
                     <th
                         scope="row"
-                        class="md:min-w-10 md:max-w-20 px-6 py-4 font-medium text-text-dark overflow-hidden"
+                        class="md:min-w-10 md:max-w-20 px-2 py-3 md:px-6 md:py-3 font-medium text-text-dark overflow-hidden"
                     >
                         {{ user.email }}
                     </th>
-                    <td class="max-w-[5rem] px-6 py-4 md:min-w-10 md:max-w-10">
+                    <td class="max-w-[5rem] px-2 py-3 md:px-6 md:py-3 md:min-w-10 md:max-w-10">
                         {{ user.lastName }}
                     </td>
-                    <td class="max-w-[5rem] px-6 py-4 md:min-w-10 md:max-w-10">
+                    <td class="max-w-[5rem] px-2 py-3 md:px-6 md:py-3 min-w-20 md:min-w-10 md:max-w-10">
                         {{ user.role }}
                     </td>
-                    <td class="max-w-[10rem] px-6 py-4">
-                        <div class="flex flex-wrap md:flex-nowrap gap-2 justify-start">
-                            <CustomButton
+                    <td class="max-w-[6rem] px-2 py-3 md:px-6 md:py-3">
+                        <div class="flex flex-wrap md:flex-nowrap gap-2 justify-center">
+                            <div class="flex grow max-w-sm">
+                                <CustomButton
                                 label="Editar rol"
                                 :buttonType="ButtonType.outlined"
                                 :onClick="() => handleEditState(user)"
                                 iconName="fa-solid fa-pen-to-square"
-                            />
+                                />
+                            </div>
                         </div>
                     </td>
                 </tr>
