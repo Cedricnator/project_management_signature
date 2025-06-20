@@ -34,7 +34,8 @@ export class UsersService {
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       email: createUserDto.email,
-      password: by.hashSync(createUserDto.password, 10), // Hash the password
+      password: by.hashSync(createUserDto.password, 10),
+      role: createUserDto.role || UserRole.USER,
     });
     const userCreated = await this.usersRepository.save(user);
     if (!userCreated) {
