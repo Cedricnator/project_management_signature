@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from '../../common/enum/user-role.enum';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -33,4 +34,11 @@ export class CreateUserDto {
     example: 'email@example.com',
   })
   email: string;
+  @IsString()
+  @ApiProperty({
+    description: 'User role',
+    example: 'USER',
+    default: UserRole.USER,
+  })
+  role: UserRole = UserRole.USER;
 }

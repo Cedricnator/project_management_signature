@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as by from 'bcryptjs';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
-import { SignInAuthDto } from '../auth/dto/sign-in-auth.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserRole } from '../common/enum/user-role.enum';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
@@ -21,7 +20,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<SignInAuthDto> {
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const exists = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
     });
@@ -34,14 +33,16 @@ export class UsersService {
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       email: createUserDto.email,
-      password: by.hashSync(createUserDto.password, 10), // Hash the password
+      password: by.hashSync(createUserDto.password, 10),
+      role: createUserDto.role || UserRole.USER,
     });
     const userCreated = await this.usersRepository.save(user);
     if (!userCreated) {
       throw new ConflictException('User creation failed');
     }
     return {
-      id: userCreated.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: userCreated.email,
       role: userCreated.role,
     };
