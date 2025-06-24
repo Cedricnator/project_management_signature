@@ -2,6 +2,13 @@ import { bootstrap } from "./main"
 import { AppModule } from "./app.module";
 import { NestFactory } from "@nestjs/core";
 
+jest.mock('compression', () => {
+  const mockCompression = jest.fn().mockReturnValue((req: any, res: any, next: any) => next());
+  // Add the filter property directly to the mock function
+  (mockCompression as any).filter = jest.fn().mockReturnValue(true);
+  return mockCompression;
+});
+
 jest.mock('@nestjs/swagger', () => ({
     DocumentBuilder: jest.fn().mockImplementation(() => ({
         setTitle: jest.fn().mockReturnThis(),
@@ -33,6 +40,7 @@ jest.mock('@nestjs/core', () => ({
             setGlobalPrefix: jest.fn(),
             listen: jest.fn(),
             getHttpAdapter: jest.fn(),
+            use: jest.fn(),
         })
     }
 }))
@@ -46,6 +54,7 @@ describe('Main.ts Bootstrap', () => {
         setGlobalPrefix: jest.Mock;
         listen: jest.Mock;
         getHttpAdapter: jest.Mock;
+        use: jest.Mock;
     };
 
     beforeEach(() => {
@@ -57,6 +66,7 @@ describe('Main.ts Bootstrap', () => {
             setGlobalPrefix: jest.fn(),
             listen: jest.fn(),     
             getHttpAdapter: jest.fn(),
+            use: jest.fn(),
         };
 
         (NestFactory.create as jest.Mock).mockResolvedValue(mockApp)

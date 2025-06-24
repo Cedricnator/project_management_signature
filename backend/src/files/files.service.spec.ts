@@ -14,6 +14,9 @@ import { DocumentStatus } from './enum/document-status.enum';
 
 describe('FilesService', () => {
   let service: FilesService;
+  let loggerSpy: jest.SpyInstance;
+  let loggerWarnSpy: jest.SpyInstance;
+  let loggerErrorSpy: jest.SpyInstance;
 
   let mockUserService: Partial<UsersService>;
   let mockAuthService: Partial<AuthService>;
@@ -142,6 +145,18 @@ describe('FilesService', () => {
           useValue: mockAuthService,
         },
         {
+          provide: getRepositoryToken(DocumentHistory),
+          useValue: mockHistoryRepo,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUserService,
+        },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
+        },
+        {
           provide: JwtService,
           useValue: mockJwtService,
         },
@@ -149,6 +164,9 @@ describe('FilesService', () => {
     }).compile();
 
     service = module.get<FilesService>(FilesService);
+    loggerSpy = jest.spyOn(service['logger'], 'log').mockImplementation();
+    loggerWarnSpy = jest.spyOn(service['logger'], 'warn').mockImplementation();
+    loggerErrorSpy = jest.spyOn(service['logger'], 'error').mockImplementation();
   });
 
   afterEach(() => {
@@ -401,7 +419,7 @@ describe('FilesService', () => {
         const mockUnlinkSync = jest.spyOn(require('fs'), 'unlinkSync').mockImplementation(() => {
           throw new Error('Cannot delete file');
         });
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+        
         
         const existingFile = { ...mockFile, uploadBy: mockUser, fileHash: 'samehash' };
         
@@ -410,13 +428,13 @@ describe('FilesService', () => {
         
         await expect(service.uploadFile(mockMulterFile, { name: 'test', description: 'test' }, 'test@example.com'))
           .rejects.toThrow('You have already uploaded this file');
-          
-        expect(consoleSpy).toHaveBeenCalledWith('Could not cleanup temporary file:', expect.any(Error));
-          
+
+        expect(loggerWarnSpy).toHaveBeenCalledWith('Could not cleanup temporary file:', expect.any(Error));
+
         mockExistsSync.mockRestore();
         mockReadFileSync.mockRestore();
         mockUnlinkSync.mockRestore();
-        consoleSpy.mockRestore();
+        loggerSpy.mockRestore();
       });
     });
 
@@ -582,8 +600,7 @@ describe('FilesService', () => {
         const mockUnlinkSync = jest.spyOn(require('fs'), 'unlinkSync').mockImplementation(() => {
           throw new Error('Cannot delete old file');
         });
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-        
+
         (mockFileRepo.findOne as jest.Mock)
           .mockResolvedValueOnce(rejectedFile)
           .mockResolvedValueOnce(rejectedFile);
@@ -594,13 +611,12 @@ describe('FilesService', () => {
         
         const result = await service.update(mockFile.id, newFile, mockUser.email, { name: 'new name' });
         
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Could not delete old file'), expect.any(Error));
+        expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Could not delete old file'), expect.any(Error));
         expect(result).toBeDefined();
         
         mockExistsSync.mockRestore();
         mockReadFileSync.mockRestore();
         mockUnlinkSync.mockRestore();
-        consoleSpy.mockRestore();
       });
     });
 
@@ -610,19 +626,17 @@ describe('FilesService', () => {
         const mockUnlinkSync = jest.spyOn(require('fs'), 'unlinkSync').mockImplementation(() => {
           throw new Error('Permission denied');
         });
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
         
         (mockFileRepo.findOne as jest.Mock).mockResolvedValue(mockFile);
         (mockFileRepo.remove as jest.Mock).mockResolvedValue(mockFile);
         
         const result = await service.remove(mockFile.id);
         
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Could not delete file'), expect.any(Error));
+        expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Could not delete file'), expect.any(Error));
         expect(result).toEqual({ id: mockFile.id, documentName: mockFile.name });
         
         mockExistsSync.mockRestore();
         mockUnlinkSync.mockRestore();
-        consoleSpy.mockRestore();
       });
     });
 
@@ -647,35 +661,32 @@ describe('FilesService', () => {
 
     describe('verifyFileIntegrity', () => {
       it('should return false when document has no fileBuffer', () => {
-        const fileWithoutBuffer = { ...mockFile, fileBuffer: null };
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const fileWithoutBuffer = { ...mockFile, fileBuffer: null };    
         
         const result = service.verifyFileIntegrity(fileWithoutBuffer as any);
         
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Document does not have a file buffer to verify');
-        
-        consoleSpy.mockRestore();
+        expect(loggerWarnSpy).toHaveBeenCalledWith('Document does not have a file buffer to verify');
+
+        loggerWarnSpy.mockRestore();
       });
 
       it('should return false when document has no fileHash', () => {
         const fileWithoutHash = { ...mockFile, fileHash: null, fileBuffer: Buffer.from('test') };
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-        
+
         const result = service.verifyFileIntegrity(fileWithoutHash as any);
         
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Document does not have a file hash to compare against');
-        
-        consoleSpy.mockRestore();
+        expect(loggerWarnSpy).toHaveBeenCalledWith('Document does not have a file hash to compare against');
+
+        loggerWarnSpy.mockRestore();
       });
 
       it('should throw InternalServerErrorException when crypto fails', () => {
         const mockCreateHash = jest.spyOn(require('crypto'), 'createHash').mockImplementation(() => {
           throw new Error('Crypto error');
         });
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-        
+
         const fileWithBufferAndHash = { 
           ...mockFile, 
           fileBuffer: Buffer.from('test'), 
@@ -686,7 +697,6 @@ describe('FilesService', () => {
           .toThrow('Could not verify file integrity');
           
         mockCreateHash.mockRestore();
-        consoleSpy.mockRestore();
       });
 
       it('should return false when hashes do not match', () => {
@@ -704,28 +714,27 @@ describe('FilesService', () => {
     describe('getStatusTypes', () => {
       it('should throw InternalServerErrorException when repository fails', async () => {
         (mockStatusRepo.find as jest.Mock).mockRejectedValue(new Error('Database error'));
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-        
+
         await expect(service.getStatusTypes())
           .rejects.toThrow('Could not fetch document status types');
-          
-        expect(consoleSpy).toHaveBeenCalledWith('Error fetching document status types:', expect.any(Error));
-        
-        consoleSpy.mockRestore();
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('Error fetching document status types:', expect.any(Error));
+
+        loggerErrorSpy.mockRestore();
       });
     });
 
     describe('findDocumentStatus', () => {
       it('should throw InternalServerErrorException when repository throws', async () => {
         (mockStatusRepo.findOne as jest.Mock).mockRejectedValue(new Error('Database connection lost'));
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-        
+        const loggerSpy = jest.spyOn(service['logger'], 'error').mockImplementation();
+
         await expect(service['findDocumentStatus']('any-id'))
           .rejects.toThrow('Error finding document status');
-          
-        expect(consoleSpy).toHaveBeenCalledWith('Error finding document status with id any-id:', expect.any(Error));
-        
-        consoleSpy.mockRestore();
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('Error finding document status with id any-id:', expect.any(Error));
+
+        loggerErrorSpy.mockRestore();
       });
     });
 
