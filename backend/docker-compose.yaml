@@ -34,6 +34,8 @@ services:
       db-signature-project-management:  
         condition: service_healthy
     environment:
+      DB_USER: postgres
+      DB_PASSWORD: postgres
       DB_HOST: db.signature.project_management.local  
       DB_PORT: 5432
       DB_NAME: signature_project

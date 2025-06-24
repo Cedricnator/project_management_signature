@@ -1,0 +1,38 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "target": "es2020",
+    "loose": true,
+    "externalHelpers": false,
+    "keepClassNames": true,
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true,
+      "optimizer": {
+        "globals": {
+          "vars": {
+            "process.env.APP_ENV": "production"
+          }
+        }
+      }
+    },
+    "minify": {
+      "compress": true,
+      "mangle": true
+    }
+  },
+  "module": {
+    "type": "commonjs",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "minify": true,
+  "isModule": true
+}

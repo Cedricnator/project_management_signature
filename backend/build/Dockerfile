@@ -1,32 +1,74 @@
-FROM node:23-slim AS base
+FROM node:23-alpine AS base
 
-FROM base AS prod
+# Instalar dependencias del sistema necesarias
+RUN apk add --no-cache dumb-init
 
-RUN useradd -Umrd /app app && \
-    chown -R app:app /app
-WORKDIR /app
-USER app
+# Crear usuario no-root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
 
-COPY --chown=app:app package.json package-lock.json ./
-COPY --chown=app:app . .
-
-ENV NODE_ENV=test
-RUN npm install --save-dev jest
-# RUN npm test
-
-ENV NODE_ENV=production
-RUN npm run build
-
-FROM base AS build
+# ===== ETAPA DE DEPENDENCIAS =====
+FROM base AS deps
 
 WORKDIR /app
 
-COPY --chown=app:app --from=prod /app/node_modules /app/node_modules
-COPY --chown=app:app --from=prod /app/dist /app/dist
+# Copiar solo archivos de dependencias para aprovechar cache de Docker
+COPY package*.json ./
 
-ENV TZ=America/Santiago
+# Instalar dependencias con configuraciones optimizadas
+RUN npm ci --only=production --omit=dev --ignore-scripts && \
+    npm cache clean --force
 
+# ===== ETAPA DE BUILD =====
+FROM base AS builder
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+COPY nest-cli.json tsconfig*.json .swcrc ./
+
+# Instalar TODAS las dependencias para el build
+RUN npm ci --ignore-scripts
+
+# Copiar código fuente
+COPY src/ ./src/
+
+# Build optimizado
+ENV APP_ENV=production
+RUN npm run build && \
+    npm prune --production
+
+# ===== ETAPA DE PRODUCCIÓN =====
+FROM base AS runner
+
+WORKDIR /app
+
+# Configurar variables de entorno
+ENV APP_ENV=production
+ENV PORT=3000
+
+# Crear directorio uploads con permisos correctos ANTES de cambiar a usuario nestjs
+RUN mkdir -p /app/uploads && \
+    chown -R nestjs:nodejs /app/uploads && \
+    chmod 755 /app/uploads
+
+# Copiar dependencias de producción
+COPY --from=deps --chown=nestjs:nodejs /app/node_modules ./node_modules
+
+# Copiar app compilada
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+
+# Cambiar a usuario no-root por seguridad
+USER nestjs
+
+# Exponer puerto de la app
 EXPOSE 3000
 
-ENV NODE_ENV production
-CMD [ "node", "/app/dist/main.js" ]
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node dist/health-check.js || exit 1
+
+# Comando optimizado con dumb-init
+CMD ["dumb-init", "node", "dist/main.js"]

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { SignDocumentDto } from './dto/sign-document.dto';
@@ -16,6 +17,8 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class SignatureService {
+  private readonly logger = new Logger(SignatureService.name);
+
   constructor(
     @InjectRepository(SignDocument)
     private readonly accountDocumentRepository: Repository<SignDocument>,
@@ -24,17 +27,23 @@ export class SignatureService {
   ) {}
 
   private async validateDocumentForSigning(documentId: string, user: any) {
+    this.logger.log(`Validating document for signing: ${documentId} by user: ${user?.email}`);
     const document = await this.filesService.findDocumentWithBuffer(documentId);
 
     if (!user) {
+      this.logger.warn(`User not found for email: ${user?.email}`);
       return { isValid: false, message: 'User not found' };
     }
 
     if (user.role !== UserRole.SUPERVISOR) {
+      this.logger.warn(`User with email ${user.email} is not a supervisor`);
       return { isValid: false, message: 'User is not a supervisor' };
     }
 
     if (document.currentStatusId !== DocumentStatus.PENDING_REVIEW) {
+      this.logger.warn(
+        `Document with ID ${documentId} is not in a valid status for signing: ${document.currentStatusId}`,
+      );
       return {
         isValid: false,
         message: 'Document is not in a valid status for signing',
@@ -43,6 +52,7 @@ export class SignatureService {
 
     const fileIntegrity = this.filesService.verifyFileIntegrity(document);
     if (!fileIntegrity) {
+      this.logger.warn(`File integrity check failed for document with ID: ${documentId}`);
       return {
         isValid: false,
         message: 'Document integrity check failed',
@@ -57,12 +67,14 @@ export class SignatureService {
     });
 
     if (existingSignature) {
+      this.logger.warn(`User ${user.email} has already signed document with ID: ${documentId}`);
       return {
         isValid: false,
         message: 'You have already signed this document',
       };
     }
 
+    this.logger.log(`Document with ID ${documentId} is valid for signing by user: ${user.email}`);
     return {
       isValid: true,
       document,
@@ -70,6 +82,7 @@ export class SignatureService {
   }
 
   async signDocument(signDocumentDto: SignDocumentDto, userEmail: string, req: Request) {
+    this.logger.log(`Signing document with ID: ${signDocumentDto.documentId} for user: ${userEmail}`);
     const user = await this.userService.findByEmail(userEmail);
 
     const { documentId, comment } = signDocumentDto;
@@ -81,6 +94,7 @@ export class SignatureService {
     );
 
     if (!validationResult.isValid) {
+      this.logger.warn(`Validation failed for document ID: ${documentId} - ${validationResult.message}`);
       throw new BadRequestException(validationResult.message);
     }
     const { document } = validationResult;
@@ -109,7 +123,8 @@ export class SignatureService {
       ipAddress: req.ip || '',
       userAgent: req.headers['user-agent'] || '',
     });
-    
+
+    this.logger.log(`Creating new signature for document ID: ${documentId} by user: ${user.email}`);
     const signature = await this.accountDocumentRepository.save(newSignature);
 
     await this.filesService.changeFileStatus(   
@@ -121,7 +136,8 @@ export class SignatureService {
 
     const updatedDocument = await this.filesService.findOne(documentId);
     const { fileBuffer, ...rest } = updatedDocument;
-
+  
+    this.logger.log(`Signature created successfully for document ID: ${documentId} by user: ${user.email}`);
     return {
       ...rest,
       signatureHash: signatureHash,
@@ -137,18 +153,20 @@ export class SignatureService {
   }
 
   async findAll() {
+  this.logger.log('Fetching all signatures');
     return await this.accountDocumentRepository.find();
   }
 
   async verifySignatureIntegrity(signatureId: string): Promise<boolean> {
     try {
+      this.logger.log(`Verifying integrity of signature with ID: ${signatureId}`);
       const signature = await this.findOne(signatureId);
       const document = await this.filesService.findOne(signature.documentId);
  
       // Verify if the document not has been modified
       const isFileValid = this.filesService.verifyFileIntegrity(document);
       if (!isFileValid) {
-        console.warn(
+        this.logger.warn(
           `Signature ${signatureId} is invalid - file has been modified`,
         );
         return false;
@@ -167,35 +185,43 @@ export class SignatureService {
       const expectedHash = createHash('sha256')
         .update(JSON.stringify(originalSignatureData))
         .digest('hex');
-
+      
       return expectedHash === signature.signatureHash;
     } catch (error) {
-      console.error('Error verifying signature integrity:', error);
+      this.logger.error('Error verifying signature integrity:', error);
       return false;
     }
   }
 
   async findOne(id: string) {
+    this.logger.log(`Fetching signature with ID: ${id}`);
     const signature = await this.accountDocumentRepository.findOne({
       where: { id },
       relations: ['account', 'document'],
     });
 
     if (!signature) {
+      this.logger.warn(`Signature with ID ${id} not found`);
       throw new NotFoundException(`Signature with ID ${id} not found`);
     }
 
+  this.logger.log(`Signature with ID ${id} found successfully`);
     return signature;
   }
 
   async remove(id: string) {
+    this.logger.log(`Deleting signature with ID: ${id}`);
     const signature = await this.findOne(id);
+
     if (!signature) {
+      this.logger.warn(`Signature with ID ${id} not found for deletion`);
       throw new NotFoundException(`Signature with ID ${id} not found`);
     }
+
     const deletedSignature =
       await this.accountDocumentRepository.remove(signature);
-
+      
+    this.logger.log(`Signature with ID ${id} deleted successfully`);
     return {
       message: `Signature with ID ${id} has been deleted successfully`,
       deletedSignature,

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -24,6 +25,8 @@ import { DocumentStatus } from './enum/document-status.enum';
 
 @Injectable()
 export class FilesService {
+  private readonly logger = new Logger(FilesService.name);
+
   constructor(
     @InjectRepository(File)
     private documentRepository: Repository<File>,
@@ -46,15 +49,17 @@ export class FilesService {
    */
   private async findDocumentStatus(id: string): Promise<DocumentStatusType> {
     try {
+      this.logger.log(`Finding document status with id: ${id}`);
       const status = await this.documentStatusRepository.findOne({
         where: { id },
       });
       if (!status) {
+        this.logger.warn(`Document status with id ${id} not found`);
         throw new NotFoundException(`Document status with id ${id} not found`);
       }
       return status;
     } catch (error) {
-      console.error(`Error finding document status with id ${id}:`, error);
+      this.logger.error(`Error finding document status with id ${id}:`, error);
       throw new InternalServerErrorException(`Error finding document status`);
     }
   }
@@ -76,16 +81,20 @@ export class FilesService {
     uploadFileDto: UploadFileDto,
     userEmail: string,
   ) {
+    this.logger.log(`Uploading file for user: ${userEmail}`);
     if (!file) {
+      this.logger.error('No file provided for upload');
       throw new BadRequestException('No file provided!');
     }
 
     if (!file.path || !existsSync(file.path)) {
+      this.logger.error('File not saved properly to disk');
       throw new BadRequestException('File not saved properly to disk');
     }
 
     const user = await this.userService.findOneByEmail(userEmail);
     if (!user) {
+      this.logger.warn(`User with email ${userEmail} not found`);
       throw new NotFoundException(`User with email ${userEmail} not found`);
     }
 
@@ -97,7 +106,7 @@ export class FilesService {
       documentHash = createHash('sha256').update(fileBuffer).digest('hex');
       
     } catch (error) {
-      console.error('Error reading file or calculating hash:', error);
+      this.logger.error('Error reading file or calculating hash:', error);
       throw new BadRequestException(`Error processing file: ${error.message}`);
     }
 
@@ -110,10 +119,11 @@ export class FilesService {
       try {
         unlinkSync(file.path);
       } catch (cleanupError) {
-        console.warn('Could not cleanup temporary file:', cleanupError);
+        this.logger.warn('Could not cleanup temporary file:', cleanupError);
       }
       
       if (existingDocument.uploadBy.id === user.id) {
+        this.logger.warn(`User ${user.email} is trying to re-upload the same file.`);
         throw new ConflictException({
           message: 'You have already uploaded this file',
           existingDocument: {
@@ -124,6 +134,7 @@ export class FilesService {
           }
         });
       } else {
+        this.logger.warn(`File already uploaded by another user: ${existingDocument.uploadBy.email}`);
         throw new ConflictException({
           message: 'This file has already been uploaded by another user',
           suggestion: 'Please verify this is not a duplicate submission',
@@ -159,6 +170,7 @@ export class FilesService {
     });
 
     await this.documentHistoryRepository.save(historyEntry);
+    this.logger.log(`File uploaded successfully with id: ${savedDocument.id}`);
 
     const { fileBuffer: _, ...documentWithoutBuffer } = savedDocument;
     return documentWithoutBuffer;
@@ -174,8 +186,10 @@ export class FilesService {
    * @throws {NotFoundException} - If the user or their documents are not found.
    */
   async findFilesByUser(userId: string): Promise<File[]> {
+    this.logger.log(`Finding files for user: ${userId}`);
     const user = await this.userService.findOne(userId);
     if (!user) {
+      this.logger.warn(`User with id ${userId} not found`);
       throw new NotFoundException(`User with id ${userId} not found`);
     }
 
@@ -198,9 +212,11 @@ export class FilesService {
     });
 
     if (!documents || documents.length === 0) {
+      this.logger.warn(`No documents found for user: ${user.email}`);
       throw new NotFoundException(`No documents found for user ${user.email}`);
     }
 
+    this.logger.log(`Found ${documents.length} documents for user: ${user.email}`);
     return documents;
   }
 
@@ -212,6 +228,7 @@ export class FilesService {
    * @returns {Promise<File[]>} - An array of all documents.
    */
   async findAll(): Promise<File[]> {
+    this.logger.log(`Finding all documents`);
     const documents = await this.documentRepository.find({
       select: [
         'id',
@@ -228,17 +245,24 @@ export class FilesService {
         'updatedAt',
       ]
     });
+
+    this.logger.log(`Found ${documents.length} documents`);
+
     return documents;
   }
 
   async findDocumentWithBuffer(id: string): Promise<File> {
+    this.logger.log(`Finding document with buffer for id: ${id}`);
+    
     const document = await this.documentRepository.findOne({
       where: { id },
     });
+    
     if (!document) {
+      this.logger.warn(`Document with id ${id} not found`);
       throw new NotFoundException(`Document with id ${id} not found`);
     }
-
+    
     return document;
   }
 
@@ -252,6 +276,7 @@ export class FilesService {
    * @throws {NotFoundException} - If the document with the given ID is not found.
    */ 
   async findOne(id: string): Promise<File> {
+    this.logger.log(`Finding document with id: ${id}`);
     const document = await this.documentRepository.findOne({
       where: { id },
       select: [
@@ -271,9 +296,11 @@ export class FilesService {
     });
 
     if (!document) {
+      this.logger.warn(`Document with id ${id} not found`);
       throw new NotFoundException(`Document with id ${id} not found`);
     }
 
+    this.logger.log(`Found document with id: ${id}`);
     return document;
   }
   
@@ -287,8 +314,10 @@ export class FilesService {
    * @throws {NotFoundException} - If the user or their documents are not found.
    */
   async getFileHistoryByUserId(userId: string): Promise<DocumentHistoryModified[]> {
+    this.logger.log(`Finding file history for user: ${userId}`);
     const user = await this.userService.findOne(userId);
     if (!user) {
+      this.logger.warn(`User with id ${userId} not found`);
       throw new NotFoundException(`User with id ${userId} not found`);
     }
 
@@ -309,7 +338,7 @@ export class FilesService {
         'updatedAt',
       ]
     });
-
+    
     const documentHistory: DocumentHistoryModified[] = [];
 
     for (const document of documents) {
@@ -325,6 +354,7 @@ export class FilesService {
           const changeUser = await this.userService.findOne(entry.changedBy);
 
           if (!changeUser) {
+            this.logger.warn(`User with id ${entry.changedBy} not found`);
             throw new NotFoundException(
               `User with id ${entry.changedBy} not found`,
             );
@@ -345,6 +375,7 @@ export class FilesService {
       }
     }
 
+    this.logger.log(`Found ${documentHistory.length} history entries for user: ${user.email}`);
     return documentHistory;
   }
 
@@ -357,6 +388,7 @@ export class FilesService {
    * @throws {NotFoundException} - If a user in the history is not found.
    */
   async getFilesHistory(): Promise<DocumentHistoryModified[]> {
+    this.logger.log(`Finding all documents history`);
     const documentsHistory = await this.documentHistoryRepository.find();
     const transformedsHistory: DocumentHistoryModified[] = [];
 
@@ -381,6 +413,7 @@ export class FilesService {
       transformedsHistory.push(transformedHistory);
     }
 
+    this.logger.log(`Found ${transformedsHistory.length} history entries`);
     return transformedsHistory;
   }
 
@@ -395,11 +428,13 @@ export class FilesService {
    * @throws {NotFoundException} - If the file is not found on disk.
    */
   async downloadFile(id: string, res: Response): Promise<StreamableFile> {
+    this.logger.log(`Downloading file with id: ${id}`);
     const document = await this.findOne(id);
 
     const filePath = join(process.cwd(), document.filePath);
 
     if (!existsSync(filePath)) {
+      this.logger.warn(`File not found on disk at path: ${filePath}`);
       throw new NotFoundException('File not found on disk');
     }
 
@@ -407,7 +442,7 @@ export class FilesService {
       'Content-Disposition',
       `attachment; filename="${document.originalFilename}"`,
     );
-
+    this.logger.log(`Setting content type for file: ${document.mimetype}`);
     res.setHeader('Content-Type', document.mimetype);
     
     const fileStream = createReadStream(filePath);
@@ -424,20 +459,23 @@ export class FilesService {
    * @throws {NotFoundException} - If the file path is not found or the file does not exist on disk.
    */
   async streamFile(id: string): Promise<StreamableFile> {
+    this.logger.log(`Streaming file with id: ${id}`);
     const document = await this.findOne(id);
 
     if (!document.filePath) {
+      this.logger.warn(`File path not found for document with id: ${id}`);
       throw new NotFoundException('File path not found');
     }
 
     const filePath = join(process.cwd(), document.filePath);
 
     if (!existsSync(filePath)) {
+      this.logger.warn(`File not found on disk at path: ${filePath}`);
       throw new NotFoundException('File not found on disk');
     }
 
     const fileStream = createReadStream(filePath);
-
+    this.logger.log(`Setting content type for file: ${document.mimetype}`);
     return new StreamableFile(fileStream, {
       type: document.mimetype,
       disposition: `inline; filename="${document.originalFilename}"`,
@@ -445,8 +483,8 @@ export class FilesService {
   }
   
   /**
-   * Update
-   * ------
+   * UpdateFile
+   * ----------
    * Updates an existing document with a new file and metadata.
    * 
    * @param {string} id - The ID of the document to update.
@@ -463,10 +501,12 @@ export class FilesService {
     userEmail: string,
     updateFileDto: UpdateFileDto,
   ): Promise<File> {
+    this.logger.log(`Updating file with id: ${id}`);
     const document = await this.findOne(id);
     const user = await this.userService.findOneByEmail(userEmail);
 
     if (!user) {
+      this.logger.warn(`User with email ${userEmail} not found`);
       throw new NotFoundException(`User with email ${userEmail} not found`);
     }
 
@@ -476,6 +516,7 @@ export class FilesService {
     ];
 
     if (!allowedStatuses.includes(document.currentStatusId as DocumentStatus)) {
+      this.logger.warn(`Document with id ${id} is not in a valid status for update`);
       throw new BadRequestException(
         'Document can only be updated if it is in a rejected or pending review status',
       );
@@ -483,12 +524,15 @@ export class FilesService {
 
     if (!newFile) {
       const updatedFields: Partial<File> = {};
-      
+      this.logger.log(`Updating metadata for document with id: ${id}`);
+
       if (updateFileDto.name !== undefined) {
+        this.logger.log(`Updating name for document with id: ${id}`);
         updatedFields.name = updateFileDto.name;
       }
       
       if (updateFileDto.description !== undefined) {
+        this.logger.log(`Updating description for document with id: ${id}`);
         updatedFields.description = updateFileDto.description;
       }
 
@@ -508,6 +552,7 @@ export class FilesService {
     }
 
     if (!newFile.path || !existsSync(newFile.path)) {
+      this.logger.error('New file not saved properly to disk');
       throw new BadRequestException('New file not saved properly to disk');
     }
 
@@ -515,7 +560,7 @@ export class FilesService {
       try {
         unlinkSync(join(process.cwd(), document.filePath));
       } catch (error) {
-        console.warn(`Could not delete old file: ${document.filePath}`, error);
+        this.logger.warn(`Could not delete old file: ${document.filePath}`, error);
       }
     }
 
@@ -526,7 +571,7 @@ export class FilesService {
       fileBuffer = readFileSync(newFile.path);
       fileHash = createHash('sha256').update(fileBuffer).digest('hex');
     } catch (error) {
-      console.error('Error processing new file:', error);
+      this.logger.error('Error processing new file:', error);
       throw new BadRequestException(`Error processing new file: ${error.message}`);
     }
 
@@ -541,15 +586,18 @@ export class FilesService {
     };
 
     if (updateFileDto.name !== undefined) {
+      this.logger.log(`Updating name for document with id: ${id}`);
       updateData.name = updateFileDto.name;
     }
     
     if (updateFileDto.description !== undefined) {
+      this.logger.log(`Updating description for document with id: ${id}`);
       updateData.description = updateFileDto.description;
     }
 
    // If the document was rejected, set it to pending review
     if (document.currentStatusId === DocumentStatus.REJECTED) {
+      this.logger.log(`Setting document with id ${id} to pending review status`);
       document.currentStatusId = DocumentStatus.PENDING_REVIEW;
     }
 
@@ -563,7 +611,7 @@ export class FilesService {
     });
 
     await this.documentHistoryRepository.save(historyEntry);
-
+    this.logger.log(`File with id ${id} updated successfully`);
     const updatedDocument = await this.findOne(id);
     return updatedDocument;
   }
@@ -578,6 +626,7 @@ export class FilesService {
    * @throws {NotFoundException} - If the document with the given ID is not found.
    */
   async remove(id: string): Promise<{ id: string; documentName: string; }> {
+    this.logger.log(`Removing document with id: ${id}`);
     const document = await this.findOne(id);
 
     // Delete file from disk
@@ -588,12 +637,13 @@ export class FilesService {
       try {
         unlinkSync(join(process.cwd(), document.filePath));
       } catch (error) {
-        console.warn(`Could not delete file: ${document.filePath}`, error);
+        this.logger.warn(`Could not delete file: ${document.filePath}`, error);
       }
     }
 
     // Delete document from db
     await this.documentRepository.remove(document);
+    this.logger.log(`Document with id ${id} removed successfully`);
 
     return {
       id: document.id,
@@ -618,11 +668,13 @@ export class FilesService {
     changedBy: string,
     comment?: string,
   ) {
+    this.logger.log(`Changing status for document with id: ${id}`);
     const document = await this.findOne(id);
 
     const user = await this.userService.findOneByEmail(changedBy);
 
     if (!user) {
+      this.logger.warn(`User with email ${changedBy} not found`);
       throw new NotFoundException(`User with email ${changedBy} not found`);
     }
 
@@ -631,6 +683,7 @@ export class FilesService {
     });
 
     if (!newStatus) {
+      this.logger.warn(`Status with id ${statusId} not found`); 
       throw new NotFoundException('Status not found');
     }
 
@@ -649,11 +702,12 @@ export class FilesService {
       changedBy: user.id,
       comment: comment || `Estado cambiado a: ${newStatus.status}`,
     });
-
+    this.logger.log(`Creating history entry for document with id: ${id}`);
     await this.documentHistoryRepository.save(historyEntry);
 
     const updatedDocument = await this.findOne(id);
     
+    this.logger.log(`Status for document with id ${id} changed to ${newStatus.status}`);
     return {
       ...updatedDocument,
     };
@@ -669,6 +723,7 @@ export class FilesService {
    * @throws {NotFoundException} - If the document with the given ID is not found.
    */
   async getFileHistoryById(id: string): Promise<{ document: File; history: DocumentHistory[] }> {
+    this.logger.log(`Getting file history for document with id: ${id}`);
     const document = await this.findOne(id);
 
     const history = await this.documentHistoryRepository.find({
@@ -677,6 +732,7 @@ export class FilesService {
       order: { createdAt: 'DESC' },
     });
 
+    this.logger.log(`File history retrieved for document with id: ${id}`);
     return {
       document,
       history,
@@ -692,11 +748,12 @@ export class FilesService {
    */
   async getStatusTypes(): Promise<DocumentStatusType[]> {
     try {
+      this.logger.log('Fetching all document status types');
       return await this.documentStatusRepository.find({
         order: { status: 'ASC' },
       });
     } catch (error) {
-      console.error('Error fetching document status types:', error);
+      this.logger.error('Error fetching document status types:', error);
       throw new InternalServerErrorException(
         'Could not fetch document status types',
       );
@@ -713,13 +770,14 @@ export class FilesService {
    */
   verifyFileIntegrity(document: File): boolean {
     try {
+      this.logger.log(`Verifying file integrity for document with id: ${document.id}`);
       if (!document.fileBuffer) {
-        console.warn('Document does not have a file buffer to verify');
+        this.logger.warn('Document does not have a file buffer to verify');
         return false;
       }
 
       if (!document.fileHash) {
-        console.warn('Document does not have a file hash to compare against');
+        this.logger.warn('Document does not have a file hash to compare against');
         return false;
       }
      
@@ -729,7 +787,7 @@ export class FilesService {
 
       return currentHash === document.fileHash;
     } catch (error) {
-      console.error('Error verifying file integrity:', error);
+      this.logger.error('Error verifying file integrity:', error);
       throw new InternalServerErrorException('Could not verify file integrity');
     }
   }
