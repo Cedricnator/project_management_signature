@@ -36,4 +36,56 @@
 //   }
 // }
 
+Cypress.Commands.add('loginAsAdmin', () => {
+    const dummySession = {
+        token: 'dummy-admin-token',
+        account: {
+            accountId: '1234',
+            role: 'admin',
+            username: 'Admin',
+            email: 'admin@fake.cl',
+        },
+    }
+
+    localStorage.setItem('session', JSON.stringify(dummySession))
+})
+
+Cypress.Commands.add('loginAsUser', () => {
+    const dummySession = {
+        token: 'dummy-user-token',
+        account: {
+            accountId: '1234',
+            role: 'user',
+            username: 'user',
+            email: 'user@fake.cl',
+        },
+    }
+
+    localStorage.setItem('session', JSON.stringify(dummySession))
+})
+
+Cypress.Commands.add('loginAsSupervisor', () => {
+    const dummySession = {
+        token: 'dummy-supervisor-token',
+        account: {
+            accountId: '1234',
+            role: 'supervisor',
+            username: 'supervisor',
+            email: 'supervisor@fake.cl',
+        },
+    }
+
+    localStorage.setItem('session', JSON.stringify(dummySession))
+})
+
+declare global {
+    namespace Cypress {
+        interface Chainable {
+            loginAsAdmin(): Chainable<void>
+            loginAsUser(): Chainable<void>
+            loginAsSupervisor(): Chainable<void>
+        }
+    }
+}
+
 export {}

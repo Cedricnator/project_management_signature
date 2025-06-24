@@ -1,0 +1,48 @@
+{
+  "document": {
+    "id": "b2797660-d82a-457d-aee3-883f01477fe9",
+    "name": "HOPE DRIVEN DEVELOPMENT",
+    "description": "HOPE DRIVEN DEVELOPMENT",
+    "currentStatusId": "01974b23-bc2f-7e5f-a9d0-73a5774d2778",
+    "filePath": "uploads/Manual Spring Boot.pdf-1750303311237-489178220.pdf",
+    "fileSize": "3056069",
+    "mimetype": "application/pdf",
+    "originalFilename": "Manual Spring Boot.pdf",
+    "filename": "Manual Spring Boot.pdf-1750303311237-489178220.pdf",
+    "createdAt": "2025-06-19T03:21:51.340Z",
+    "updatedAt": "2025-06-19T03:22:04.921Z",
+    "uploadedBy": "01974b59-7d0e-7745-b45a-5a36316863e6"
+  },
+  "history": [
+    {
+      "id": "fc3e7b79-a315-4555-9360-c47dbf3e818a",
+      "documentId": "d5ab3d59-f48b-47ff-8ee1-7dbd2b38d74c",
+      "statusId": "01974b23-d84d-7319-95b3-02322c982216",
+      "changedBy": "3c0eb6a1-f099-4e21-a961-4d6ca406b747",
+      "comment": "Documento firmado por: cucha@cucha.rs",
+      "createdAt": "2025-06-24T09:32:41.659Z",
+      "updatedAt": "2025-06-24T09:32:41.659Z",
+      "status": {
+        "id": "01974b23-d84d-7319-95b3-02322c982216",
+        "status": "Aprovado",
+        "createdAt": "2025-06-19T03:21:06.110Z",
+        "updatedAt": "2025-06-19T03:21:06.110Z"
+      }
+    },
+    {
+      "id": "42a77bff-7d26-4850-90f8-004a38262f28",
+      "documentId": "d5ab3d59-f48b-47ff-8ee1-7dbd2b38d74c",
+      "statusId": "01974b23-bc2f-7e5f-a9d0-73a5774d2778",
+      "changedBy": "01974b59-7d0e-7745-b45a-5a36316863e6",
+      "comment": "Documento subido el 24 de junio de 2025, 05:32",
+      "createdAt": "2025-06-24T09:32:26.028Z",
+      "updatedAt": "2025-06-24T09:32:26.028Z",
+      "status": {
+        "id": "01974b23-bc2f-7e5f-a9d0-73a5774d2778",
+        "status": "Por validar",
+        "createdAt": "2025-06-19T03:21:06.110Z",
+        "updatedAt": "2025-06-19T03:21:06.110Z"
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 describe('Crear usuario', () => {
     beforeEach(() => {
+        cy.loginAsAdmin()
         cy.intercept('GET', '/users', { fixture: 'users.json' }).as('getUsers')
         cy.visit('/admin')
         cy.wait('@getUsers')

@@ -1,6 +1,6 @@
 describe('Admin changes user role', () => {
     beforeEach(() => {
-        // Load the page and wait for initial documents
+        cy.loginAsAdmin()
         cy.intercept('GET', '/users', { fixture: 'users.json' }).as('getUsers')
         cy.visit('/admin')
         cy.wait('@getUsers')
@@ -26,7 +26,6 @@ describe('Admin changes user role', () => {
             })
         }).as('changeRole')
 
-        // Open modal for the specific user — this depends on how you open it
         cy.contains(testUser.email)
             .parents('tr')
             .within(() => {
@@ -37,7 +36,7 @@ describe('Admin changes user role', () => {
         cy.get('[data-testid="create-user-modal"]').should('be.visible')
 
         // Select new role from dropdown
-        cy.get('select').select('Supervisor') // assuming it's a native `<select>`, otherwise update selector
+        cy.get('select').select('Supervisor')
 
         // Submit the form
         cy.get('[data-testid="edit-role-button"]').click()
@@ -46,7 +45,7 @@ describe('Admin changes user role', () => {
         cy.wait('@changeRole')
 
         // Expect toast or modal close
-        cy.contains('Usuario modificado con éxito').should('exist') // or wait for modal to disappear
+        cy.contains('Usuario modificado con éxito').should('exist')
         cy.get('[data-testid="create-user-modal"]').should('not.exist')
     })
 })
