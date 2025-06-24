@@ -1,44 +1,34 @@
-import { AccountRole, type Account } from '@/types'
+import { AccountRole, type Account, type NewLogin, type Result } from '@/types'
 import { API_ROUTE } from '@/utils/const'
 import { logger } from '@/utils/logger'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { userResponseToAccount, type UserResponseDto } from './dto/UserResponseDto'
+import api from '@/utils/axios'
+import type { LoginResponseDto } from './dto/LoginResponseDto'
+import { ToastType } from './ToastStore'
 
 export const useSessionStore = defineStore('session', {
     state: () => ({
-        token: {} as string,
+        token: '' as string,
         account: {} as Account,
     }),
     actions: {
-        async login() {
+        async login(newLogin: NewLogin) {
             try {
-                interface NewLogin {
-                    email: string
-                    password: string
-                }
+                // const newlogin: NewLogin = {
+                //     email: 'pedro.lopez@signature.com',
+                //     // email: 'supervisor@signature.com',
+                //     // email: 'admin@signature.com',
+                //     password: '123456789',
+                // }
 
-                interface loginResponseDto {
-                    email: string
-                    role: string
-                    token: string
-                }
-
-                const newlogin: NewLogin = {
-                    // email: 'pedro.lopez@signature.com',
-                    // email: 'supervisor@signature.com',
-                    email: 'admin@signature.com',
-                    password: '123456789',
-                }
-
-                const header = {}
-
-                const response = await axios.post<loginResponseDto>(
+                const response = await api.post<LoginResponseDto>(
                     `${API_ROUTE}/auth/login`,
-                    newlogin,
+                    newLogin,
                 )
 
-                logger.info('[auth]', 'login response:', response)
+                logger.info('[AUTH]', 'login response:', response)
 
                 if (response.status == 200) {
                     const responseLogin = response.data
@@ -46,8 +36,26 @@ export const useSessionStore = defineStore('session', {
                     this.token = responseLogin.token
 
                     this.getUserByEmail(responseLogin.email)
+
+                    return {
+                        success: true,
+                        message: 'Se ha iniciado sesión con éxito.',
+                        type: ToastType.success,
+                    } as Result
                 }
-            } catch (error) {}
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result
+            } catch (error: any) {
+                logger.error('[AUTH]', error)
+                return {
+                    success: false,
+                    message: error.message,
+                    type: ToastType.error,
+                } as Result
+            }
         },
 
         async getUserByEmail(email: string) {

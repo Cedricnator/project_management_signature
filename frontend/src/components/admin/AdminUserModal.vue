@@ -91,6 +91,7 @@ watch(
         v-if="isOpen"
         @click.self="closeModal"
         id="crud-modal"
+        data-testid="create-user-modal"
         tabindex="-1"
         class="fixed flex overflow-y-auto overflow-x-hidden z-50 justify-center items-center w-full inset-0 h-[calc(100%-1rem)] max-h-full opacity-100"
     >
@@ -259,6 +260,7 @@ watch(
                             <CustomButton
                                 type="submit"
                                 label="Crear Usuario"
+                                data-testid="create-user-button"
                                 iconName="fa-solid fa-plus"
                                 @click="() => (actionClicked = 'create')"
                             />
@@ -267,6 +269,7 @@ watch(
                             <CustomButton
                                 type="submit"
                                 label="Editar rol"
+                                data-testid="edit-role-button"
                                 iconName="fa-solid fa-pen-to-square"
                                 @click="() => (actionClicked = 'edit')"
                             />

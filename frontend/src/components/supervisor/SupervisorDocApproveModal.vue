@@ -46,7 +46,7 @@ watch(
             description.value = props.document.description
             comentario.value = props.document.commentary ?? ''
             fileName.value = props.document.originalName
-            sleep(500)
+            await sleep(500)
             loading.value = false
         }
     },

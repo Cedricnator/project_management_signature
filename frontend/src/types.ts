@@ -34,6 +34,11 @@ export interface NewUser {
     role: AccountRole
 }
 
+export interface NewLogin {
+    email: string
+    password: string
+}
+
 export interface EditUser {
     newRole: AccountRole
     email: string
