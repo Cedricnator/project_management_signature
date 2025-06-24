@@ -29,6 +29,7 @@ jest.mock('@nestjs/core', () => ({
             enableCors: jest.fn(),
             useGlobalPipes: jest.fn(),
             useGlobalFilters: jest.fn(), 
+            useGlobalInterceptors: jest.fn(),
             setGlobalPrefix: jest.fn(),
             listen: jest.fn(),
             getHttpAdapter: jest.fn(),
@@ -41,6 +42,7 @@ describe('Main.ts Bootstrap', () => {
         enableCors: jest.Mock;
         useGlobalPipes: jest.Mock;
         useGlobalFilters: jest.Mock;
+        useGlobalInterceptors: jest.Mock;
         setGlobalPrefix: jest.Mock;
         listen: jest.Mock;
         getHttpAdapter: jest.Mock;
@@ -51,6 +53,7 @@ describe('Main.ts Bootstrap', () => {
             enableCors: jest.fn(),
             useGlobalPipes: jest.fn(),
             useGlobalFilters: jest.fn(),
+            useGlobalInterceptors: jest.fn(),
             setGlobalPrefix: jest.fn(),
             listen: jest.fn(),     
             getHttpAdapter: jest.fn(),

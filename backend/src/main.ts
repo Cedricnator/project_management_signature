@@ -3,11 +3,13 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { LoggerInterceptor } from './common/logger.interceptor';
 
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger(bootstrap.name);
   const port = 3000;
+  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,7 +20,9 @@ export async function bootstrap() {
       },
     }),
   );
+  
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalInterceptors(new LoggerInterceptor());
   app.enableCors();
 
   const config = new DocumentBuilder()
@@ -37,6 +41,7 @@ export async function bootstrap() {
       'jwt', // ← este nombre debe coincidir con el de @ApiBearerAuth('jwt')
     )
     .build();
+  
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
