@@ -14,7 +14,6 @@ import { HealthModule } from './health/health.module';
     FilesModule,
     AuthModule,
     SignatureModule,
-    UsersModule,
     SecurityModule,
     HealthModule,
   ],

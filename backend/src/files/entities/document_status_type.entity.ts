@@ -20,3 +20,4 @@ export class DocumentStatusType {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
+

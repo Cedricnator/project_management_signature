@@ -38,7 +38,7 @@ export class File {
   @Column({ name: 'original_name', length: 255, nullable: false })
   originalFilename: string;
 
-  @Column({ name: 'file_name', length: 255, nullable: false })
+  @Column({ name: 'file∑_name', length: 255, nullable: false })
   filename: string;
 
   @Column({ name: 'file_hash', length: 255, nullable: false })
