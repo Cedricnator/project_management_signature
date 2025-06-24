@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggerInterceptor } from './common/logger.interceptor';
+import * as compression from 'compression';
 
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +25,17 @@ export async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new LoggerInterceptor());
   app.enableCors();
+
+  app.use(compression({
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+    threshold: 1024,
+    level: 4
+  }));
 
   const config = new DocumentBuilder()
     .setTitle('Firma Tic')

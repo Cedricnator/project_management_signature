@@ -40,7 +40,7 @@ services:
       DB_PORT: 5432
       DB_NAME: signature_project
       JWT_SECRET: 'secreto'
-      APP_ENV: staging
+      APP_ENV: production
     ports:
       - "32000:3000"
     networks:
