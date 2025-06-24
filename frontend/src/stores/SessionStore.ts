@@ -4,6 +4,7 @@ import { logger } from '@/utils/logger'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { userResponseToAccount, type UserResponseDto } from './dto/UserResponseDto'
+import api from '@/utils/axios'
 
 export const useSessionStore = defineStore('session', {
     state: () => ({
@@ -25,15 +26,15 @@ export const useSessionStore = defineStore('session', {
                 }
 
                 const newlogin: NewLogin = {
-                    // email: 'pedro.lopez@signature.com',
+                    email: 'pedro.lopez@signature.com',
                     // email: 'supervisor@signature.com',
-                    email: 'admin@signature.com',
+                    // email: 'admin@signature.com',
                     password: '123456789',
                 }
 
                 const header = {}
 
-                const response = await axios.post<loginResponseDto>(
+                const response = await api.post<loginResponseDto>(
                     `${API_ROUTE}/auth/login`,
                     newlogin,
                 )
