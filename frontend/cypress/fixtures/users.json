@@ -1,0 +1,44 @@
+[
+  {
+    "firstName": "Carlos",
+    "lastName": "Administrador",
+    "email": "admin@signature.com",
+    "role": "admin"
+  },
+  {
+    "firstName": "Maria",
+    "lastName": "Supervisora",
+    "email": "supervisor@signature.com",
+    "role": "supervisor"
+  },
+  {
+    "firstName": "Juan",
+    "lastName": "Pérez",
+    "email": "juan.perez@signature.com",
+    "role": "user"
+  },
+  {
+    "firstName": "Ana",
+    "lastName": "García",
+    "email": "ana.garcia@signature.com",
+    "role": "user"
+  },
+  {
+    "firstName": "Pedro",
+    "lastName": "López",
+    "email": "pedro.lopez@signature.com",
+    "role": "user"
+  },
+  {
+    "firstName": "cucha",
+    "lastName": "roth",
+    "email": "cucharoth@cucha.rs",
+    "role": "user"
+  },
+  {
+    "firstName": "cucha",
+    "lastName": "roth",
+    "email": "cucha@cucha.rs",
+    "role": "supervisor"
+  }
+]
