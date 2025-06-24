@@ -46,7 +46,6 @@ const fetchDocumentHistory = async () => {
     )
     if (!fetchResult.success) toastStore.addToast(fetchResult.type, fetchResult.message)
     documentHistory.value = fetchResult.data ?? []
-    await sleep(500)
     loading.value = false
 }
 

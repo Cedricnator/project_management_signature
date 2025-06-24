@@ -1,6 +1,6 @@
 describe('Upload document modal', () => {
     beforeEach(() => {
-        // Load the page and wait for initial documents
+        cy.loginAsUser()
         cy.intercept('GET', '/files/users/*', []).as('getUserDocs')
         cy.visit('/user')
         cy.wait('@getUserDocs')
@@ -19,7 +19,6 @@ describe('Upload document modal', () => {
         // Intercept FormData POST request
         cy.intercept('POST', '/files/upload/', (req) => {
             // FormData is not visible directly in Cypress, so we can't assert body
-            // But you can still spy and return a mocked success
             req.reply({
                 statusCode: 201,
                 body: {
