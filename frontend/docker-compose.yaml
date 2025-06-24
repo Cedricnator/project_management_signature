@@ -1,0 +1,14 @@
+services:
+  frontend-signature-project-management:
+    container_name: frontend-signature-project-management
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+    ports:
+      - 33000:8080
+    networks:
+      - backend_project-management-network
+
+networks:
+  backend_project-management-network:
+    external: true
