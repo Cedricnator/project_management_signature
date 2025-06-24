@@ -49,6 +49,10 @@ body,
     --color-supervisor-primary: #147e6c;
     --color-supervisor-primary-800: #106355;
     --color-supervisor-primary-200: #bfe7e1;
+    --color-admin-primary: #222222;
+    --color-admin-primary-200: #c7c7c7;
+    --color-admin-primary-800: #000000;
+    --color-admin-background: #e6e6e6;
 }
 
 [data-theme="user"] {
@@ -63,6 +67,13 @@ body,
     --color-primary: var(--color-supervisor-primary);
     --color-primary-200: var(--color-supervisor-primary-200);
     --color-primary-800: var(--color-supervisor-primary-800);
+}
+
+[data-theme="admin"] {
+    --color-background: var(--color-admin-background);
+    --color-primary: var(--color-admin-primary);
+    --color-primary-200: var(--color-admin-primary-200);
+    --color-primary-800: var(--color-admin-primary-800);
 }
 
 @theme {
@@ -87,6 +98,12 @@ body,
 
 @custom-variant user {
     &:where([data-theme="user"] *) {
+        @slot;
+    }
+}
+
+@custom-variant admin {
+    &:where([data-theme="admin"] *) {
         @slot;
     }
 }
