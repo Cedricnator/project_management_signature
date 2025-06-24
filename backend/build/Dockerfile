@@ -19,6 +19,27 @@ COPY package*.json ./
 RUN npm ci --only=production --omit=dev --ignore-scripts && \
     npm cache clean --force
 
+
+# ===== ETAPA DE TESTING =====
+FROM base AS testing
+
+WORKDIR /app
+
+# Copiar archivos de dependencias y configuración
+COPY package*.json ./
+COPY nest-cli.json tsconfig*.json .swcrc ./
+COPY jest.config.js ./
+
+# Instalar TODAS las dependencias (incluyendo dev dependencies para testing)
+RUN npm ci --ignore-scripts
+
+# Copiar código fuente y tests
+COPY src/ ./src/
+
+# Ejecutar tests - si fallan, el build se detiene aquí
+RUN npm run test
+
+
 # ===== ETAPA DE BUILD =====
 FROM base AS builder
 
