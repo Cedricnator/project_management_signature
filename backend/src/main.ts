@@ -59,6 +59,8 @@ export async function bootstrap() {
 
   await app.listen(port);
   logger.log(`Server is running on port: ${port}`);
+  logger.log(`Swagger is available at: http://localhost:${port}/api`);
+  logger.log(`App is running in ${process.env.APP_ENV || 'development'} mode`);
 }
 
 void bootstrap();
