@@ -4,6 +4,9 @@ import type { Account, AdminUser } from '@/types'
 import { ButtonType } from '@/types'
 import { computed, ref, watch } from 'vue'
 import CustomButton from '@/components/CustomButton.vue'
+import AdminUserModal from '@/components/admin/AdminUserModal.vue';
+import DeleteUserModal from '@/components/admin/DeleteUserModal.vue'
+import { AccountRoleLabel } from '@/types'
 
 const props = defineProps<{
     users: AdminUser[]
@@ -13,7 +16,10 @@ const toastStore = useToastStore()
 
 const allUsers = computed(() => props.users)
 const searchQuery = ref('')
+const isCreateUserModal = ref(false)
+const isDeleteUserModal = ref(false)
 const currentPage = ref(1)
+const currentUser = ref<AdminUser>()
 const itemsPerPage = 6
 
 const sortKey = ref<'email' | 'lastName' | 'role' | null>(null)
@@ -56,7 +62,15 @@ function sortBy(key: 'email' | 'lastName' | 'role') {
     }
 }
 
-function handleEditState(user: AdminUser) {}
+function handleEditUser(user: AdminUser) {
+    currentUser.value = user
+    isCreateUserModal.value = true
+}
+
+function handleDeleteUser(user: AdminUser) {
+    currentUser.value = user
+    isDeleteUserModal.value = true
+}
 
 /**
  * moves to first page when searching, so it doesn't show empty pages.
@@ -67,6 +81,8 @@ watch(searchQuery, () => {
 </script>
 
 <template>
+    <AdminUserModal :isOpen="isCreateUserModal" :user="currentUser" @close="isCreateUserModal = false"/>
+    <DeleteUserModal :isOpen="isDeleteUserModal" :user="currentUser" @close="isDeleteUserModal = false"/>
     <div class="flex flex-col h-full w-full overflow-x-auto sm:rounded-lg">
         <div class="grid grid-cols-1 md:grid-cols-2 pb-4 bg-white">
             <p class="font-semibold text-2xl">Usuarios</p>
@@ -153,17 +169,20 @@ watch(searchQuery, () => {
                         {{ user.lastName }}
                     </td>
                     <td class="max-w-[5rem] px-2 py-3 md:px-6 md:py-3 min-w-20 md:min-w-10 md:max-w-10">
-                        {{ user.role }}
+                        {{ AccountRoleLabel[user.role] }}
                     </td>
                     <td class="max-w-[6rem] px-2 py-3 md:px-6 md:py-3">
                         <div class="flex flex-wrap md:flex-nowrap gap-2 justify-center">
                             <div class="flex grow max-w-sm">
                                 <CustomButton
-                                label="Editar rol"
-                                :buttonType="ButtonType.outlined"
-                                :onClick="() => handleEditState(user)"
-                                iconName="fa-solid fa-pen-to-square"
+                                    label="Editar rol"
+                                    :buttonType="ButtonType.outlined"
+                                    :onClick="() => handleEditUser(user)"
+                                    iconName="fa-solid fa-pen-to-square"
                                 />
+                            </div>
+                            <div>
+                                <CustomButton label="test" :buttonType="ButtonType.icon" :onClick="() => handleDeleteUser(user)" iconName="fa-solid fa-trash-can"/>
                             </div>
                         </div>
                     </td>

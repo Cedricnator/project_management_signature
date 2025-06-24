@@ -1,6 +1,6 @@
 // composables/useAccountFormValidation.ts
 import { ref } from 'vue'
-import { AccountRole } from '@/types'
+import { AccountRole, type AdminUser } from '@/types'
 
 export function useAccountFormValidation() {
     const email = ref('')
@@ -21,10 +21,17 @@ export function useAccountFormValidation() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-    function validate(): boolean {
+    function validate(user?: AdminUser): boolean {
         let ok = true
 
-        errors.value = { email: null, firstName: null, lastName: null, role: null, password: null, confirmPassword: null}
+        errors.value = {
+            email: null,
+            firstName: null,
+            lastName: null,
+            role: null,
+            password: null,
+            confirmPassword: null,
+        }
 
         // email
         const emailTrimmed = email.value.trim()
@@ -88,6 +95,9 @@ export function useAccountFormValidation() {
         // role
         if (!Object.values(AccountRole).includes(role.value)) {
             errors.value.role = 'Rol inválido'
+            ok = false
+        } else if (user?.role === role.value) {
+            errors.value.role = 'El usuario ya posee este rol'
             ok = false
         }
 

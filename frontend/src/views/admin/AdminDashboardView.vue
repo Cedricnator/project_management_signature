@@ -12,7 +12,6 @@ const isCreateUserModal = ref(false)
 
 const users = computed(() => adminStore.users)
 
-
 const createUserModal = () => {
     isCreateUserModal.value = true
 }

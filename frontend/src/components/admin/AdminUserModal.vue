@@ -33,26 +33,27 @@ const adminUserRoles = [ {
 
 
 const handleSubmit = async () => {
-    if (!validate()) return
-
-    actionClicked.value == 'create' ? handleCreate() : handleEdit()
-
-
+    if (!validate(props.user)) return
+    
+    const response = actionClicked.value == 'create' ? await handleCreate() : await handleEdit()
+    toastStore.addToast(response.type, response.message)
+    
     closeModal()
 }
 
-const handleCreate = () => {
+const handleCreate = async () => {
     const newUser: NewUser = {
         email: email.value,
         firstName: firstName.value,
         lastName: lastName.value,
         password: password.value,
+        role: role.value
     }
-    adminStore.createUser(newUser)
+    return await adminStore.createUser(newUser)
 }
 
-const handleEdit = () => {
-
+const handleEdit = async () => {
+    return await adminStore.editRole(email.value, role.value)
 }
 
 const isEditMode = computed(() => !!props.user)
@@ -65,8 +66,8 @@ watch(
             firstName.value = props.user.firstName
             lastName.value = props.user.lastName
             role.value = props.user.role
-            password.value = ''
-            confirmPassword.value = ''
+            password.value = 'isEditMode'
+            confirmPassword.value = 'isEditMode'
             loading.value = false
         } else if (open) {
             // email.value = ''
@@ -103,7 +104,7 @@ watch(
                     <h3 v-if="isEditMode" class="text-lg font-semibold text-gray-900">
                         Editar rol
                     </h3>
-                    <h3 class="text-lg font-semibold text-gray-900">Crear Usuario</h3>
+                    <h3 v-else class="text-lg font-semibold text-gray-900">Crear Usuario</h3>
 
                     <button
                         @click="closeModal"
@@ -246,6 +247,9 @@ watch(
                                 label="Rol"
                                 placeholder="Seleccione rol"
                             />
+                            <p v-if="errors.role" class="text-red-500 text-sm mt-1">
+                                {{ errors.role }}
+                            </p>
                         </div>
                     </div>
 
@@ -259,13 +263,12 @@ watch(
                                 @click="() => (actionClicked = 'create')"
                             />
                         </div>
-                        <div v-else class="flex">
+                        <div v-else class="flex grow">
                             <CustomButton
                                 type="submit"
                                 label="Editar rol"
                                 iconName="fa-solid fa-pen-to-square"
                                 @click="() => (actionClicked = 'edit')"
-                                color="bg-red-800"
                             />
                         </div>
                     </div>

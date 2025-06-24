@@ -1,4 +1,4 @@
-import type { Account, AccountRole, AdminUser, NewUser, Result } from '@/types'
+import type { Account, AccountRole, AdminUser, EditUser, NewUser, Result } from '@/types'
 import api from '@/utils/axios'
 import { API_ROUTE } from '@/utils/const'
 import { logger } from '@/utils/logger'
@@ -49,7 +49,7 @@ export const useAdminStore = defineStore('admin', {
                 logger.info('[CREATE_USER]', 'response: ', response)
 
                 if (response.status == 201) {
-                    // this.users.push(AdminUserResponseDto.fromJson(response.data).toAdminUser())
+                    this.users.push(AdminUserResponseDto.fromJson(response.data).toAdminUser())
 
                     return {
                         success: true,
@@ -73,24 +73,21 @@ export const useAdminStore = defineStore('admin', {
         },
         async editRole(userEmail: string, newRole: AccountRole) {
             try {
-                const data = {
+                const data: EditUser = {
                     newRole: newRole,
                     email: userEmail,
                 }
-                const response = await api.post<AdminUserResponseDto>(
-                    `${API_ROUTE}/users/change-role`,
-                    {
-                        data,
-                    },
-                )
+                const response = await api.patch(`${API_ROUTE}/users/change-role`, {
+                    ...data,
+                })
                 logger.info('[EDIT_USER]', 'response: ', response)
 
                 if (response.status == 200) {
-                    // this.users.push(AdminUserResponseDto.fromJson(response.data).toAdminUser())
+                    this.handleEditRole(userEmail, newRole)
 
                     return {
                         success: true,
-                        message: 'Usuario creado con éxito',
+                        message: 'Usuario modificado con éxito',
                         type: ToastType.success,
                     } as Result
                 }
@@ -107,6 +104,53 @@ export const useAdminStore = defineStore('admin', {
                     type: ToastType.error,
                 } as Result
             }
+        },
+        async deleteUser(user: AdminUser) {
+            try {
+                const response = await api.delete(`${API_ROUTE}/users/email/${user.email}`)
+                logger.info('[DELETE_USER]', 'response: ', response)
+
+                if (response.status == 204) {
+                    this.handleDeleteUser(user.email)
+
+                    return {
+                        success: true,
+                        message: 'Usuario eliminado con éxito',
+                        type: ToastType.success,
+                    } as Result
+                }
+                return {
+                    success: false,
+                    message: response.statusText,
+                    type: ToastType.warning,
+                } as Result
+            } catch (error: any) {
+                logger.error('[DELETE_USER]', error)
+                return {
+                    success: false,
+                    message: error.message,
+                    type: ToastType.error,
+                } as Result
+            }
+        },
+        handleDeleteUser(userEmail: string) {
+            const index = this.users.findIndex((user) => user.email === userEmail)
+            if (index === -1) {
+                logger.error('[DELETE_USER]', 'could not find user in pinia store.')
+                return
+            }
+
+            this.users.splice(index, 1)
+        },
+
+        handleEditRole(userEmail: string, newRole: AccountRole) {
+            const index = this.users.findIndex((user) => user.email === userEmail)
+            if (index === -1) {
+                logger.error('[EDIT_USER]', 'could not find user in pinia store.')
+                return
+            }
+
+            this.users[index].role = newRole
         },
     },
 })

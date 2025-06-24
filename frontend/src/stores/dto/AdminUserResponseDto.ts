@@ -12,7 +12,7 @@ export class AdminUserResponseDto {
     toAdminUser(): AdminUser {
         const adminUser: AdminUser = {
             email: this.email,
-            firstName: this.email,
+            firstName: this.firstName,
             lastName: this.lastName,
             role: mapAccountRole(this.role),
         }

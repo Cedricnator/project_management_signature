@@ -1,9 +1,15 @@
 import type { ToastType } from "./stores/ToastStore"
 
 export enum AccountRole {
-    user = 'Usuario',
-    admin = 'Administrador',
-    supervisor = 'Supervisor',
+    user = 'user',
+    admin = 'admin',
+    supervisor = 'supervisor',
+}
+
+export const AccountRoleLabel: Record<AccountRole, string> = {
+    [AccountRole.user]: 'Usuario',
+    [AccountRole.admin]: 'Administrador',
+    [AccountRole.supervisor]: 'Supervisor',
 }
 
 export interface Account {
@@ -21,10 +27,16 @@ export interface AdminUser {
 }
 
 export interface NewUser {
-    email: string,
-    firstName: string,
-    lastName: string,
-    password: string,
+    email: string
+    firstName: string
+    lastName: string
+    password: string
+    role: AccountRole
+}
+
+export interface EditUser {
+    newRole: AccountRole
+    email: string
 }
 
 export enum DocumentStatus {
@@ -77,6 +89,7 @@ export interface DocumentHistory {
 export enum ButtonType {
     filled = 'filled',
     outlined = 'outlined',
+    icon = 'icon',
 }
 
 export interface Result<T = void> {
