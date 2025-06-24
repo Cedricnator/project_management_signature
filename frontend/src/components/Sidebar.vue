@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import SidebarButton from '@/components/SidebarButton.vue'
+import router from '@/router';
 import { useSessionStore } from '@/stores/SessionStore';
 import { AccountRole } from '@/types';
 import { computed } from 'vue';
@@ -14,6 +15,11 @@ function toggleSidebar() {
 }
 
 const userType = computed(() => sessionStore.account.role)
+
+const handleLogout = () => {
+    sessionStore.$reset()
+    router.push({name: 'auth'})
+}
 
 </script>
 
@@ -95,7 +101,17 @@ const userType = computed(() => sessionStore.account.role)
                 </ul>
             </div>
             <div class="w-full mb-5">
-                <SidebarButton label="Cerrar sesión" iconName="fa-solid fa-arrow-right-from-bracket" :rotation="180" :danger="true" to="login" />
+                <!-- <SidebarButton label="Cerrar sesión" iconName="fa-solid fa-arrow-right-from-bracket" :rotation="180" :danger="true" to="login" /> -->
+                <button
+                    class="flex w-full justify-start items-center p-2 rounded-lg hover:bg-primary hover:text-text-white group border-b-1 shadow-xl/10 text-red-800" 
+                    @click="handleLogout"
+                >   
+                    <div class="flex flex-1 justify-center">
+                        <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" rotation="180" size="lg" />
+                    </div>
+                    
+                    <span class="flex flex-7 ms-3">Cerrar Sesión</span>
+                </button>
             </div>
             
         </div>
