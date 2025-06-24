@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Account, AccountRole } from '@/types'
+import { AccountRoleLabel } from '@/types';
 
 const props = defineProps<{
     account: Account
@@ -16,7 +17,7 @@ const props = defineProps<{
             </div>
             <div class="flex w-full flex-col p-2 justify-start">
                 <div class="flex grow truncate">
-                    <p class="text-primary font-semibold">{{ account.role }}</p>
+                    <p class="text-primary font-semibold">{{ AccountRoleLabel[account.role] }}</p>
                 </div>
                 <div class="flex grow truncate">
                     <p class="font-bold">{{ account.username }}</p>

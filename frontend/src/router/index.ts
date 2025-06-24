@@ -7,6 +7,8 @@ import UserView from '@/views/UserView.vue'
 import UserHistory from '@/views/user/UserHistory.vue'
 import SupervisorView from '@/views/SupervisorView.vue'
 import SupervisorDashboardView from '@/views/supervisor/SupervisorDashboardView.vue'
+import AdminView from '@/views/AdminView.vue'
+import AdminDashboard from '@/views/admin/AdminDashboardView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -75,6 +77,21 @@ const router = createRouter({
                     path: 'documents',
                     name: 'user-documents',
                     component: DocumentsView,
+                    meta: {
+                        requireAuth: true,
+                    },
+                },
+            ],
+        },
+        {
+            path: '/admin',
+            component: AdminView,
+            redirect: { path: '/admin/dashboard' },
+            children: [
+                {
+                    path: 'dashboard',
+                    name: 'admin-dashboard',
+                    component: AdminDashboard,
                     meta: {
                         requireAuth: true,
                     },
