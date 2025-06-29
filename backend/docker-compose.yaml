@@ -50,4 +50,4 @@ volumes:
 
 networks:
   project-management-network:
-    driver: bridge
+    external: true
