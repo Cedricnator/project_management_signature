@@ -64,7 +64,7 @@ describe('Auth E2E Tests', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     token_admin = response.body.token as string;
   });
-  it('/Post /auth/register', async () => {
+  it('t.001 /Post /auth/register must fail', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
       .set('Content-Type', 'application/json')
@@ -84,7 +84,7 @@ describe('Auth E2E Tests', () => {
 
     expect(response.status).toBe(401);
   });
-  it('PF-03 Gestión de usuarios', async () => {
+  it('t.002 PF-03 Gestión de usuarios', async () => {
     //Crear nuevo usuario con rol
     //un usuario con rol admin puede crear un usuario indicando email y contraseña
     const response = await request(app.getHttpServer())
@@ -97,13 +97,6 @@ describe('Auth E2E Tests', () => {
         firstName: 'Test',
         lastName: 'User',
       });
-    /**
-     * {
-     *   "id": "2a9460e6-eb57-4b12-882d-a6fbd584be3c",
-     *   "email": "test@test.com",
-     *   "role": "user"
-     * }
-     */
 
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('firstName', 'Test');
@@ -111,7 +104,8 @@ describe('Auth E2E Tests', () => {
     expect(response.body).toHaveProperty('email', 'test@test.com');
     expect(response.body).toHaveProperty('role', 'user');
   });
-  it('/Post /auth/login', async () => {
+  it('t.005 /Post /auth/login', async () => {
+    // Iniciar sesión con el usuario creado devuelve el token
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .set('Content-Type', 'application/json')
@@ -125,14 +119,15 @@ describe('Auth E2E Tests', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     token = response.body.token;
   });
-  it('should reject login with wrong password', async () => {
+  it('t.003 should reject login with wrong password', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: 'test@test.com', password: 'wrongpass' });
 
     expect(res.status).toBe(401);
   });
-  it('/Get /auth/me', async () => {
+  it('t.004 /Get /auth/me', async () => {
+    // Verificar que el token es válido y devuelve los datos del usuario
     const response = await request(app.getHttpServer())
       .get('/auth/me')
       .set('Authorization', `Bearer ${token}`)
@@ -151,10 +146,6 @@ describe('Auth E2E Tests', () => {
     expect(response.body).toHaveProperty('id');
     expect(response.body).toHaveProperty('email', 'test@test.com');
     expect(response.body).toHaveProperty('role', 'user');
-  });
-  it('PF-03 Gestión de usuarios', async () => {
-    //Crear nuevo usuario con rol
-    //un usuario con rol admin puede crear un usuario indicando email y contraseña
   });
   afterAll(async () => {
     await app.close();
