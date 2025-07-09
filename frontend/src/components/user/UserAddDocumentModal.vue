@@ -277,7 +277,7 @@ const handleEdit = async () => {
                                         </svg>
                                         <p class="mb-2 text-sm text-gray-500">
                                             <span class="font-semibold"
-                                                >Click o arrastre para subir documento</span
+                                                >Click para subir documento</span
                                             >
                                         </p>
                                         <p class="text-xs text-gray-500">PDF</p>

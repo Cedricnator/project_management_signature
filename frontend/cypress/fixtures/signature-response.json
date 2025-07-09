@@ -1,0 +1,23 @@
+{
+  "id": "b2797660-d82a-457d-aee3-883f01477fe9",
+  "name": "HOPE DRIVEN DEVELOPMENT",
+  "description": "HOPE DRIVEN DEVELOPMENT",
+  "currentStatusId": "01974b23-d84d-7319-95b3-02322c982216",
+  "filePath": "uploads/06 DP Kick Off V1.1.pdf-1750757545931-744337738.pdf",
+  "fileSize": "360235",
+  "mimetype": "application/pdf",
+  "originalFilename": "06 DP Kick Off V1.1.pdf",
+  "filename": "06 DP Kick Off V1.1.pdf-1750757545931-744337738.pdf",
+  "createdAt": "2025-06-24T09:32:25.992Z",
+  "updatedAt": "2025-06-24T09:32:41.657Z",
+  "uploadedBy": "01974b59-7d0e-7745-b45a-5a36316863e6",
+  "signatureHash": "6173f4c552cc52fce837eaf384f3544db46f651e7c56fa56293cbcab86643742",
+  "signedAt": "2025-06-24T09:32:41.634Z",
+  "signer": {
+    "id": "3c0eb6a1-f099-4e21-a961-4d6ca406b747",
+    "email": "cucha@cucha.rs",
+    "firstName": "cucha",
+    "lastName": "roth",
+    "role": "supervisor"
+  }
+}

@@ -46,7 +46,7 @@ watch(
             description.value = props.document.description
             comentario.value = props.document.commentary ?? ''
             fileName.value = props.document.originalName
-            sleep(500)
+            await sleep(500)
             loading.value = false
         }
     },
@@ -216,6 +216,7 @@ const handleRejectDoc = async (processedDocument: ProcededDocument) => {
                                 type="submit"
                                 label="Aprobar documento"
                                 iconName="fa-solid fa-check-circle"
+                                data-testid="approve-document-button"
                                 @click="() => (actionClicked = 'approve')"
                             />
                         </div>
@@ -224,6 +225,7 @@ const handleRejectDoc = async (processedDocument: ProcededDocument) => {
                                 type="submit"
                                 label="Rechazar documento"
                                 iconName="fa-solid fa-circle-xmark"
+                                data-testid="reject-document-button"
                                 @click="() => (actionClicked = 'reject')"
                                 color="bg-red-800"
                             />

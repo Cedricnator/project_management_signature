@@ -30,6 +30,7 @@ import {
     faCircleXmark,
     faCircleInfo,
     faTriangleExclamation,
+    faTrashCan,
 } from '@fortawesome/free-solid-svg-icons'
 /* adds icons */
 library.add(faStar)
@@ -51,6 +52,7 @@ library.add(faCircleCheck)
 library.add(faCircleXmark)
 library.add(faCircleInfo)
 library.add(faTriangleExclamation)
+library.add(faTrashCan)
 
 /* pinia */
 const pinia = createPinia()

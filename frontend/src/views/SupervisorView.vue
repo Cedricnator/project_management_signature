@@ -11,7 +11,6 @@ const sessionStore = useSessionStore()
 
 onMounted(() => {
     document.documentElement.setAttribute('data-theme', 'supervisor');
-    sessionStore.login()
 })
 </script>
 
