@@ -106,8 +106,9 @@ describe('Auth E2E Tests', () => {
      */
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
-    expect(response.body).toHaveProperty('email');
+    expect(response.body).toHaveProperty('firstName', 'Test');
+    expect(response.body).toHaveProperty('lastName', 'User');
+    expect(response.body).toHaveProperty('email', 'test@test.com');
     expect(response.body).toHaveProperty('role', 'user');
   });
   it('/Post /auth/login', async () => {
