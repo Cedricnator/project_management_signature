@@ -32,7 +32,7 @@ describe('Auth E2E Tests', () => {
           logging: false,
         }),
         AuthModule,
-        ConfigModule.forRoot(),
+        await ConfigModule.forRoot(),
       ],
     }).compile();
     app = moduleFixture.createNestApplication();

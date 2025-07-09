@@ -19,7 +19,9 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/health')
       .expect(200)
-      .expect('{"status":"OK","message":"Service is OK"}');
+      .expect(
+        '{"status":"ok","info":{"database":{"status":"up"}},"error":{},"details":{"database":{"status":"up"}}}',
+      );
   });
   afterAll(async () => {
     await app.close();
