@@ -1,12 +1,17 @@
-import { Before, After, Given, When, Then } from '@cucumber/cucumber';
+import { Before, After, When, Then } from '@cucumber/cucumber';
 import { Test } from '@nestjs/testing';
-import { INestApplication, ConflictException, BadRequestException } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as supertest from 'supertest';
 import * as assert from 'assert';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from '../../src/users/users.module';
+import { AuthModule } from '../../src/auth/auth.module';
 import { UsersService } from '../../src/users/users.service';
-import { AppModule } from '../../src/app.module';
+import { User } from '../../src/users/entities/user.entity';
+import { UserRole } from '../../src/common/enum/user-role.enum';
+import { AllExceptionsFilter } from '../../src/common/exceptions.filter';
+import { CreateUserDto } from '../../src/users/dto/create-user.dto';
 
 let app: INestApplication;
 let request: any;
@@ -15,40 +20,50 @@ let request: any;
 Before(async function () {
   const loginEmail = process.env.TEST_ADMIN_EMAIL || 'admin@signature.com';
   const loginPassword = process.env.TEST_ADMIN_PASSWORD || '123456789';
+  const existingEmail = 'existing@example.com';
 
-  // mock simple del UsersService para evitar dependencias de TypeORM en el test
-  const mockUsersService: Partial<UsersService> = {
-    findOneByEmail: async (email: string) => {
-      if (email !== loginEmail) return undefined;
-      return {
-        id: 1,
-        email,
-        // bcrypt hash de la password de prueba para que bcrypt.compare funcione
-        password: bcrypt.hashSync(loginPassword, 10),
-        role: 'ADMIN',
-      } as any;
-    },
-    create: async (dto: any) => {
-      // simula conflicto cuando el email ya existe
-      const existingEmail = 'existing@example.com';
-      if (dto.email === existingEmail) {
-        throw new ConflictException('Email already exists');
-      }
-      if (dto.password && dto.password.length < 6) {
-        throw new BadRequestException('Password too short');
-      }
-      return { id: 999, ...dto } as any;
-    },
-  };
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
+  process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
+
+  const dbHost = process.env.TEST_DB_HOST || 'localhost';
+  const dbPort = parseInt(process.env.TEST_DB_PORT || '31000', 10);
+  const dbUser = process.env.TEST_DB_USER || 'postgres';
+  const dbPassword = process.env.TEST_DB_PASSWORD || 'postgres';
+  const dbName = process.env.TEST_DB_NAME || 'signature_project';
 
   const moduleRef = await Test.createTestingModule({
-    imports: [AppModule],
-  })
-    .overrideProvider(UsersService)
-    .useValue(mockUsersService)
-    .compile();
+    imports: [
+      ConfigModule.forRoot({ isGlobal: true }),
+      TypeOrmModule.forRoot({
+        type: 'postgres',
+        host: dbHost,
+        port: dbPort,
+        username: dbUser,
+        password: dbPassword,
+        database: dbName,
+        entities: [User],
+        synchronize: true,
+        dropSchema: true,
+        logging: false,
+      }),
+      UsersModule,
+      AuthModule,
+    ],
+  }).compile();
 
   app = moduleRef.createNestApplication();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   await app.init();
   request = supertest(app.getHttpServer());
   this.request = request;
@@ -56,24 +71,44 @@ Before(async function () {
   this.response = undefined;
   this.authHeader = undefined;
 
-  // intenta loguear para obtener token real
-  try {
-    const loginRes = await request
-      .post('/auth/login')
-      .send({ email: loginEmail, password: loginPassword });
+  const usersService = moduleRef.get(UsersService);
 
-    if (
-      loginRes &&
-      loginRes.status === 200 &&
-      (loginRes.body?.access_token || loginRes.body?.token)
-    ) {
-      const token = loginRes.body.access_token || loginRes.body.token;
-      this.authHeader = `Bearer ${token}`;
-      return;
-    }
-  } catch (err) {
-    console.error('login mock fallback:', err);
+  const adminUser: CreateUserDto = {
+    email: loginEmail,
+    password: loginPassword,
+    firstName: 'Admin',
+    lastName: 'User',
+    role: UserRole.ADMIN,
+  };
+
+  const existingUser: CreateUserDto = {
+    email: existingEmail,
+    password: 'Existing123!',
+    firstName: 'Existing',
+    lastName: 'User',
+    role: UserRole.USER,
+  };
+
+  await usersService.create(adminUser);
+  await usersService.create(existingUser);
+
+  const loginRes = await request
+    .post('/auth/login')
+    .send({ email: loginEmail, password: loginPassword });
+
+  if (
+    loginRes.status === 200 &&
+    (loginRes.body?.token || loginRes.body?.access_token)
+  ) {
+    const token =
+      loginRes.body.token ||
+      loginRes.body.access_token ||
+      loginRes.body.accessToken;
+    this.authHeader = `Bearer ${token}`;
+    return;
   }
+
+  throw new Error('No fue posible autenticar al administrador de pruebas');
 });
 
 // Tag hook: forzar sin token
@@ -91,12 +126,17 @@ When('el servidor esta disponible', function () {
 
 When('envío una petición de registro con:', async function (dataTable: any) {
   const data = dataTable.hashes()[0];
-  const payload: any = {
+  const roleValue =
+    typeof data.role === 'string' && data.role.trim().length > 0
+      ? data.role.trim().toLowerCase()
+      : UserRole.USER;
+
+  const payload: Record<string, unknown> = {
     email: data.email,
     password: data.password,
     firstName: data.firstName,
     lastName: data.lastName,
-    role: data.role || 'USER',
+    role: roleValue,
   };
   this.payload = payload;
 
