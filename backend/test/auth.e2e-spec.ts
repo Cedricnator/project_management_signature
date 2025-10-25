@@ -78,7 +78,7 @@ describe('Auth Integration Test', () => {
     const body = response.body as { message: string };
     expect(response.status).toBe(401);
     expect(body).toHaveProperty('message');
-    expect(body).toBe('Invalid password');
+    expect(body.message).toBe('Invalid password');
     expect(body).not.toHaveProperty('token');
   });
 
