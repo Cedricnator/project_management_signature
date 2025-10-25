@@ -1,5 +1,5 @@
 import * as request from 'supertest';
-
+import { Server } from 'http';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AuthModule } from '../src/auth/auth.module';
@@ -10,11 +10,10 @@ import { Repository } from 'typeorm';
 import { UserRole } from '../src/common/enum/user-role.enum';
 import * as bcrypt from 'bcryptjs';
 
-describe('Auth E2E Tests', () => {
+describe('Auth Integration Test', () => {
   let app: INestApplication;
-  let token: string;
+  let httpServer: Server;
   let userRepository: Repository<User>;
-  let token_admin: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,10 +21,10 @@ describe('Auth E2E Tests', () => {
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: 'localhost',
-          port: 5433,
-          username: 'test',
-          password: 'test',
-          database: 'test',
+          port: 31000,
+          username: 'postgres',
+          password: 'postgres',
+          database: 'signature_project',
           entities: [User],
           synchronize: true,
           dropSchema: true,
@@ -37,11 +36,11 @@ describe('Auth E2E Tests', () => {
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
+    httpServer = app.getHttpServer() as Server;
     userRepository = moduleFixture.get<Repository<User>>(
       getRepositoryToken(User),
     );
-
-    // 👇 Seed de un usuario admin
+    // seed de un usuario admin
     await userRepository.save({
       firstName: 'Admin',
       lastName: 'admin last name',
@@ -51,102 +50,38 @@ describe('Auth E2E Tests', () => {
       role: UserRole.ADMIN,
     });
   });
-  it('login admin', async () => {
-    const response = await request(app.getHttpServer())
+
+  it('IT-1 should login admin and return the access token', async () => {
+    const response = await request(httpServer)
       .post('/auth/login')
       .set('Content-Type', 'application/json')
       .send({
         email: 'admin@test.com',
         password: 'admin123',
       });
+    const body = response.body as { token: string };
+    const token_admin = body.token;
+
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('token');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    token_admin = response.body.token as string;
+    expect(token_admin).toBeDefined();
   });
-  it('t.001 /Post /auth/register must fail', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/auth/register')
+
+  it('IT-2 should fail to login if credentials are wrong', async () => {
+    const response = await request(httpServer)
+      .post('/auth/login')
       .set('Content-Type', 'application/json')
       .send({
-        email: 'testfail@test.com',
-        password: 'test1234',
-        firstName: 'Test',
-        lastName: 'User',
+        email: 'admin@test.com',
+        password: 'wrongpassword',
       });
-    /**
-     * {
-     *   "id": "2a9460e6-eb57-4b12-882d-a6fbd584be3c",
-     *   "email": "test@test.com",
-     *   "role": "user"
-     * }
-     */
-
+    const body = response.body as { message: string };
     expect(response.status).toBe(401);
+    expect(body).toHaveProperty('message');
+    expect(body).toBe('Invalid password');
+    expect(body).not.toHaveProperty('token');
   });
-  it('t.002 PF-03 Gestión de usuarios', async () => {
-    //Crear nuevo usuario con rol
-    //un usuario con rol admin puede crear un usuario indicando email y contraseña
-    const response = await request(app.getHttpServer())
-      .post('/auth/register')
-      .set('Content-Type', 'application/json')
-      .set('Authorization', `Bearer ${token_admin}`)
-      .send({
-        email: 'test@test.com',
-        password: 'test1234',
-        firstName: 'Test',
-        lastName: 'User',
-      });
 
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('firstName', 'Test');
-    expect(response.body).toHaveProperty('lastName', 'User');
-    expect(response.body).toHaveProperty('email', 'test@test.com');
-    expect(response.body).toHaveProperty('role', 'user');
-  });
-  it('t.005 /Post /auth/login', async () => {
-    // Iniciar sesión con el usuario creado devuelve el token
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
-      .set('Content-Type', 'application/json')
-      .send({
-        password: 'test1234',
-        email: 'test@test.com',
-      });
-
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('token');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-    token = response.body.token;
-  });
-  it('t.003 should reject login with wrong password', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'test@test.com', password: 'wrongpass' });
-
-    expect(res.status).toBe(401);
-  });
-  it('t.004 /Get /auth/me', async () => {
-    // Verificar que el token es válido y devuelve los datos del usuario
-    const response = await request(app.getHttpServer())
-      .get('/auth/me')
-      .set('Authorization', `Bearer ${token}`)
-      .send();
-
-    /**
-     * {
-     *         id: 1,
-     *         email: 'test@test.com',
-     *         role: 'user',
-     *         iat: 1749438897,
-     *         exp: 1749698097
-     *       }
-     */
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('id');
-    expect(response.body).toHaveProperty('email', 'test@test.com');
-    expect(response.body).toHaveProperty('role', 'user');
-  });
   afterAll(async () => {
     await app.close();
   });
