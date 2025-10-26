@@ -372,8 +372,12 @@ describe('Signature Integration Test', () => {
     const endTime = Date.now();
     const responseTime = (endTime - startTime) / 1000; // en segundos
 
+    // Verificar la respuesta de la petición
     expect(uploadResponse.status).toBe(201);
     expect(responseTime).toBeLessThanOrEqual(2);
+    expect(uploadResponse.request).toBeDefined();
+    expect(uploadResponse.request.method).toBe('POST');
+    expect(uploadResponse.request.url).toContain('/files/upload');
 
     const body = uploadResponse.body as DocumentUploadResponse;
     expect(body).toHaveProperty('id');
@@ -418,7 +422,11 @@ describe('Signature Integration Test', () => {
         role: UserRole.USER,
       });
 
+    // Verificar que la petición fue rechazada correctamente
     expect([400, 403, 409]).toContain(createUserResponse.status);
+    expect(createUserResponse.request).toBeDefined();
+    expect(createUserResponse.request.method).toBe('POST');
+    expect(createUserResponse.request.url).toContain('/users');
 
     const errorBody = createUserResponse.body as ErrorResponse;
     expect(errorBody.message).toBeDefined();
