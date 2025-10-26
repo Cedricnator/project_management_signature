@@ -88,6 +88,21 @@ describe('Auth Integration Test', () => {
     expect(body).not.toHaveProperty('token');
   });
 
+  it('IT-3 should fail to login with invalid credentials', async () => {
+    const response = await request(httpServer)
+      .post('/auth/login')
+      .set('Content-Type', 'application/json')
+      .send({
+        email: 'admin@test.com',
+        password: 'wrongpassword',
+      });
+    const body = response.body as { message: string };
+    expect(response.status).toBe(401);
+    expect(body).toHaveProperty('message');
+    expect(body.message).toBe('Invalid password');
+    expect(body).not.toHaveProperty('token');
+  });
+
   afterAll(async () => {
     await app.close();
   });
