@@ -7,6 +7,8 @@ import { Server } from 'http';
 import { SignDocument } from '../src/signature/entities/account-document.entity';
 import { SignatureModule } from '../src/signature/signature.module';
 import { AuthModule } from '../src/auth/auth.module';
+import { FilesModule } from '../src/files/files.module';
+import { UsersModule } from '../src/users/users.module';
 import { Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { File } from '../src/files/entities/file.entity';
@@ -40,6 +42,17 @@ interface ErrorResponse {
   message: string;
   error?: string;
   statusCode?: number;
+}
+
+interface DocumentUploadResponse {
+  id: string;
+  name: string;
+  description: string;
+  currentStatusId: string;
+  filePath: string;
+  fileSize: number;
+  mimetype: string;
+  uploadedBy: string;
 }
 
 describe('Signature Integration Test', () => {
@@ -82,6 +95,8 @@ describe('Signature Integration Test', () => {
         }),
         AuthModule,
         SignatureModule,
+        FilesModule,
+        UsersModule,
         ConfigModule.forRoot(),
       ],
     }).compile();
@@ -335,6 +350,88 @@ describe('Signature Integration Test', () => {
       },
     });
     expect(signature).toBeNull();
+  });
+
+  it('IT-7 should upload document and persist metadata successfully', async () => {
+    const startTime = Date.now();
+    const documentCountBefore = await fileRepository.count();
+
+    // Simular archivo de prueba
+    const fileBuffer = Buffer.from('Test document content for upload');
+
+    const uploadResponse = await request(httpServer)
+      .post('/files/upload')
+      .set('Authorization', `Bearer ${supervisorToken}`)
+      .field('name', 'New Test Document')
+      .field('description', 'Document uploaded via integration test')
+      .attach('file', fileBuffer, {
+        filename: 'test-upload.pdf',
+        contentType: 'application/pdf',
+      });
+
+    const endTime = Date.now();
+    const responseTime = (endTime - startTime) / 1000; // en segundos
+
+    expect(uploadResponse.status).toBe(201);
+    expect(responseTime).toBeLessThanOrEqual(2);
+
+    const body = uploadResponse.body as DocumentUploadResponse;
+    expect(body).toHaveProperty('id');
+    expect(body.name).toBe('New Test Document');
+    expect(body.description).toBe('Document uploaded via integration test');
+
+    // Verificar que se creó el registro en la BD
+    const documentCountAfter = await fileRepository.count();
+    expect(documentCountAfter).toBe(documentCountBefore + 1);
+
+    const savedDocument = await fileRepository.findOne({
+      where: { id: body.id },
+    });
+    expect(savedDocument).not.toBeNull();
+    expect(savedDocument?.name).toBe('New Test Document');
+    expect(savedDocument?.fileHash).toBeDefined();
+    expect(savedDocument?.uploadedBy).toBe(supervisorId);
+    expect(savedDocument?.currentStatusId).toBe(statusPendingId);
+
+    // Verificar que se creó el historial del documento
+    const history = await historyRepository.findOne({
+      where: {
+        documentId: body.id,
+        statusId: statusPendingId,
+      },
+    });
+    expect(history).not.toBeNull();
+  });
+
+  it('IT-8 should fail to create user with duplicate email', async () => {
+    const userCountBefore = await userRepository.count();
+
+    // Intentar crear usuario con email duplicado
+    const createUserResponse = await request(httpServer)
+      .post('/users')
+      .set('Authorization', `Bearer ${supervisorToken}`)
+      .send({
+        firstName: 'Duplicate',
+        lastName: 'User',
+        email: 'supervisor@test.com', // Email ya existe
+        password: 'password123',
+        role: UserRole.USER,
+      });
+
+    expect([400, 403, 409]).toContain(createUserResponse.status);
+
+    const errorBody = createUserResponse.body as ErrorResponse;
+    expect(errorBody.message).toBeDefined();
+
+    // Verificar que NO se creó un nuevo usuario en la BD
+    const userCountAfter = await userRepository.count();
+    expect(userCountAfter).toBe(userCountBefore);
+
+    // Verificar que no existe un usuario duplicado
+    const duplicateUsers = await userRepository.find({
+      where: { email: 'supervisor@test.com' },
+    });
+    expect(duplicateUsers.length).toBe(1); // Solo debe existir el original
   });
 
   afterAll(async () => {
