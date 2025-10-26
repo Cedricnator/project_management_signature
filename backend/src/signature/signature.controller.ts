@@ -32,7 +32,11 @@ export class SignatureController {
     @CurrentUser() user: JwtPayload,
     @Req() req: Request,
   ) {
-    return this.signatureService.signDocument(createSignatureDto, user.email, req);
+    return this.signatureService.signDocument(
+      createSignatureDto,
+      user.email,
+      req,
+    );
   }
 
   @Get()
@@ -43,10 +47,18 @@ export class SignatureController {
   }
 
   @Get(':id')
-  @Role(UserRole.SUPERVISOR)  
+  @Role(UserRole.SUPERVISOR)
   @UseGuards(JwtAuthGuard, RoleGuard)
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.signatureService.findOne(id);
+  }
+
+  @Get(':id/verify')
+  @Role(UserRole.SUPERVISOR)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  async verifySignature(@Param('id', new ParseUUIDPipe()) id: string) {
+    const isValid = await this.signatureService.verifySignatureIntegrity(id);
+    return { isValid };
   }
 
   @Delete(':id')

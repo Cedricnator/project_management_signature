@@ -27,7 +27,7 @@ describe('Auth Integration Test', () => {
           database: 'signature_project',
           entities: [User],
           synchronize: true,
-          dropSchema: true,
+          dropSchema: false,
           logging: false,
         }),
         AuthModule,
@@ -40,6 +40,12 @@ describe('Auth Integration Test', () => {
     userRepository = moduleFixture.get<Repository<User>>(
       getRepositoryToken(User),
     );
+  });
+
+  beforeEach(async () => {
+    // Limpiar usuarios antes de cada test
+    await userRepository.createQueryBuilder().delete().execute();
+
     // seed de un usuario admin
     await userRepository.save({
       firstName: 'Admin',

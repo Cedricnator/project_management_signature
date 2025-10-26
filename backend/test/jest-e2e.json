@@ -13,5 +13,15 @@
   },
   "setupFiles": [
     "<rootDir>/test/setup.ts"
-  ]
+  ],
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/main.ts",
+    "!src/**/*.module.ts",
+    "!src/**/*.entity.ts",
+    "!src/**/*.dto.ts",
+    "!src/**/*.interface.ts",
+    "!src/**/*.enum.ts"
+  ],
+  "coverageDirectory": "./coverage-e2e"
 }

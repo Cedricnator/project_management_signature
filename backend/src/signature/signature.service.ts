@@ -69,7 +69,11 @@ export class SignatureService {
     };
   }
 
-  async signDocument(signDocumentDto: SignDocumentDto, userEmail: string, req: Request) {
+  async signDocument(
+    signDocumentDto: SignDocumentDto,
+    userEmail: string,
+    req: Request,
+  ) {
     const user = await this.userService.findByEmail(userEmail);
 
     const { documentId, comment } = signDocumentDto;
@@ -109,14 +113,14 @@ export class SignatureService {
       ipAddress: req.ip || '',
       userAgent: req.headers['user-agent'] || '',
     });
-    
+
     const signature = await this.accountDocumentRepository.save(newSignature);
 
-    await this.filesService.changeFileStatus(   
+    await this.filesService.changeFileStatus(
       documentId,
       DocumentStatus.APPROVED,
       user.email,
-      comment || `Documento firmado por: ${user.email}`
+      comment || `Documento firmado por: ${user.email}`,
     );
 
     const updatedDocument = await this.filesService.findOne(documentId);
@@ -144,7 +148,7 @@ export class SignatureService {
     try {
       const signature = await this.findOne(signatureId);
       const document = await this.filesService.findOne(signature.documentId);
- 
+
       // Verify if the document not has been modified
       const isFileValid = this.filesService.verifyFileIntegrity(document);
       if (!isFileValid) {
