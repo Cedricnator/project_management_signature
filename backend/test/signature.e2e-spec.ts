@@ -222,8 +222,6 @@ describe('Signature Integration Test', () => {
     expect(body).toHaveProperty('signedAt');
     expect(body.signer.email).toBe('supervisor@test.com');
 
-    // 3. Verificar que la integridad de la firma es válida
-
     // 3. Verificar que la firma SÍ existe en la BD
     const signatureAfterSigning = await signRepository.findOne({
       where: {
