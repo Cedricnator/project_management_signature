@@ -362,10 +362,10 @@ describe('Signature Integration Test', () => {
     const uploadResponse = await request(httpServer)
       .post('/files/upload')
       .set('Authorization', `Bearer ${supervisorToken}`)
-      .field('name', 'New Test Document')
-      .field('description', 'Document uploaded via integration test')
+      .field('name', 'Nuevo Documento de Prueba')
+      .field('description', 'Documento subido mediante prueba de integración')
       .attach('file', fileBuffer, {
-        filename: 'test-upload.pdf',
+        filename: 'prueba-subida.pdf',
         contentType: 'application/pdf',
       });
 
@@ -381,8 +381,10 @@ describe('Signature Integration Test', () => {
 
     const body = uploadResponse.body as DocumentUploadResponse;
     expect(body).toHaveProperty('id');
-    expect(body.name).toBe('New Test Document');
-    expect(body.description).toBe('Document uploaded via integration test');
+    expect(body.name).toBe('Nuevo Documento de Prueba');
+    expect(body.description).toBe(
+      'Documento subido mediante prueba de integración',
+    );
 
     // Verificar que se creó el registro en la BD
     const documentCountAfter = await fileRepository.count();
@@ -392,7 +394,7 @@ describe('Signature Integration Test', () => {
       where: { id: body.id },
     });
     expect(savedDocument).not.toBeNull();
-    expect(savedDocument?.name).toBe('New Test Document');
+    expect(savedDocument?.name).toBe('Nuevo Documento de Prueba');
     expect(savedDocument?.fileHash).toBeDefined();
     expect(savedDocument?.uploadedBy).toBe(supervisorId);
     expect(savedDocument?.currentStatusId).toBe(statusPendingId);
@@ -415,8 +417,8 @@ describe('Signature Integration Test', () => {
       .post('/users')
       .set('Authorization', `Bearer ${supervisorToken}`)
       .send({
-        firstName: 'Duplicate',
-        lastName: 'User',
+        firstName: 'Usuario',
+        lastName: 'Duplicado',
         email: 'supervisor@test.com', // Email ya existe
         password: 'password123',
         role: UserRole.USER,
