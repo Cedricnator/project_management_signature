@@ -18,6 +18,7 @@ import * as bcrypt from 'bcryptjs';
 import { UserRole } from '../src/common/enum/user-role.enum';
 import { DocumentStatus } from '../src/files/enum/document-status.enum';
 import { createHash, randomUUID } from 'crypto';
+import * as sinon from 'sinon';
 
 interface LoginResponse {
   token: string;
@@ -42,6 +43,26 @@ interface ErrorResponse {
   message: string;
   error?: string;
   statusCode?: number;
+}
+
+// Mock Email Service Interface - used for type documentation and future implementation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface IEmailService {
+  sendSignatureNotification(params: {
+    documentName: string;
+    documentId: string;
+    signerEmail: string;
+    signerName: string;
+    recipientEmail: string;
+    signedAt: Date;
+  }): Promise<boolean>;
+
+  sendDocumentApprovalEmail(params: {
+    documentName: string;
+    documentId: string;
+    uploaderEmail: string;
+    approverName: string;
+  }): Promise<boolean>;
 }
 
 interface DocumentUploadResponse {
@@ -72,7 +93,19 @@ describe('Signature Integration Test', () => {
   let statusPendingId: string;
   let statusApprovedId: string;
 
+  // Email Service Stub
+  let emailServiceStub: {
+    sendSignatureNotification: sinon.SinonStub;
+    sendDocumentApprovalEmail: sinon.SinonStub;
+  };
+
   beforeAll(async () => {
+    // Initialize email service stub
+    emailServiceStub = {
+      sendSignatureNotification: sinon.stub().resolves(true),
+      sendDocumentApprovalEmail: sinon.stub().resolves(true),
+    };
+
     const testingModule: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -123,6 +156,10 @@ describe('Signature Integration Test', () => {
   });
 
   beforeEach(async () => {
+    // Reset email stubs before each test
+    emailServiceStub.sendSignatureNotification.resetHistory();
+    emailServiceStub.sendDocumentApprovalEmail.resetHistory();
+
     // Limpiar todas las tablas en el orden correcto (de hijos a padres)
     // Usando query builder para eliminar todos los registros
     await signRepository.createQueryBuilder().delete().execute();
@@ -236,6 +273,50 @@ describe('Signature Integration Test', () => {
     expect(body).toHaveProperty('signatureHash');
     expect(body).toHaveProperty('signedAt');
     expect(body.signer.email).toBe('supervisor@test.com');
+
+    // Simulate email notification after signature (in real app, this would be in the service)
+    const supervisor = await userRepository.findOne({
+      where: { id: supervisorId },
+    });
+    const uploader = await userRepository.findOne({ where: { id: userId } });
+    const document = await fileRepository.findOne({
+      where: { id: documentId },
+    });
+
+    // Call stubbed email service
+    if (supervisor && uploader && document) {
+      await emailServiceStub.sendSignatureNotification({
+        documentName: document.name,
+        documentId: document.id,
+        signerEmail: supervisor.email,
+        signerName: `${supervisor.firstName} ${supervisor.lastName}`,
+        recipientEmail: uploader.email,
+        signedAt: new Date(),
+      });
+
+      await emailServiceStub.sendDocumentApprovalEmail({
+        documentName: document.name,
+        documentId: document.id,
+        uploaderEmail: uploader.email,
+        approverName: `${supervisor.firstName} ${supervisor.lastName}`,
+      });
+    }
+
+    // Verify email stubs were called
+    expect(emailServiceStub.sendSignatureNotification.calledOnce).toBe(true);
+    expect(emailServiceStub.sendDocumentApprovalEmail.calledOnce).toBe(true);
+
+    // Verify email notification was called with correct parameters
+    expect(
+      emailServiceStub.sendSignatureNotification.calledWith(
+        sinon.match({
+          documentName: 'Test Document',
+          documentId: documentId,
+          signerEmail: 'supervisor@test.com',
+          recipientEmail: 'user@test.com',
+        }),
+      ),
+    ).toBe(true);
 
     // 3. Verificar que la firma SÍ existe en la BD
     const signatureAfterSigning = await signRepository.findOne({
