@@ -1,4 +1,5 @@
 # language: es
+@user
 Característica: Registro de usuario
   Como administrador
   Quiero registrar nuevos usuarios

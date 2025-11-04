@@ -12,7 +12,7 @@ let app: INestApplication;
 let request: any;
 
 // Hook global: prepara app y mock por defecto
-Before(async function () {
+Before({ tags: '@user' }, async function () {
   const loginEmail = process.env.TEST_ADMIN_EMAIL || 'admin@signature.com';
   const loginPassword = process.env.TEST_ADMIN_PASSWORD || '123456789';
 
@@ -131,3 +131,16 @@ Then(
     );
   },
 );
+
+Given('que el servidor está disponible', function () {
+  assert.ok(this.request, 'El servidor no está disponible');
+});
+
+Given('tengo un usuario autenticado como {string}', function (role: string) {
+  if (role === 'USER') {
+    this.authHeader = this.userToken;
+  } else if (role === 'SUPERVISOR') {
+    this.authHeader = this.supervisorToken;
+  }
+  assert.ok(this.authHeader, 'Usuario no autenticado');
+});
