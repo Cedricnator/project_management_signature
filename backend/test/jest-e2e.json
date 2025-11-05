@@ -9,7 +9,7 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t)s$": "ts-jest"
   },
   "setupFiles": [
     "<rootDir>/test/setup.ts"

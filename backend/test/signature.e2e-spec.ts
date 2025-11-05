@@ -446,7 +446,7 @@ describe('Signature Integration Test', () => {
       .field('name', 'Nuevo Documento de Prueba')
       .field('description', 'Documento subido mediante prueba de integración')
       .attach('file', fileBuffer, {
-        filename: 'prueba-subida.pdf',
+        filename: 'test.pdf',
         contentType: 'application/pdf',
       });
 

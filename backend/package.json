@@ -13,13 +13,13 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test:unit": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage --runInBand",
-    "bdd": "cucumber-js --require-module ts-node/register --require test/steps/**/*.ts test/features/**/*.feature"
+    "test:bdd": "cucumber-js --require-module ts-node/register --require test/steps/**/*.ts test/features/**/*.feature"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -77,6 +77,7 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
+    "silent": true,
     "moduleFileExtensions": [
       "js",
       "json",
