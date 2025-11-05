@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { AuthentificationInput } from './dto/auth-input-auth.dto';
 import { JwtAuthGuard } from '../security/guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
+import { UserRole } from '../common/enum/user-role.enum';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -50,6 +51,29 @@ describe('AuthController', () => {
     const result = await controller.create(input);
 
     expect(mockAuthService.authenticate).toHaveBeenCalledWith(input);
+    expect(result).toEqual(expectedResponse);
+  });
+
+  it('should call UsersService.create() on register', async () => {
+    const input = {
+      firstName: 'New',
+      lastName: 'User',
+      email: 'newuser@example.com',
+      password: 'password123',
+      role: UserRole.USER,
+    };
+    const expectedResponse = {
+      id: '1',
+      email: 'newuser@example.com',
+      firstName: 'New',
+      lastName: 'User',
+    };
+
+    mockUsersService.create.mockResolvedValue(expectedResponse);
+
+    const result = await controller.register(input);
+
+    expect(mockUsersService.create).toHaveBeenCalledWith(input);
     expect(result).toEqual(expectedResponse);
   });
 
