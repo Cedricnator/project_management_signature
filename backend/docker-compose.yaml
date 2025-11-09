@@ -43,11 +43,43 @@ services:
       - "32000:3000"
     networks:
       - project-management-network
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    depends_on:
+      - sonardb
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonardb:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - project-management-network
+
+  sonardb:
+    image: postgres:15
+    container_name: sonardb
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonarqube_db:/var/lib/postgresql/data
+    networks:
+      - project-management-network
 
 volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_db:
   db-signature-project-management:  
     driver: local
-
 networks:
   project-management-network:
     external: true
