@@ -21,6 +21,9 @@ lerna-debug.log*
 /.nyc_output
 test.*
 
+# SonarQube
+.scannerwork/
+
 # IDEs and editors
 /.idea
 .project

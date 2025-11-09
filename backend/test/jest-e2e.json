@@ -23,5 +23,10 @@
     "!src/**/*.interface.ts",
     "!src/**/*.enum.ts"
   ],
-  "coverageDirectory": "./coverage-e2e"
+  "coverageDirectory": "./coverage-e2e",
+  "coverageReporters": [
+    "text",
+    "lcov",
+    "html"
+  ]
 }
