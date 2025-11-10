@@ -1,5 +1,5 @@
-import { validateSync } from "class-validator";
-import { CreateUserDto } from "./create-user.dto";
+import { validateSync } from 'class-validator';
+import { CreateUserDto } from './create-user.dto';
 
 describe('CreateUserDto', () => {
   it('should validate user data correctly', () => {

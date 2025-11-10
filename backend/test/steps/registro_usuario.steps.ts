@@ -1,6 +1,10 @@
 import { Before, After, Given, When, Then } from '@cucumber/cucumber';
 import { Test } from '@nestjs/testing';
-import { INestApplication, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  INestApplication,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import * as supertest from 'supertest';
 import * as assert from 'assert';
 import { JwtService } from '@nestjs/jwt';
@@ -37,7 +41,7 @@ Before({ tags: '@user' }, async function () {
       if (dto.password && dto.password.length < 6) {
         throw new BadRequestException('Password too short');
       }
-      return { id: 999, ...dto } as any;
+      return { id: 999, ...dto };
     },
   };
 

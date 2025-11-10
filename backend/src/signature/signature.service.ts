@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SignDocument } from './entities/account-document.entity';
 import { Request } from 'express';
 import { Repository } from 'typeorm';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { FilesService } from '../files/files.service';
 import { UserRole } from '../common/enum/user-role.enum';
 import { DocumentStatus } from '../files/enum/document-status.enum';

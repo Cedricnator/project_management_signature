@@ -4,9 +4,9 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-async function bootstrap() {
+void (async () => {
   const app = await NestFactory.create(AppModule);
-  const logger = new Logger(bootstrap.name);
+  const logger = new Logger('Bootstrap');
   const port = 3000;
   app.useGlobalPipes(
     new ValidationPipe({
@@ -42,6 +42,4 @@ async function bootstrap() {
 
   await app.listen(port);
   logger.log(`Server is running on port: ${port}`);
-}
-
-void bootstrap();
+})();
