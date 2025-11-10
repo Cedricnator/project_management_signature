@@ -9,7 +9,7 @@ const config = {
   username: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASS || 'postgres',
   database: process.env.DB_NAME || 'signature_project',
-  entities: ['dist/**/*.entity{.ts,.js}'],
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   timezone: 'America/Santiago',
   migrationsRun: false,
   synchronize: false,

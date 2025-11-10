@@ -9,7 +9,15 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t)s$": "ts-jest"
+    "^.+\\.(t)s$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "module": "commonjs",
+          "esModuleInterop": true
+        }
+      }
+    ]
   },
   "setupFiles": [
     "<rootDir>/test/setup.ts"
