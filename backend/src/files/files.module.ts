@@ -10,6 +10,7 @@ import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
 import { SecurityModule } from '../security/security.module';
 import { UsersModule } from '../users/users.module';
+import { randomBytes } from 'crypto';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { UsersModule } from '../users/users.module';
         destination: './uploads',
         filename: (req, file, callback) => {
           const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
+            Date.now() + '-' + randomBytes(8).toString('hex');
           const ext = extname(file.originalname);
           const fileName = `${file.originalname}-${uniqueSuffix}${ext}`;
           callback(null, fileName);
@@ -38,7 +39,7 @@ import { UsersModule } from '../users/users.module';
         }
       },
       limits: {
-        fileSize: 10 * 1024 * 1024,
+        fileSize: 5 * 1024 * 1024, // 5MB - Reduced limit to prevent DoS attacks
       },
     }),
     SecurityModule,
