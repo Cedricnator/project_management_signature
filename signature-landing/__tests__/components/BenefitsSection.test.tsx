@@ -1,5 +1,5 @@
+import BenefitsSection from "@/components/BenefitsSection";
 import { render, screen } from "@testing-library/react";
-import BenefitsSection from "@/app/components/BenefitsSection";
 
 describe("BenefitsSection Component", () => {
   it("should render the main title", () => {

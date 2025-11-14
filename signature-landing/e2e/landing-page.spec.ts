@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Landing Page Integration', () => {
   test.beforeEach(async ({ page }) => {
     // Navegar a la landing page
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:3001');
   });
 
   test('should display all main sections of the landing page', async ({ page }) => {

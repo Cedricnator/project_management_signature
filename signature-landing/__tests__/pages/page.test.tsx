@@ -2,51 +2,43 @@ import Home from '@/app/page';
 import { render, screen } from '@testing-library/react';
 
 jest.mock('@/components/Navbar', () => {
-  return function Navbar() {
-    return <nav data-testid="navbar">Navbar</nav>;
-  };
+  const MockNavbar = () => <nav data-testid="navbar">Navbar</nav>;
+  return MockNavbar;
 });
 
 jest.mock('@/components/Hero', () => {
-  return function Hero() {
-    return <section data-testid="hero">Hero</section>;
-  };
+  const MockHero = () => <section data-testid="hero">Hero</section>;
+  return MockHero;
 });
 
 jest.mock('@/components/MetricsSection', () => {
-  return function MetricsSection() {
-    return <section data-testid="metrics-section">MetricsSection</section>;
-  };
+  const MockMetricsSection = () => <section data-testid="metrics-section">MetricsSection</section>;
+  return MockMetricsSection;
 });
 
 jest.mock('@/components/BenefitsSection', () => {
-  return function BenefitsSection() {
-    return <section data-testid="benefits-section">BenefitsSection</section>;
-  };
+  const MockBenefitsSection = () => <section data-testid="benefits-section">BenefitsSection</section>;
+  return MockBenefitsSection;
 });
 
 jest.mock('@/components/CharacteristicSection', () => {
-  return function CharacteristicSection() {
-    return <section data-testid="characteristic-section">CharacteristicSection</section>;
-  };
+  const MockCharacteristicSection = () => <section data-testid="characteristic-section">CharacteristicSection</section>;
+  return MockCharacteristicSection;
 });
 
 jest.mock('@/components/HowItWorksSection', () => {
-  return function HowItWorksSection() {
-    return <section data-testid="how-it-works-section">HowItWorksSection</section>;
-  };
+  const MockHowItWorksSection = () => <section data-testid="how-it-works-section">HowItWorksSection</section>;
+  return MockHowItWorksSection;
 });
 
-jest.mock('@/components/Cta', () => {
-  return function Cta() {
-    return <section data-testid="cta">CTA</section>;
-  };
+jest.mock('@/components/CTA', () => {
+  const MockCta = () => <section data-testid="cta">CTA</section>;
+  return MockCta;
 });
 
 jest.mock('@/components/Footer', () => {
-  return function Footer() {
-    return <footer data-testid="footer">Footer</footer>;
-  };
+  const MockFooter = () => <footer data-testid="footer">Footer</footer>;
+  return MockFooter;
 });
 
 describe('Landing Page', () => {

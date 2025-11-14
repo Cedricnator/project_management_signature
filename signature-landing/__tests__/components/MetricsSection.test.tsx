@@ -1,6 +1,6 @@
+import { getSystemMetrics } from '@/app/lib/metrics';
+import MetricsSection from '@/components/MetricsSection';
 import { render, screen, waitFor } from '@testing-library/react';
-import MetricsSection from '../../components/MetricsSection';
-import { getSystemMetrics } from '../../app/lib/metrics';
 
 // Mock del servicio de métricas
 jest.mock('../../app/lib/metrics');
