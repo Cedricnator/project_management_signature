@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import CTA from "@/app/components/CTA";
+import CTA from "@/components/CTA";
 
 describe('CTA Component', () => {
   it('should render the main heading', () => {

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Navbar from "@/app/components/Navbar";
+import Navbar from "@/components/Navbar";
 
 describe('Navbar Component Test', () => {
   it('should render Firmatic logo/brand text', () => {

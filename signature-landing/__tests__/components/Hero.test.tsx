@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Hero from "@/app/components/Hero";
+import Hero from "@/components/Hero";
 
 describe("Hero Component Test", () => {
   it("should render the badge with security text", () => {

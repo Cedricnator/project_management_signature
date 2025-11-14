@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import Footer from "@/app/components/Footer";
+import Footer from "@/components/Footer";
 
 describe('Footer Component', () => {
   it('should render Firmatic brand', () => {
     render(<Footer />);
     
-    const brand = screen.getByText(/firmatic/i);
+    const brand = screen.getAllByText(/firmatic/i)[0];
 
     expect(brand).toBeInTheDocument();
   });
@@ -148,7 +148,7 @@ describe('Footer Component', () => {
   it('should have three column layout', () => {
     render(<Footer />);
     
-    const firmatic = screen.getByText(/firmatic/i);
+    const firmatic = screen.getAllByText(/firmatic/i)[0];
     const producto = screen.getByText(/^producto$/i);
     const contacto = screen.getByText(/^contacto$/i);
 

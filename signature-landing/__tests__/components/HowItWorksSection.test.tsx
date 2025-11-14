@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import HowItWorksSection from "@/app/components/HowItWorksSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
 
 describe("HowItWorksSection Component", () => {
   it("should render the main title", () => {

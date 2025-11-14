@@ -1,3 +1,4 @@
+import CharacteristicSection from "@/components/CharacteristicSection";
 import { render } from "@testing-library/react";
 
 describe('CharacteristicSection Component Test', () => {
