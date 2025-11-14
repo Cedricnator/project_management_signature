@@ -25,7 +25,6 @@ import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { ChangeFileStatusDto } from './dto/change-status.dto';
 import { Role } from '../common/decorators/role.decorator';
 import { UserRole } from '../common/enum/user-role.enum';
-import { STATUS_CODES } from 'http';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -130,9 +129,9 @@ export class FilesController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.filesService.changeFileStatus(
-      id, 
-      changeFileStatusDto.statusId, 
-      user.email, 
+      id,
+      changeFileStatusDto.statusId,
+      user.email,
       changeFileStatusDto.comment,
     );
   }

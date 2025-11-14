@@ -14,12 +14,14 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
+    "test:unit": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage --runInBand",
-    "bdd": "cucumber-js --require-module ts-node/register --require test/steps/**/*.ts test/features/**/*.feature"
+    "test:bdd": "cucumber-js --require-module ts-node/register --require test/steps/**/*.ts test/features/**/*.feature",
+    "sonar": "sonar-scanner"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -66,6 +68,7 @@
     "jest": "^29.7.0",
     "prettier": "^3.4.2",
     "sinon": "^21.0.0",
+    "sonarqube-scanner": "^4.3.2",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "testcontainers": "^11.0.2",
@@ -77,6 +80,7 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
+    "silent": true,
     "moduleFileExtensions": [
       "js",
       "json",
@@ -85,12 +89,32 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "commonjs"
+          }
+        }
+      ]
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.spec.ts",
+      "!**/*.e2e-spec.ts",
+      "!**/*.interface.ts",
+      "!**/*.dto.ts",
+      "!**/*.entity.ts",
+      "!**/*.enum.ts",
+      "!**/*.module.ts",
+      "!**/main.ts"
     ],
     "coverageDirectory": "../coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
     "testEnvironment": "node"
   }
 }

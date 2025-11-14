@@ -1,7 +1,11 @@
 import { Before, After, Given, When, Then } from '@cucumber/cucumber';
 import { Test } from '@nestjs/testing';
-import { INestApplication, ConflictException, BadRequestException } from '@nestjs/common';
-import * as supertest from 'supertest';
+import {
+  INestApplication,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
+const supertest = require('supertest');
 import * as assert from 'assert';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -12,7 +16,7 @@ let app: INestApplication;
 let request: any;
 
 // Hook global: prepara app y mock por defecto
-Before(async function () {
+Before({ tags: '@user' }, async function () {
   const loginEmail = process.env.TEST_ADMIN_EMAIL || 'admin@signature.com';
   const loginPassword = process.env.TEST_ADMIN_PASSWORD || '123456789';
 
@@ -37,7 +41,7 @@ Before(async function () {
       if (dto.password && dto.password.length < 6) {
         throw new BadRequestException('Password too short');
       }
-      return { id: 999, ...dto } as any;
+      return { id: 999, ...dto };
     },
   };
 
@@ -131,3 +135,16 @@ Then(
     );
   },
 );
+
+Given('que el servidor está disponible', function () {
+  assert.ok(this.request, 'El servidor no está disponible');
+});
+
+Given('tengo un usuario autenticado como {string}', function (role: string) {
+  if (role === 'USER') {
+    this.authHeader = this.userToken;
+  } else if (role === 'SUPERVISOR') {
+    this.authHeader = this.supervisorToken;
+  }
+  assert.ok(this.authHeader, 'Usuario no autenticado');
+});

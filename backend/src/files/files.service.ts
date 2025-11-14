@@ -7,15 +7,20 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { UpdateFileDto } from './dto/update-file.dto';
-import { join } from 'path';
-import { createReadStream, existsSync, readFileSync, unlinkSync } from 'fs';
+import { join } from 'node:path';
+import {
+  createReadStream,
+  existsSync,
+  readFileSync,
+  unlinkSync,
+} from 'node:fs';
 import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from './entities/file.entity';
 import { Repository } from 'typeorm';
 import { DocumentStatusType } from './entities/document_status_type.entity';
 import { DocumentHistory } from './entities/document_history.entity';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { UsersService } from '../users/users.service';
 import { DocumentHistoryModified } from './interfaces/document-historym.interface';
@@ -26,19 +31,19 @@ import { DocumentStatus } from './enum/document-status.enum';
 export class FilesService {
   constructor(
     @InjectRepository(File)
-    private documentRepository: Repository<File>,
+    private readonly documentRepository: Repository<File>,
     @InjectRepository(DocumentStatusType)
-    private documentStatusRepository: Repository<DocumentStatusType>,
+    private readonly documentStatusRepository: Repository<DocumentStatusType>,
     @InjectRepository(DocumentHistory)
-    private documentHistoryRepository: Repository<DocumentHistory>,
+    private readonly documentHistoryRepository: Repository<DocumentHistory>,
     private readonly userService: UsersService,
   ) {}
-  
+
   /**
    * FindDocumentStatus
    * ------------------
    * Finds a document status by its ID.
-   * 
+   *
    * @param {string} id - The ID of the document status to find.
    * @returns {Promise<DocumentStatusType>} - The found DocumentStatusType.
    * @throws {NotFoundException} - if the status is not found.
@@ -58,12 +63,12 @@ export class FilesService {
       throw new InternalServerErrorException(`Error finding document status`);
     }
   }
-  
+
   /**
    * UploadFile
    * ----------
    * Uploads a file and creates a document entry in the database.
-   * 
+   *
    * @param {Express.Multer.File} file - The file to upload.
    * @param {UploadFileDto} uploadFileDto - DTO containing file metadata.
    * @param {string} userEmail - Email of the user uploading the file.
@@ -91,11 +96,10 @@ export class FilesService {
 
     let fileBuffer: Buffer;
     let documentHash: string;
-    
+
     try {
       fileBuffer = readFileSync(file.path);
       documentHash = createHash('sha256').update(fileBuffer).digest('hex');
-      
     } catch (error) {
       console.error('Error reading file or calculating hash:', error);
       throw new BadRequestException(`Error processing file: ${error.message}`);
@@ -105,14 +109,14 @@ export class FilesService {
       where: { fileHash: documentHash },
       relations: ['uploadBy'],
     });
-    
+
     if (existingDocument) {
       try {
         unlinkSync(file.path);
       } catch (cleanupError) {
         console.warn('Could not cleanup temporary file:', cleanupError);
       }
-      
+
       if (existingDocument.uploadBy.id === user.id) {
         throw new ConflictException({
           message: 'You have already uploaded this file',
@@ -120,20 +124,22 @@ export class FilesService {
             id: existingDocument.id,
             name: existingDocument.name,
             uploadedAt: existingDocument.createdAt,
-            currentStatus: existingDocument.currentStatusId
-          }
+            currentStatus: existingDocument.currentStatusId,
+          },
         });
       } else {
         throw new ConflictException({
           message: 'This file has already been uploaded by another user',
           suggestion: 'Please verify this is not a duplicate submission',
           existingFileId: existingDocument.id,
-          uploadedAt: existingDocument.createdAt
+          uploadedAt: existingDocument.createdAt,
         });
       }
     }
 
-    const draftStatus = await this.findDocumentStatus(DocumentStatus.PENDING_REVIEW);
+    const draftStatus = await this.findDocumentStatus(
+      DocumentStatus.PENDING_REVIEW,
+    );
 
     const document = this.documentRepository.create({
       name: uploadFileDto.name,
@@ -146,7 +152,7 @@ export class FilesService {
       filename: file.filename,
       uploadedBy: user.id,
       fileHash: documentHash,
-      fileBuffer: fileBuffer, 
+      fileBuffer: fileBuffer,
     });
 
     const savedDocument = await this.documentRepository.save(document);
@@ -155,7 +161,9 @@ export class FilesService {
       documentId: savedDocument.id,
       statusId: draftStatus.id,
       changedBy: user.id,
-      comment: uploadFileDto.comment || `Documento subido el ${formatFriendlyDate(new Date())}`,
+      comment:
+        uploadFileDto.comment ||
+        `Documento subido el ${formatFriendlyDate(new Date())}`,
     });
 
     await this.documentHistoryRepository.save(historyEntry);
@@ -163,12 +171,12 @@ export class FilesService {
     const { fileBuffer: _, ...documentWithoutBuffer } = savedDocument;
     return documentWithoutBuffer;
   }
-  
+
   /**
    * FindFilesByUser
    * ---------------
    * Finds all files uploaded by a specific user.
-   * 
+   *
    * @param {string} userId - The ID of the user whose files to find.
    * @returns {Promise<File[]>} - An array of files uploaded by the user.
    * @throws {NotFoundException} - If the user or their documents are not found.
@@ -194,7 +202,7 @@ export class FilesService {
         'currentStatusId',
         'createdAt',
         'updatedAt',
-      ]
+      ],
     });
 
     if (!documents || documents.length === 0) {
@@ -208,7 +216,7 @@ export class FilesService {
    * FindAll
    * -------
    * Retrieves all documents from the database.
-   * 
+   *
    * @returns {Promise<File[]>} - An array of all documents.
    */
   async findAll(): Promise<File[]> {
@@ -226,7 +234,7 @@ export class FilesService {
         'currentStatusId',
         'createdAt',
         'updatedAt',
-      ]
+      ],
     });
     return documents;
   }
@@ -246,11 +254,11 @@ export class FilesService {
    * FindOne
    * -------
    * Finds a document by its ID.
-   * 
+   *
    * @param {string} id - The ID of the document to find.
    * @returns {Promise<File>} - The found document.
    * @throws {NotFoundException} - If the document with the given ID is not found.
-   */ 
+   */
   async findOne(id: string): Promise<File> {
     const document = await this.documentRepository.findOne({
       where: { id },
@@ -267,7 +275,7 @@ export class FilesService {
         'currentStatusId',
         'createdAt',
         'updatedAt',
-      ]
+      ],
     });
 
     if (!document) {
@@ -276,17 +284,19 @@ export class FilesService {
 
     return document;
   }
-  
+
   /**
    * GetFileHistoryByUserId
    * -----------------------
    * Retrieves the file history for a specific user.
-   * 
+   *
    * @param {string} userId - The ID of the user whose file history to retrieve.
    * @returns {Promise<DocumentHistoryModified[]>} - An array of document history entries for the user.
    * @throws {NotFoundException} - If the user or their documents are not found.
    */
-  async getFileHistoryByUserId(userId: string): Promise<DocumentHistoryModified[]> {
+  async getFileHistoryByUserId(
+    userId: string,
+  ): Promise<DocumentHistoryModified[]> {
     const user = await this.userService.findOne(userId);
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
@@ -307,7 +317,7 @@ export class FilesService {
         'currentStatusId',
         'createdAt',
         'updatedAt',
-      ]
+      ],
     });
 
     const documentHistory: DocumentHistoryModified[] = [];
@@ -352,7 +362,7 @@ export class FilesService {
    * GetFilesHistory
    * ---------------
    * Retrieves the history of all documents.
-   * 
+   *
    * @returns {Promise<DocumentHistoryModified[]>} - An array of document history entries.
    * @throws {NotFoundException} - If a user in the history is not found.
    */
@@ -388,7 +398,7 @@ export class FilesService {
    * DownloadFile
    * ------------
    * Downloads a file by its ID.
-   * 
+   *
    * @param {string} id - The ID of the document to download.
    * @param {Response} res - The Express response object.
    * @returns {Promise<StreamableFile>} - A streamable file for download.
@@ -409,7 +419,7 @@ export class FilesService {
     );
 
     res.setHeader('Content-Type', document.mimetype);
-    
+
     const fileStream = createReadStream(filePath);
     return new StreamableFile(fileStream);
   }
@@ -418,7 +428,7 @@ export class FilesService {
    * StreamFile
    * ----------
    * Streams a file by its ID.
-   * 
+   *
    * @param {string} id - The ID of the document to stream.
    * @returns {Promise<StreamableFile>} - A streamable file for inline viewing.
    * @throws {NotFoundException} - If the file path is not found or the file does not exist on disk.
@@ -443,12 +453,12 @@ export class FilesService {
       disposition: `inline; filename="${document.originalFilename}"`,
     });
   }
-  
+
   /**
    * Update
    * ------
    * Updates an existing document with a new file and metadata.
-   * 
+   *
    * @param {string} id - The ID of the document to update.
    * @param {Express.Multer.File} newFile - The new file to upload.
    * @param {string} userEmail - Email of the user updating the file.
@@ -459,7 +469,7 @@ export class FilesService {
    */
   async update(
     id: string,
-    newFile: Express.Multer.File | undefined, 
+    newFile: Express.Multer.File | undefined,
     userEmail: string,
     updateFileDto: UpdateFileDto,
   ): Promise<File> {
@@ -470,6 +480,20 @@ export class FilesService {
       throw new NotFoundException(`User with email ${userEmail} not found`);
     }
 
+    this.validateDocumentStatus(document);
+
+    if (!newFile) {
+      return this.updateMetadataOnly(id, document, user, updateFileDto);
+    }
+
+    return this.updateWithNewFile(id, document, user, newFile, updateFileDto);
+  }
+
+  /**
+   * Validates if document is in a valid status for updating
+   * @private
+   */
+  private validateDocumentStatus(document: File): void {
     const allowedStatuses = [
       DocumentStatus.REJECTED,
       DocumentStatus.PENDING_REVIEW,
@@ -480,56 +504,133 @@ export class FilesService {
         'Document can only be updated if it is in a rejected or pending review status',
       );
     }
+  }
 
-    if (!newFile) {
-      const updatedFields: Partial<File> = {};
-      
-      if (updateFileDto.name !== undefined) {
-        updatedFields.name = updateFileDto.name;
-      }
-      
-      if (updateFileDto.description !== undefined) {
-        updatedFields.description = updateFileDto.description;
-      }
+  /**
+   * Updates only document metadata without changing the file
+   * @private
+   */
+  private async updateMetadataOnly(
+    id: string,
+    document: File,
+    user: any,
+    updateFileDto: UpdateFileDto,
+  ): Promise<File> {
+    const updatedFields: Partial<File> = {};
 
-      await this.documentRepository.update({ id }, updatedFields);
-
-      const historyEntry = this.documentHistoryRepository.create({
-        documentId: id,
-        statusId: document.currentStatusId,
-        changedBy: user.id,
-        comment: updateFileDto.comment ?? `Metadatos actualizados el ${formatFriendlyDate(new Date())}`,
-      });
-
-      await this.documentHistoryRepository.save(historyEntry);
-
-      const updatedDocument = await this.findOne(id);
-      return updatedDocument;
+    if (updateFileDto.name !== undefined) {
+      updatedFields.name = updateFileDto.name;
     }
 
+    if (updateFileDto.description !== undefined) {
+      updatedFields.description = updateFileDto.description;
+    }
+
+    await this.documentRepository.update({ id }, updatedFields);
+
+    const historyEntry = this.documentHistoryRepository.create({
+      documentId: id,
+      statusId: document.currentStatusId,
+      changedBy: user.id,
+      comment:
+        updateFileDto.comment ??
+        `Metadatos actualizados el ${formatFriendlyDate(new Date())}`,
+    });
+
+    await this.documentHistoryRepository.save(historyEntry);
+
+    return this.findOne(id);
+  }
+
+  /**
+   * Updates document with a new file
+   * @private
+   */
+  private async updateWithNewFile(
+    id: string,
+    document: File,
+    user: any,
+    newFile: Express.Multer.File,
+    updateFileDto: UpdateFileDto,
+  ): Promise<File> {
     if (!newFile.path || !existsSync(newFile.path)) {
       throw new BadRequestException('New file not saved properly to disk');
     }
 
-    if (document.filePath && existsSync(join(process.cwd(), document.filePath))) {
+    this.deleteOldFile(document.filePath);
+
+    const { fileBuffer, fileHash } = this.processNewFile(newFile);
+
+    const updateData = this.buildUpdateData(
+      newFile,
+      fileBuffer,
+      fileHash,
+      updateFileDto,
+    );
+
+    // If the document was rejected, set it to pending review
+    const statusId =
+      document.currentStatusId === DocumentStatus.REJECTED
+        ? DocumentStatus.PENDING_REVIEW
+        : document.currentStatusId;
+
+    await this.documentRepository.update({ id }, updateData);
+
+    await this.createHistoryEntry(
+      id,
+      statusId,
+      user.id,
+      updateFileDto.comment ??
+        `Documento y archivo actualizados el ${formatFriendlyDate(new Date())}`,
+    );
+
+    return this.findOne(id);
+  }
+
+  /**
+   * Deletes old file from disk if it exists
+   * @private
+   */
+  private deleteOldFile(filePath: string | undefined): void {
+    if (filePath && existsSync(join(process.cwd(), filePath))) {
       try {
-        unlinkSync(join(process.cwd(), document.filePath));
+        unlinkSync(join(process.cwd(), filePath));
       } catch (error) {
-        console.warn(`Could not delete old file: ${document.filePath}`, error);
+        console.warn(`Could not delete old file: ${filePath}`, error);
       }
     }
+  }
 
-    let fileBuffer: Buffer;
-    let fileHash: string;
-    
+  /**
+   * Processes new file and returns buffer and hash
+   * @private
+   */
+  private processNewFile(newFile: Express.Multer.File): {
+    fileBuffer: Buffer;
+    fileHash: string;
+  } {
     try {
-      fileBuffer = readFileSync(newFile.path);
-      fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+      const fileBuffer = readFileSync(newFile.path);
+      const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+      return { fileBuffer, fileHash };
     } catch (error) {
       console.error('Error processing new file:', error);
-      throw new BadRequestException(`Error processing new file: ${error.message}`);
+      throw new BadRequestException(
+        `Error processing new file: ${(error as Error).message}`,
+      );
     }
+  }
 
+  /**
+   * Builds update data object for document
+   * @private
+   */
+  private buildUpdateData(
+    newFile: Express.Multer.File,
+    fileBuffer: Buffer,
+    fileHash: string,
+    updateFileDto: UpdateFileDto,
+  ): Partial<File> {
     const updateData: Partial<File> = {
       filePath: newFile.path,
       fileSize: newFile.size,
@@ -543,41 +644,44 @@ export class FilesService {
     if (updateFileDto.name !== undefined) {
       updateData.name = updateFileDto.name;
     }
-    
+
     if (updateFileDto.description !== undefined) {
       updateData.description = updateFileDto.description;
     }
 
-   // If the document was rejected, set it to pending review
-    if (document.currentStatusId === DocumentStatus.REJECTED) {
-      document.currentStatusId = DocumentStatus.PENDING_REVIEW;
-    }
+    return updateData;
+  }
 
-    await this.documentRepository.update({ id }, updateData);
-
+  /**
+   * Creates a history entry for document changes
+   * @private
+   */
+  private async createHistoryEntry(
+    documentId: string,
+    statusId: number | string,
+    changedBy: string,
+    comment: string,
+  ): Promise<void> {
     const historyEntry = this.documentHistoryRepository.create({
-      documentId: id,
-      statusId: document.currentStatusId,
-      changedBy: user.id,
-      comment: updateFileDto.comment ?? `Documento y archivo actualizados el ${formatFriendlyDate(new Date())}`,
+      documentId,
+      statusId: String(statusId),
+      changedBy,
+      comment,
     });
 
     await this.documentHistoryRepository.save(historyEntry);
-
-    const updatedDocument = await this.findOne(id);
-    return updatedDocument;
   }
 
   /**
    * Remove
    * ------
    * Deletes a document and its associated file from disk.
-   * 
+   *
    * @param {string} id - The ID of the document to remove.
    * @returns {Promise<{ id: string, documentName: string }>} - Confirmation of deletion.
    * @throws {NotFoundException} - If the document with the given ID is not found.
    */
-  async remove(id: string): Promise<{ id: string; documentName: string; }> {
+  async remove(id: string): Promise<{ id: string; documentName: string }> {
     const document = await this.findOne(id);
 
     // Delete file from disk
@@ -600,12 +704,12 @@ export class FilesService {
       documentName: document.name,
     };
   }
-  
+
   /**
    * ChangeFileStatus
    * ----------------
    * Changes the status of a document and logs the change in history.
-   * 
+   *
    * @param {string} id - The ID of the document to change status.
    * @param {string} statusId - The ID of the new status to set.
    * @param {string} changedBy - Email of the user changing the status.
@@ -636,12 +740,9 @@ export class FilesService {
 
     // Update state of document
     document.currentStatusId = statusId;
-      
-    await this.documentRepository.update(
-      { id }, 
-      { currentStatusId: statusId }
-    );
-    
+
+    await this.documentRepository.update({ id }, { currentStatusId: statusId });
+
     // Create history entry
     const historyEntry = this.documentHistoryRepository.create({
       documentId: document.id,
@@ -653,7 +754,7 @@ export class FilesService {
     await this.documentHistoryRepository.save(historyEntry);
 
     const updatedDocument = await this.findOne(id);
-    
+
     return {
       ...updatedDocument,
     };
@@ -663,12 +764,14 @@ export class FilesService {
    * GetFileHistoryById
    * ------------------
    * Retrieves the history of a specific document by its ID.
-   * 
+   *
    * @param {string} id - The ID of the document to retrieve history for.
    * @returns {Promise<{ document: File, history: DocumentHistory[] }>} - An object containing the document and its history.
    * @throws {NotFoundException} - If the document with the given ID is not found.
    */
-  async getFileHistoryById(id: string): Promise<{ document: File; history: DocumentHistory[] }> {
+  async getFileHistoryById(
+    id: string,
+  ): Promise<{ document: File; history: DocumentHistory[] }> {
     const document = await this.findOne(id);
 
     const history = await this.documentHistoryRepository.find({
@@ -682,12 +785,12 @@ export class FilesService {
       history,
     };
   }
-  
+
   /**
    * GetStatusTypes
    * ---------------
    * Retrieves all available document status types.
-   * 
+   *
    * @returns {Promise<DocumentStatusType[]>} - An array of document status types.
    */
   async getStatusTypes(): Promise<DocumentStatusType[]> {
@@ -707,7 +810,7 @@ export class FilesService {
    * VerifyFileIntegrity
    * -------------------
    * Verifies the integrity of a file by comparing its hash.
-   * 
+   *
    * @param {File} document - The file document to verify.
    * @returns {boolean} - True if the file is intact, false otherwise.
    */
@@ -722,7 +825,7 @@ export class FilesService {
         console.warn('Document does not have a file hash to compare against');
         return false;
       }
-     
+
       const currentHash = createHash('sha256')
         .update(document.fileBuffer)
         .digest('hex');

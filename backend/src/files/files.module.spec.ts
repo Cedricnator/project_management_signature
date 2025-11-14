@@ -95,7 +95,7 @@ describe('FilesModule Configuration', () => {
     expect(module.get(FilesService)).toBeDefined();
     expect(module.get(FilesController)).toBeDefined();
     expect(module.get(JwtService)).toBeDefined();
-    
+
     await module.close();
   });
 
@@ -133,7 +133,7 @@ describe('FilesModule Configuration', () => {
       .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)
       .compile();
-    
+
     await module.close();
   });
 });

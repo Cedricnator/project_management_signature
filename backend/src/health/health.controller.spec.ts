@@ -50,28 +50,28 @@ describe('HealthController', () => {
         info: {
           database: {
             status: 'up',
-            message: 'Connection successful'
-          }
+            message: 'Connection successful',
+          },
         },
         error: {},
         details: {
           database: {
             status: 'up',
-            message: 'Connection successful'
-          }
-        }
+            message: 'Connection successful',
+          },
+        },
       };
 
       mockHealthCheckService.check.mockResolvedValue(mockHealthResult);
       mockTypeOrmHealthIndicator.pingCheck.mockResolvedValue({
-        database: { status: 'up', message: 'Connection successful' }
+        database: { status: 'up', message: 'Connection successful' },
       });
 
       const result = await controller.check();
 
       expect(result).toEqual(mockHealthResult);
       expect(result.status).toBe('ok');
-      expect(result!.info!.database.status).toBe('up');
+      expect(result.info!.database.status).toBe('up');
     });
 
     it('should return error status when database is down', async () => {
@@ -81,15 +81,15 @@ describe('HealthController', () => {
         error: {
           database: {
             status: 'down',
-            message: 'Connection failed'
-          }
+            message: 'Connection failed',
+          },
         },
         details: {
           database: {
             status: 'down',
-            message: 'Connection failed'
-          }
-        }
+            message: 'Connection failed',
+          },
+        },
       };
 
       // ✅ CORREGIDO: El health check service maneja el error internamente
@@ -100,49 +100,49 @@ describe('HealthController', () => {
       const result = await controller.check();
 
       expect(result.status).toBe('error');
-      expect(result!.error!.database.status).toBe('down');
+      expect(result.error!.database.status).toBe('down');
     });
 
     it('should verify database ping check is called correctly', async () => {
-      const mockResult = { 
-        status: 'ok', 
-        info: { database: { status: 'up' } }, 
-        error: {}, 
-        details: { database: { status: 'up' } } 
+      const mockResult = {
+        status: 'ok',
+        info: { database: { status: 'up' } },
+        error: {},
+        details: { database: { status: 'up' } },
       };
-      
+
       mockHealthCheckService.check.mockResolvedValue(mockResult);
 
       await controller.check();
 
       expect(healthCheckService.check).toHaveBeenCalledWith([
-        expect.any(Function)
+        expect.any(Function),
       ]);
-      
+
       // ✅ CORREGIDO: Verificar que la función se ejecuta sin error
       const checkFunction = mockHealthCheckService.check.mock.calls[0][0][0];
-      
+
       // Mock para que pingCheck funcione correctamente cuando se llame
       mockTypeOrmHealthIndicator.pingCheck.mockResolvedValue({
-        database: { status: 'up' }
+        database: { status: 'up' },
       });
-      
+
       // Ejecutar la función y verificar que no lance error
       await expect(checkFunction()).resolves.toEqual({
-        database: { status: 'up' }
+        database: { status: 'up' },
       });
-      
+
       expect(db.pingCheck).toHaveBeenCalledWith('database');
     });
 
     it('should handle health check service errors', async () => {
       // ✅ CORREGIDO: Testear cuando el HealthCheckService mismo falla
       mockHealthCheckService.check.mockRejectedValue(
-        new Error('Health check service error')
+        new Error('Health check service error'),
       );
 
       await expect(controller.check()).rejects.toThrow(
-        'Health check service error'
+        'Health check service error',
       );
     });
 
@@ -151,7 +151,7 @@ describe('HealthController', () => {
         status: 'ok',
         info: { database: { status: 'up' } },
         error: {},
-        details: { database: { status: 'up' } }
+        details: { database: { status: 'up' } },
       };
 
       mockHealthCheckService.check.mockResolvedValue(mockResult);
@@ -174,7 +174,7 @@ describe('HealthController', () => {
         status: 'ok',
         info: { database: { status: 'up' } },
         error: {},
-        details: { database: { status: 'up' } }
+        details: { database: { status: 'up' } },
       };
 
       mockHealthCheckService.check.mockResolvedValue(mockResult);
@@ -202,7 +202,7 @@ describe('HealthController', () => {
 
       expect(healthCheckService.check).toHaveBeenCalledTimes(1);
       expect(healthCheckService.check).toHaveBeenCalledWith([
-        expect.any(Function)
+        expect.any(Function),
       ]);
     });
 
@@ -211,7 +211,7 @@ describe('HealthController', () => {
         status: 'ok',
         info: { database: { status: 'up' } },
         error: {},
-        details: { database: { status: 'up' } }
+        details: { database: { status: 'up' } },
       };
 
       mockHealthCheckService.check.mockResolvedValue(expectedResult);

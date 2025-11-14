@@ -6,6 +6,7 @@ import { FilesService } from '../files/files.service';
 import { UsersService } from '../users/users.service';
 import { Repository } from 'typeorm';
 import { UserRole } from '../common/enum/user-role.enum';
+import { createHash } from 'crypto';
 
 describe('SignatureService', () => {
   let service: SignatureService;
@@ -22,7 +23,7 @@ describe('SignatureService', () => {
     isActive: true,
     password: 'hashedpassword',
   };
-  
+
   const mockFile = {
     id: 'file-123',
     name: 'test.pdf',
@@ -35,7 +36,7 @@ describe('SignatureService', () => {
     uploadedBy: 'user-123',
     currentStatusId: '01974b23-bc2f-7e5f-a9d0-73a5774d2778', // pending status
     fileHash: 'abc123hash',
-    fileBuffer: Buffer.from('test content'), 
+    fileBuffer: Buffer.from('test content'),
   };
 
   const mockSignature = {
@@ -63,7 +64,9 @@ describe('SignatureService', () => {
       findOne: jest.fn().mockResolvedValue(mockFile),
       findDocumentWithBuffer: jest.fn().mockResolvedValue(mockFile),
       verifyFileIntegrity: jest.fn().mockReturnValue(true),
-      changeFileStatus: jest.fn().mockResolvedValue({ message: 'Status updated' }),
+      changeFileStatus: jest
+        .fn()
+        .mockResolvedValue({ message: 'Status updated' }),
     };
 
     mockUsersService = {
@@ -108,34 +111,46 @@ describe('SignatureService', () => {
     it('should return valid document and user for signing', async () => {
       // Setup mocks
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(null); // No existing signature
-      
-      const result = await service['validateDocumentForSigning'](documentId, mockUser);
-      
+
+      const result = await service['validateDocumentForSigning'](
+        documentId,
+        mockUser,
+      );
+
       expect(result.isValid).toBe(true);
       expect(result.document).toEqual(mockFile);
     });
 
     it('should return invalid if user is not found', async () => {
-      const result = await service['validateDocumentForSigning'](documentId, null);
-      
+      const result = await service['validateDocumentForSigning'](
+        documentId,
+        null,
+      );
+
       expect(result.isValid).toBe(false);
       expect(result.message).toBe('User not found');
     });
 
     it('should return invalid if user is not a supervisor', async () => {
       const regularUser = { ...mockSupervisor, role: UserRole.USER };
-      
-      const result = await service['validateDocumentForSigning'](documentId, regularUser);
-      
+
+      const result = await service['validateDocumentForSigning'](
+        documentId,
+        regularUser,
+      );
+
       expect(result.isValid).toBe(false);
       expect(result.message).toBe('User is not a supervisor');
     });
 
     it('should return invalid if document already signed by user', async () => {
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(mockSignature); // Existing signature
-      
-      const result = await service['validateDocumentForSigning'](documentId, mockUser);
-      
+
+      const result = await service['validateDocumentForSigning'](
+        documentId,
+        mockUser,
+      );
+
       expect(result.isValid).toBe(false);
       expect(result.message).toBe('You have already signed this document');
     });
@@ -144,14 +159,22 @@ describe('SignatureService', () => {
   describe('findAll', () => {
     it('should return all signatures', async () => {
       const mockSignatures = [
-        { id: 'signature-1', documentId: 'file-123', accountId: 'supervisor-123' },
-        { id: 'signature-2', documentId: 'file-456', accountId: 'supervisor-456' },
+        {
+          id: 'signature-1',
+          documentId: 'file-123',
+          accountId: 'supervisor-123',
+        },
+        {
+          id: 'signature-2',
+          documentId: 'file-456',
+          accountId: 'supervisor-456',
+        },
       ];
-      
+
       (mockSignatureRepo.find as jest.Mock).mockResolvedValue(mockSignatures);
-      
+
       const result = await service.findAll();
-      
+
       expect(result).toEqual(mockSignatures);
       expect(mockSignatureRepo.find).toHaveBeenCalled();
     });
@@ -160,9 +183,9 @@ describe('SignatureService', () => {
   describe('findOne', () => {
     it('should return a signature by id', async () => {
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(mockSignature);
-      
+
       const result = await service.findOne('signature-1');
-      
+
       expect(result).toEqual(mockSignature);
       expect(mockSignatureRepo.findOne).toHaveBeenCalledWith({
         where: { id: 'signature-1' },
@@ -172,31 +195,91 @@ describe('SignatureService', () => {
 
     it('should throw NotFoundException if signature not found', async () => {
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(null);
-      
+
       await expect(service.findOne('fake-id')).rejects.toThrow(
-        'Signature with ID fake-id not found'
+        'Signature with ID fake-id not found',
       );
     });
   });
 
   describe('verifySignatureIntegrity', () => {
-    it('should verify signature integrity', async () => {
-      (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(mockSignature);
-      
+    it('should return true when signature hash matches expected hash', async () => {
+      const testDate = new Date('2025-01-01T12:00:00Z');
+      const mockSignatureWithValidHash = {
+        ...mockSignature,
+        validatedAt: testDate,
+        signatureHash: '', // Will be calculated
+      };
+
+      // Calculate the expected hash based on the signature data
+      const originalSignatureData = {
+        documentId: mockSignatureWithValidHash.documentId,
+        userId: mockSignatureWithValidHash.accountId,
+        timestamp: testDate.toISOString(),
+        userAgent: mockSignatureWithValidHash.userAgent,
+        ipAddress: mockSignatureWithValidHash.ipAddress,
+        originalFileHash: mockFile.fileHash,
+      };
+
+      const expectedHash = createHash('sha256')
+        .update(JSON.stringify(originalSignatureData))
+        .digest('hex');
+
+      mockSignatureWithValidHash.signatureHash = expectedHash;
+
+      (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(
+        mockSignatureWithValidHash,
+      );
+
       const result = await service.verifySignatureIntegrity('signature-1');
-      
-      expect(mockFilesService.verifyFileIntegrity).toHaveBeenCalledWith(mockFile);
-      // Note: This test might return false due to hash comparison, 
-      // but it should not throw an error
-      expect(typeof result).toBe('boolean');
+
+      expect(result).toBe(true);
+      expect(mockFilesService.verifyFileIntegrity).toHaveBeenCalledWith(
+        mockFile,
+      );
+    });
+
+    it('should return false when signature hash does not match expected hash', async () => {
+      const testDate = new Date('2025-01-01T12:00:00Z');
+      const mockSignatureWithInvalidHash = {
+        ...mockSignature,
+        validatedAt: testDate,
+        signatureHash: 'invalidhash123', // Wrong hash
+      };
+
+      (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(
+        mockSignatureWithInvalidHash,
+      );
+
+      const result = await service.verifySignatureIntegrity('signature-1');
+
+      expect(result).toBe(false);
+      expect(mockFilesService.verifyFileIntegrity).toHaveBeenCalledWith(
+        mockFile,
+      );
+    });
+
+    it('should return false when file integrity check fails', async () => {
+      (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(mockSignature);
+      (mockFilesService.verifyFileIntegrity as jest.Mock).mockReturnValue(
+        false,
+      );
+
+      const result = await service.verifySignatureIntegrity('signature-1');
+
+      expect(result).toBe(false);
+      expect(mockFilesService.verifyFileIntegrity).toHaveBeenCalledWith(
+        mockFile,
+      );
     });
 
     it('should return false if signature not found', async () => {
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(null);
-      
+
       const result = await service.verifySignatureIntegrity('fake-id');
-      
+
       expect(result).toBe(false);
+      expect(mockFilesService.verifyFileIntegrity).not.toHaveBeenCalled();
     });
   });
 
@@ -204,18 +287,18 @@ describe('SignatureService', () => {
     it('should remove a signature by id', async () => {
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(mockSignature);
       (mockSignatureRepo.remove as jest.Mock).mockResolvedValue(mockSignature);
-      
+
       const result = await service.remove('signature-1');
-      
+
       expect(result.message).toContain('deleted successfully');
       expect(mockSignatureRepo.remove).toHaveBeenCalledWith(mockSignature);
     });
 
     it('should throw NotFoundException if signature not found', async () => {
       (mockSignatureRepo.findOne as jest.Mock).mockResolvedValue(null);
-      
+
       await expect(service.remove('fake-id')).rejects.toThrow(
-        'Signature with ID fake-id not found'
+        'Signature with ID fake-id not found',
       );
     });
   });

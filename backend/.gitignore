@@ -19,6 +19,10 @@ lerna-debug.log*
 /coverage
 /coverage-e2e
 /.nyc_output
+test.*
+
+# SonarQube
+.scannerwork/
 
 # IDEs and editors
 /.idea
