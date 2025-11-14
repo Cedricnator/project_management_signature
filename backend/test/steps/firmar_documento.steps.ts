@@ -1,7 +1,7 @@
 import { Before, After, Given, When, Then } from '@cucumber/cucumber';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as supertest from 'supertest';
+const supertest = require('supertest');
 import * as assert from 'assert';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

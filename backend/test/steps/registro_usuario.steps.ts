@@ -5,7 +5,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import * as supertest from 'supertest';
+const supertest = require('supertest');
 import * as assert from 'assert';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
