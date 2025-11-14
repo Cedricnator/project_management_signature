@@ -1,17 +1,8 @@
-import { Given, When, Then, Before } from '@cucumber/cucumber';
+import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { Page } from '@playwright/test';
+import { CustomWorld } from '../support/world';
 
-// Variables globales para el contexto del test
-let page: Page;
-let apiUrl: string;
-
-Before(async function () {
-  page = this.page;
-  apiUrl = process.env.API_URL || 'http://localhost:32000';
-});
-
-async function createTestUsers(count: number) {
+async function createTestUsers(count: number, apiUrl: string) {
   // Mock de la creación de usuarios para pruebas
   for (let i = 0; i < count; i++) {
     await fetch(`${apiUrl}/users`, {
@@ -26,7 +17,7 @@ async function createTestUsers(count: number) {
   }
 }
 
-async function createTestDocuments(count: number, status: string = 'SIGNED') {
+async function createTestDocuments(count: number, status: string = 'SIGNED', apiUrl: string) {
   // Mock de la creación de documentos para pruebas
   for (let i = 0; i < count; i++) {
     await fetch(`${apiUrl}/files/upload`, {
@@ -43,33 +34,41 @@ async function createTestDocuments(count: number, status: string = 'SIGNED') {
   }
 }
 
-Given('que estoy en la landing page', async function () {
-  const landingUrl = process.env.LANDING_URL || 'http://localhost:3000';
-  await page.goto(landingUrl);
-  await page.waitForLoadState('networkidle');
+Given('que estoy en la landing page', async function (this: CustomWorld) {
+  const landingUrl = process.env.LANDING_URL || 'http://localhost:3001';
+  await this.page.goto(landingUrl);
+  await this.page.waitForLoadState('networkidle');
 });
 
-Given('el sistema tiene {int} usuarios registrados', async function (count: number) {
-  await createTestUsers(count);
+Given('el sistema tiene {int} usuarios registrados', async function (this: CustomWorld, count: number) {
+  const apiUrl = process.env.API_URL || 'http://localhost:3000';
+  await createTestUsers(count, apiUrl);
 });
 
-Given('el sistema tiene {int} documentos gestionados', async function (count: number) {
-  await createTestDocuments(count, 'SIGNED');
+Given('el sistema tiene {int} documentos gestionados', async function (this: CustomWorld, count: number) {
+  const apiUrl = process.env.API_URL || 'http://localhost:3000';
+  await createTestDocuments(count, 'SIGNED', apiUrl);
 });
 
-Given('el sistema tiene {int} documentos pendientes de firma', async function (count: number) {
-  await createTestDocuments(count, 'PENDING');
+Given('el sistema tiene {int} documentos pendientes de firma', async function (this: CustomWorld, count: number) {
+  const apiUrl = process.env.API_URL || 'http://localhost:3000';
+  await createTestDocuments(count, 'PENDING', apiUrl);
 });
 
-When('la página carga las métricas', async function () {
+Given('el sistema no tiene usuarios ni documentos', async function (this: CustomWorld) {
+  // Este step es informativo - el sistema empieza vacío por defecto
+  // No necesita hacer nada especial, solo documentar la precondición
+});
+
+When('la página carga las métricas', async function (this: CustomWorld) {
   // Esperar a que el componente de métricas esté visible
-  await page.waitForSelector('[data-testid="metrics-section"]', {
+  await this.page.waitForSelector('[data-testid="metrics-section"]', {
     state: 'visible',
     timeout: 5000,
   });
   
   // Esperar a que las métricas terminen de cargar (no mostrar "...")
-  await page.waitForFunction(() => {
+  await this.page.waitForFunction(() => {
     const metrics = document.querySelectorAll('[data-testid$="-value"]');
     return Array.from(metrics).every(metric => 
       metric.textContent && !metric.textContent.includes('...')
@@ -77,7 +76,7 @@ When('la página carga las métricas', async function () {
   }, { timeout: 10000 });
 });
 
-Then('el visitante debe ver la métrica {string}', async function (metricText: string) {
+Then('el visitante debe ver la métrica {string}', async function (this: CustomWorld, metricText: string) {
   const [label, expectedValue] = metricText.split(':').map(s => s.trim());
 
   let testId: string;
@@ -94,13 +93,13 @@ Then('el visitante debe ver la métrica {string}', async function (metricText: s
   }
 
   // Verificar que el valor mostrado coincida con el esperado
-  const metricElement = await page.locator(`[data-testid="${testId}"]`);
+  const metricElement = await this.page.locator(`[data-testid="${testId}"]`);
   await expect(metricElement).toBeVisible();
   
   const actualValue = await metricElement.textContent();
   expect(actualValue).toBe(expectedValue);
 
   // También verificar que el label esté presente
-  const labelElement = await page.locator('text=' + label);
+  const labelElement = await this.page.locator('text=' + label);
   await expect(labelElement).toBeVisible();
 });
