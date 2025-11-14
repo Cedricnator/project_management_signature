@@ -2,14 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MetricsService } from './metrics.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
-import { Repository } from 'typeorm';
 import { DocumentStatus } from '../files/enum/document-status.enum';
-import { File } from '../files/entities/file.entity';
 
 describe('MetricsService', () => {
   let service: MetricsService;
-  let userRepository: Repository<User>;
-  let documentRepository: Repository<File>;
 
   const mockUserRepository = {
     count: jest.fn(),
@@ -35,10 +31,6 @@ describe('MetricsService', () => {
     }).compile();
 
     service = module.get<MetricsService>(MetricsService);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    documentRepository = module.get<Repository<File>>(
-      getRepositoryToken(Document),
-    );
   });
 
   afterEach(() => {
