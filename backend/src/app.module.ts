@@ -6,6 +6,7 @@ import { SignatureModule } from './signature/signature.module';
 import { DatabaseModule } from './common/database.module';
 import { SecurityModule } from './security/security.module';
 import { HealthModule } from './health/health.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { HealthModule } from './health/health.module';
     UsersModule,
     SecurityModule,
     HealthModule,
+    MetricsModule,
   ],
   controllers: [],
   providers: [],
