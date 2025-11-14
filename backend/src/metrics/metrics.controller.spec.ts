@@ -48,6 +48,7 @@ describe('MetricsController', () => {
 
       // Assert
       expect(result).toEqual(expectedMetrics);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.getSystemMetrics).toHaveBeenCalledTimes(1);
     });
 

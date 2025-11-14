@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { File } from '../src/files/entities/file.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { DocumentStatus } from '../src/files/enum/document-status.enum';
 import { randomUUID } from 'crypto';
 
 describe('Metrics (e2e)', () => {
@@ -58,7 +59,7 @@ describe('Metrics (e2e)', () => {
         fileSize: 1024,
         fileHash: `hash${i}`,
         fileBuffer: Buffer.from('test'),
-        currentStatusId: randomUUID(),
+        currentStatusId: DocumentStatus.APPROVED,
         uploadedBy: savedUsers[0].id,
       }));
       await documentRepository.save(documents as any);
@@ -93,7 +94,7 @@ describe('Metrics (e2e)', () => {
         fileSize: 1024,
         fileHash: `hash_pending${i}`,
         fileBuffer: Buffer.from('test'),
-        currentStatusId: randomUUID(),
+        currentStatusId: DocumentStatus.PENDING_REVIEW,
         uploadedBy: user.id,
       }));
 
@@ -105,7 +106,7 @@ describe('Metrics (e2e)', () => {
         fileSize: 1024,
         fileHash: `hash_signed${i}`,
         fileBuffer: Buffer.from('test'),
-        currentStatusId: randomUUID(),
+        currentStatusId: DocumentStatus.APPROVED,
         uploadedBy: user.id,
       }));
 
