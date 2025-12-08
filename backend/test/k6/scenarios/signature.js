@@ -59,7 +59,13 @@ export function signatureScenario() {
 
     check(verifyRes, {
       'verify status is 200': (r) => r.status === 200,
-      'signature is valid': (r) => r.json('isValid') === true,
+      'signature is valid': (r) => {
+        if (r.json('isValid') !== true) {
+          console.error(`Signature verification failed: ${JSON.stringify(r.json())}`);
+          return false;
+        }
+        return true;
+      },
     });
   }
 

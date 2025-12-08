@@ -23,6 +23,10 @@ export function authScenario() {
 
   const registerRes = http.post(`${config.BASE_URL}/auth/register`, registerPayload, registerParams);
   
+  if (registerRes.status !== 201) {
+    console.error(`Register failed: ${registerRes.status} ${registerRes.body}`);
+  }
+
   check(registerRes, {
       'register status is 201': (r) => r.status === 201,
   });
