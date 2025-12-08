@@ -8,6 +8,13 @@ export function filesScenario() {
   const token = authenticate(config.USERS.TEST_USER);
   const headers = getAuthHeaders(token).headers;
 
+  // Get User ID for later tests
+  const meRes = http.get(`${config.BASE_URL}/auth/me`, { 
+    headers,
+    tags: { scenario: 'files', endpoint: 'me' }
+  });
+  const userId = meRes.json('id');
+
   // 1. Upload File
   const uniqueId = `${exec.vu.idInTest}-${exec.scenario.iterationInTest}-${Date.now()}`;
   const fileName = `test-file-${uniqueId}.pdf`;
@@ -54,6 +61,40 @@ export function filesScenario() {
   check(listRes, {
     'list status is 200': (r) => r.status === 200,
   });
+
+  // 4. Stream File
+  if (fileId) {
+    const streamRes = http.get(`${config.BASE_URL}/files/${fileId}/stream`, {
+      headers,
+      tags: { scenario: 'files', endpoint: 'stream' },
+    });
+    check(streamRes, { 'stream status is 200': (r) => r.status === 200 });
+  }
+
+  // 5. File History
+  if (fileId) {
+    const fileHistoryRes = http.get(`${config.BASE_URL}/files/${fileId}/history`, {
+      headers,
+      tags: { scenario: 'files', endpoint: 'history-file' },
+    });
+    check(fileHistoryRes, { 'file history status is 200': (r) => r.status === 200 });
+  }
+
+  // 6. All Files History
+  const historyRes = http.get(`${config.BASE_URL}/files/history`, {
+    headers,
+    tags: { scenario: 'files', endpoint: 'history-all' },
+  });
+  check(historyRes, { 'history status is 200': (r) => r.status === 200 });
+
+  // 7. Files by User
+  if (userId) {
+    const userFilesRes = http.get(`${config.BASE_URL}/files/users/${userId}`, {
+      headers,
+      tags: { scenario: 'files', endpoint: 'user-files' },
+    });
+    check(userFilesRes, { 'user files status is 200': (r) => r.status === 200 });
+  }
 
   sleep(1);
 }

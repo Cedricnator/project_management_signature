@@ -63,5 +63,12 @@ export function signatureScenario() {
     });
   }
 
+  // 4. List Signatures
+  const listRes = http.get(`${config.BASE_URL}/signature`, {
+    headers,
+    tags: { scenario: 'signature', endpoint: 'list' },
+  });
+  check(listRes, { 'list signatures status is 200': (r) => r.status === 200 });
+
   sleep(1);
 }

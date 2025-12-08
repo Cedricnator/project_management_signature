@@ -1,8 +1,33 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import exec from 'k6/execution';
 import { config } from '../config.js';
 
 export function authScenario() {
+  // 1. Register a new user
+  const uniqueId = `${exec.vu.idInTest}-${exec.scenario.iterationInTest}-${Date.now()}`;
+  const registerPayload = JSON.stringify({
+    email: `loadtest-${uniqueId}@example.com`,
+    password: 'Password123!',
+    firstName: 'Load',
+    lastName: 'Test',
+    role: 'USER'
+  });
+
+  const registerParams = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    tags: { scenario: 'auth', endpoint: 'register' },
+  };
+
+  const registerRes = http.post(`${config.BASE_URL}/auth/register`, registerPayload, registerParams);
+  
+  check(registerRes, {
+      'register status is 201': (r) => r.status === 201,
+  });
+
+  // 2. Login with existing test user
   const payload = JSON.stringify({
     email: config.USERS.TEST_USER.email,
     password: config.USERS.TEST_USER.password,
