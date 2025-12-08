@@ -3,20 +3,24 @@ import { filesScenario } from './scenarios/files.js';
 import { signatureScenario } from './scenarios/signature.js';
 import { config } from './config.js';
 
+// Select scenario type via K6_SCENARIO_TYPE env var: smoke (default), load, or stress
+const scenarioType = __ENV.K6_SCENARIO_TYPE || 'smoke';
+const scenarioConfig = config.SCENARIOS[scenarioType] || config.SCENARIOS.smoke;
+
 export const options = {
   thresholds: config.THRESHOLDS,
   scenarios: {
-    auth_smoke: {
-      ...config.SCENARIOS.smoke,
+    auth: {
+      ...scenarioConfig,
       exec: 'authScenario',
     },
-    files_smoke: {
-      ...config.SCENARIOS.smoke,
+    files: {
+      ...scenarioConfig,
       exec: 'filesScenario',
       startTime: '5s',
     },
-    signature_smoke: {
-      ...config.SCENARIOS.smoke,
+    signature: {
+      ...scenarioConfig,
       exec: 'signatureScenario',
       startTime: '10s',
     },

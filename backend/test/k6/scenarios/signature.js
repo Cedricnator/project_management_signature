@@ -48,5 +48,20 @@ export function signatureScenario() {
     'signature status is 201': (r) => r.status === 201,
   });
 
+  const signatureId = signRes.json('id');
+
+  // 3. Verify Signature
+  if (signatureId) {
+    const verifyRes = http.get(`${config.BASE_URL}/signature/${signatureId}/verify`, {
+      headers,
+      tags: { scenario: 'signature', endpoint: 'verify' },
+    });
+
+    check(verifyRes, {
+      'verify status is 200': (r) => r.status === 200,
+      'signature is valid': (r) => r.json('isValid') === true,
+    });
+  }
+
   sleep(1);
 }

@@ -31,7 +31,21 @@ export function filesScenario() {
     'upload status is 201': (r) => r.status === 201,
   });
 
-  // 2. List Files
+  const fileId = uploadRes.json('id');
+
+  // 2. Download File
+  if (fileId) {
+    const downloadRes = http.get(`${config.BASE_URL}/files/${fileId}/download`, {
+      headers,
+      tags: { scenario: 'files', endpoint: 'download' },
+    });
+
+    check(downloadRes, {
+      'download status is 200': (r) => r.status === 200,
+    });
+  }
+
+  // 3. List Files
   const listRes = http.get(`${config.BASE_URL}/files`, { 
     headers,
     tags: { scenario: 'files', endpoint: 'list' },
