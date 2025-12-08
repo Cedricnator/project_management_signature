@@ -23,6 +23,7 @@ export function signatureScenario() {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
+    tags: { scenario: 'signature', endpoint: 'upload' },
   });
   
   if (uploadRes.status !== 201) {
@@ -38,7 +39,10 @@ export function signatureScenario() {
     comment: 'Signed by load test',
   });
 
-  const signRes = http.post(`${config.BASE_URL}/signature`, signPayload, { headers });
+  const signRes = http.post(`${config.BASE_URL}/signature`, signPayload, { 
+    headers,
+    tags: { scenario: 'signature', endpoint: 'sign' },
+  });
 
   check(signRes, {
     'signature status is 201': (r) => r.status === 201,

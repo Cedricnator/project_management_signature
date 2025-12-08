@@ -12,6 +12,7 @@ export function authScenario() {
     headers: {
       'Content-Type': 'application/json',
     },
+    tags: { scenario: 'auth', endpoint: 'login' },
   };
 
   const res = http.post(`${config.BASE_URL}/auth/login`, payload, params);

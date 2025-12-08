@@ -24,6 +24,7 @@ export function filesScenario() {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
+    tags: { scenario: 'files', endpoint: 'upload' },
   });
 
   check(uploadRes, {
@@ -31,7 +32,10 @@ export function filesScenario() {
   });
 
   // 2. List Files
-  const listRes = http.get(`${config.BASE_URL}/files`, { headers });
+  const listRes = http.get(`${config.BASE_URL}/files`, { 
+    headers,
+    tags: { scenario: 'files', endpoint: 'list' },
+  });
   
   check(listRes, {
     'list status is 200': (r) => r.status === 200,
