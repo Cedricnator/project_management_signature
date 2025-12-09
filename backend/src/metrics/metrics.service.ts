@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
@@ -13,6 +13,8 @@ export interface SystemMetrics {
 
 @Injectable()
 export class MetricsService {
+  private readonly logger = new Logger(MetricsService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -21,6 +23,7 @@ export class MetricsService {
   ) {}
 
   async getSystemMetrics(): Promise<SystemMetrics> {
+    this.logger.log('Fetching system metrics');
     const [totalUsers, totalDocuments, pendingSignatures] = await Promise.all([
       this.userRepository.count(),
       this.fileRepository.count(),
