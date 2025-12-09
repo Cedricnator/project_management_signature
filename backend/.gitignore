@@ -50,6 +50,7 @@ test.*
 # temp directory
 .temp
 .tmp
+*.pdf
 
 # Runtime data
 pids
