@@ -34,7 +34,6 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Created User' })
   @ApiResponse({ status: 401, description: 'Invalid Credentials' })
   @Post('register')
-  @UseGuards(JwtAuthGuard)
   register(@Body() dto: CreateUserDto) {
     return this.userService.create(dto);
   }
