@@ -44,14 +44,16 @@ export function signatureScenario() {
     tags: { scenario: 'signature', endpoint: 'sign' },
   });
 
+  // ...existing code...
   check(signRes, {
     'signature status is 201': (r) => r.status === 201,
   });
 
-  const signatureId = signRes.json('id');
+  const signatureId = signRes.json('signatureId');
 
   // 3. Verify Signature
   if (signatureId) {
+// ...existing code...
     const verifyRes = http.get(`${config.BASE_URL}/signature/${signatureId}/verify`, {
       headers,
       tags: { scenario: 'signature', endpoint: 'verify' },

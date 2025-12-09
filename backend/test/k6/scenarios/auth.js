@@ -9,12 +9,14 @@ export function authScenario() {
   const registerPayload = JSON.stringify({
     email: `loadtest-${uniqueId}@example.com`,
     password: 'Password123!',
+    // ...existing code...
     firstName: 'Load',
     lastName: 'Test',
-    role: 'USER'
+    role: 'user'
   });
 
   const registerParams = {
+// ...existing code...
     headers: {
       'Content-Type': 'application/json',
     },
