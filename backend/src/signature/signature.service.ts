@@ -89,13 +89,13 @@ export class SignatureService {
     }
     const { document } = validationResult;
 
+    const timestamp = new Date();
     const signatureData = {
       documentId,
       userId: user.id,
-      timestamp: new Date().toISOString(),
-      userAgent: req.headers['user-agent'],
-      ipAddress: req.ip,
-      comment,
+      timestamp: timestamp.toISOString(),
+      userAgent: req.headers['user-agent'] || '',
+      ipAddress: req.ip || '',
       originalFileHash: document?.fileHash,
     };
 
@@ -108,7 +108,7 @@ export class SignatureService {
       documentId: documentId,
       accountId: user.id,
       validated: true,
-      validatedAt: new Date(),
+      validatedAt: timestamp,
       signatureHash: signatureHash,
       ipAddress: req.ip || '',
       userAgent: req.headers['user-agent'] || '',
@@ -128,6 +128,7 @@ export class SignatureService {
 
     return {
       ...rest,
+      signatureId: signature.id,
       signatureHash: signatureHash,
       signedAt: signature.validatedAt,
       signer: {
@@ -147,7 +148,9 @@ export class SignatureService {
   async verifySignatureIntegrity(signatureId: string): Promise<boolean> {
     try {
       const signature = await this.findOne(signatureId);
-      const document = await this.filesService.findOne(signature.documentId);
+      const document = await this.filesService.findDocumentWithBuffer(
+        signature.documentId,
+      );
 
       // Verify if the document not has been modified
       const isFileValid = this.filesService.verifyFileIntegrity(document);

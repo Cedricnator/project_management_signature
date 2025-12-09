@@ -1,8 +1,17 @@
+'use client';
+
 export default function Footer() {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">Firmatic</h3>
             <p className="text-gray-400">
@@ -13,19 +22,33 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Producto</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">Características</a></li>
-              <li><a href="#" className="hover:text-white">Beneficios</a></li>
-              <li><a href="#" className="hover:text-white">Cómo Funciona</a></li>
-              <li><a href="#" className="hover:text-white">Seguridad</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Empresa</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">Sobre nosotros</a></li>
-              <li><a href="#" className="hover:text-white">Blog</a></li>
-              <li><a href="#" className="hover:text-white">Soporte</a></li>
+              <li>
+                <a 
+                  href="#caracteristicas" 
+                  onClick={(e) => { e.preventDefault(); scrollToSection('caracteristicas'); }} 
+                  className="hover:text-white cursor-pointer"
+                >
+                  Características
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#beneficios" 
+                  onClick={(e) => { e.preventDefault(); scrollToSection('beneficios'); }} 
+                  className="hover:text-white cursor-pointer"
+                >
+                  Beneficios
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#como-funciona" 
+                  onClick={(e) => { e.preventDefault(); scrollToSection('como-funciona'); }} 
+                  className="hover:text-white cursor-pointer"
+                >
+                  Cómo Funciona
+                </a>
+              </li>
             </ul>
           </div>
           
@@ -34,7 +57,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400">
               <li className="flex items-center gap-2">
                 <span>📧</span>
-                <a href="mailto:contacto@firmatic.com" className="hover:text-white">contacto@firmatic.com</a>
+                <a href="mailto:firmaticenterprise@gmail.com" className="hover:text-white">firmaticenterprise@gmail.com</a>
               </li>
               <li className="flex items-center gap-2">
                 <span>📞</span>

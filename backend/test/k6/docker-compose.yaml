@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:1.8
+    container_name: k6-influxdb
+    networks:
+      - project-management-network
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: k6-grafana
+    networks:
+      - project-management-network
+    ports:
+      - "33000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - influxdb
+
+  k6:
+    image: grafana/k6:latest
+    container_name: k6-load-tester
+    networks:
+      - project-management-network
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+      - K6_SCENARIO_TYPE=${K6_SCENARIO_TYPE:-smoke}
+    volumes:
+      - ./:/scripts
+    command: run /scripts/main.js
+
+networks:
+  project-management-network:
+    external: true

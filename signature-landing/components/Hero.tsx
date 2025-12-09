@@ -1,8 +1,22 @@
+'use client';
+
+import { useState } from 'react';
+import ContactFormModal from './ContactFormModal';
+
 interface HeroProps {
   onCtaClick?: () => void;
 }
 
 export default function Hero({ onCtaClick }: HeroProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCtaClick = () => {
+    if (onCtaClick) {
+      onCtaClick();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
   return (
     <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
       <div className="container mx-auto px-4">
@@ -19,13 +33,14 @@ export default function Hero({ onCtaClick }: HeroProps) {
             Reduce la gestión manual de documentos. Permite a tus empleados subir permisos, licencias y certificados.
           </p>
           
-          <button 
+                    <button
             type="button"
-            onClick={onCtaClick}
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 text-lg mb-8 inline-flex items-center gap-2"
+            onClick={handleCtaClick}
+            className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700"
           >
             Solicitar demo →
           </button>
+          <ContactFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
           
           <div className="flex justify-center gap-8 text-sm mt-8">
             <div className="flex items-center gap-2">

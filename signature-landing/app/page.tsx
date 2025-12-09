@@ -15,11 +15,19 @@ export default function Home() {
       <Navbar />
       <Hero />
       <MetricsSection />
-      <BenefitsSection />
-      <CharacteristicSection />
-      <HowItWorksSection />
+      <div id="beneficios">
+        <BenefitsSection />
+      </div>
+      <div id="caracteristicas">
+        <CharacteristicSection />
+      </div>
+      <div id="como-funciona">
+        <HowItWorksSection />
+      </div>
       <CTA />
-      <Footer />
+      <div id="contacto">
+        <Footer />
+      </div>
     </div>
   );
 }
