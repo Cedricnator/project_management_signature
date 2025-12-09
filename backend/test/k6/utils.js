@@ -22,7 +22,7 @@ export function authenticate(user) {
       'has access token': (r) => r.json('token') !== undefined,
     })
   ) {
-    fail(`Login failed: ${res.status} ${res.body}`);
+    fail(`Login failed for ${user.email}: ${res.status} ${res.body}`);
   }
 
   return res.json('token');
