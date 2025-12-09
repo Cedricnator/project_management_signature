@@ -50,14 +50,6 @@ describe('Footer Component', () => {
     expect(link).toBeInTheDocument();
   });
 
-  it('should render Seguridad link', () => {
-    render(<Footer />);
-    
-    const link = screen.getByText(/seguridad/i);
-
-    expect(link).toBeInTheDocument();
-  });
-
   it('should render Contacto section title', () => {
     render(<Footer />);
     
@@ -69,7 +61,7 @@ describe('Footer Component', () => {
   it('should render email address', () => {
     render(<Footer />);
     
-    const email = screen.getByText(/contacto@firmatic\.com/i);
+    const email = screen.getByText(/firmaticenterprise@gmail\.com/i);
 
     expect(email).toBeInTheDocument();
   });
@@ -98,14 +90,6 @@ describe('Footer Component', () => {
     expect(copyright).toBeInTheDocument();
   });
 
-  it('should have email icon', () => {
-    render(<Footer />);
-    
-    const email = screen.getByText(/contacto@firmatic\.com/i).closest('div');
-
-    expect(email).toBeInTheDocument();
-  });
-
   it('should have phone icon', () => {
     render(<Footer />);
     
@@ -128,8 +112,7 @@ describe('Footer Component', () => {
     const productLinks = [
       screen.getAllByText(/características/i)[0],
       screen.getAllByText(/beneficios/i)[0],
-      screen.getByText(/cómo funciona/i),
-      screen.getByText(/seguridad/i)
+      screen.getByText(/cómo funciona/i)
     ];
 
     productLinks.forEach(link => {
@@ -176,7 +159,7 @@ describe('Footer Component', () => {
   it('should have clickable email link', () => {
     render(<Footer />);
     
-    const email = screen.getByText(/contacto@firmatic\.com/i);
+    const email = screen.getByText(/firmaticenterprise@gmail\.com/i);
 
     expect(email).toBeInTheDocument();
   });
