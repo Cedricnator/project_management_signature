@@ -145,6 +145,8 @@ Given('tengo un usuario autenticado como {string}', function (role: string) {
     this.authHeader = this.userToken;
   } else if (role === 'SUPERVISOR') {
     this.authHeader = this.supervisorToken;
+  } else if (role === 'ADMIN') {
+    this.authHeader = this.adminToken;
   }
   assert.ok(this.authHeader, 'Usuario no autenticado');
 });

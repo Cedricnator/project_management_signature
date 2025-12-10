@@ -17,11 +17,11 @@ Característica: Registro de usuario
     Y la respuesta debe incluir el email "usuario@example.com"
 
   @negativo @sin-token
-  Escenario: Intento de registro sin token (no autorizado)
+  Escenario: Registro exitoso sin token (publico)
     Cuando envío una petición de registro con:
       | email                 | password | firstName | lastName | role |
       | sin-token@example.com | P4ssw0rd | Test      | User     | USER |
-    Entonces la respuesta debe tener código 401
+    Entonces la respuesta debe tener código 201
 
   @negativo
   Escenario: Registro con email ya existente

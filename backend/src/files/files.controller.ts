@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   Res,
   UploadedFile,
   UseGuards,
@@ -65,8 +66,8 @@ export class FilesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.filesService.findAll();
+  findAll(@Query('search') search?: string) {
+    return this.filesService.findAll(search);
   }
 
   @Get('users/:id')
